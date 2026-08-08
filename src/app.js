@@ -150,16 +150,17 @@ Mastermind.Solution_view = Backbone.View.extend({
 	},
 
 	newSolution: function () {
-		var num_colors = Mastermind.colors.length,
+		var num_colors = Mastermind.colors.length-1,
 			cur_color = -1,
 			solution = [];
 
 		for (var i = 0; i < 4; i += 1) {
-			random_index = Math.floor(Math.random()*num_colors);
+			random_index = Math.floor(Math.random()*num_colors + 1);
 			cur_color = 'nub ' + Mastermind.colors[random_index];
 			solution.push(cur_color);
 		}
 		this.model.set({code: solution});
+		log('newSolution:', solution);
 	},
 
 	render: function () {
