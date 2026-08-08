@@ -165,7 +165,7 @@ Mastermind.Solution_view = Backbone.View.extend({
 			solution.push(cur_color);
 		}
 		this.model.set({code: solution});
-		// log('newSolution:', solution);
+		log('newSolution:', solution);
 	},
 
 	render: function () {
@@ -265,6 +265,7 @@ Mastermind.Game_view = Backbone.View.extend({
 	board_el: 'ul#board',
 	header_template: '<div id="header"><h1>Mastermind</h1></div>',
 	gameOver_el: 'div#gameOver',
+	gameOver_template: '<div id="gameOver"></div>',
 
 	events: { /* see initialize */ },
 
@@ -311,7 +312,7 @@ Mastermind.Game_view = Backbone.View.extend({
 
 	render: function () { // only fired when game is initialized
 
-		var html_els_array = [this.header_template, this.solutionView.render()];
+		var html_els_array = [this.header_template, this.gameOver_template, this.solutionView.render()];
 
 		for(var i = 0; i < this.turns.length; i += 1) {
 			html_els_array.push(this.turn_views[i].render());
