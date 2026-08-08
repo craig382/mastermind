@@ -17,9 +17,8 @@ Mastermind.Turn = Backbone.Model.extend({
 		hint_string: '&middot;&middot;&middot;',
 		alt_class: '', 	// presentation
 		disabled_class: 'disabled', // for the guess button
-		locked_class: ' locked',
-		// for the solution view
-		button_text: 'reveal code' 
+		locked_class: 'locked', // is the space a bug?
+		button_text: 'reveal code' // for the solution view
 	}
 });
 
@@ -52,7 +51,7 @@ Mastermind.Turn_view = Backbone.View.extend({
 		_.bindAll(this, 'render', 'placePiece');
 
 		this.model.on('change:code', this.enableGuess, this);
-		this.model.on('change:disabled_class', this.render);
+		// this.model.on('change:disabled_class', this.render);
 
 		this.model.on('change:hint_string', this.render);
 		this.model.on('change:locked_class', this.render);
@@ -70,14 +69,16 @@ Mastermind.Turn_view = Backbone.View.extend({
 	},
 
 	placePiece: function (color, place) {
-		// log('place piece',color,place);
-		if (color !== 'zero') {
-			var code_array = this.model.get('code').slice(0);
-
+		log('place piece',color,place);
+		var code_array = this.model.get('code').slice(0);
+		if (color === 'zero') {
+			code_array[place] = 'hole';
+		} else {
 			code_array[place] = 'nub ' + color;
-			this.model.set({code:code_array});
-			// Mastermind.GameView.allPiecesView.resetNub();
+			Mastermind.GameView.allPiecesView.resetNub(); // comment out to allow easy duplicate color placement
 		}
+		this.model.set({code:code_array});
+		log('code_array', code_array)
 	},
 	
 	holeClicked: function (e) {
@@ -100,16 +101,19 @@ Mastermind.Turn_view = Backbone.View.extend({
 
 	enableGuess: function () { 
 		if (this.codeIsValid()) {
-			// remove the disabled class from the guess button
+			log('enable guess button');
 			this.model.set('disabled_class', '');
 		} else {
-			this.render();
+			log('disable guess button');
+			this.model.set('disabled_class', 'disabled');
 		}
+		this.render();
 	},
 
 	guessClicked: function (e) {
-		var enabled = !$(e.currentTarget).hasClass('disabled');
-		if (enabled) {
+		var valid = this.model.get('locked_class') === '' && this.model.get('disabled_class') === '';
+		log('clicked guess button valid =', valid);
+		if (valid) {
 			this.goGuess();
 		}
 	},
