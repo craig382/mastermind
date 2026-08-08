@@ -75,7 +75,6 @@ Mastermind.Turn_view = Backbone.View.extend({
 			code_array[place] = 'hole';
 		} else {
 			code_array[place] = 'nub ' + color;
-			// Mastermind.GameView.allPiecesView.resetNub(); // comment out to allow easy duplicate color placement
 		}
 		this.model.set({code:code_array});
 		log('code_array', code_array)
