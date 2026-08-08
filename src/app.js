@@ -50,12 +50,9 @@ Mastermind.Turn_view = Backbone.View.extend({
 	initialize: function () {
 		_.bindAll(this, 'render', 'placePiece');
 
-		this.model.on('change:code', this.enableGuess, this);
-		// this.model.on('change:disabled_class', this.render);
-
+		this.model.on('change:code', this.setGuessButtonState, this);
 		this.model.on('change:hint_string', this.render);
 		this.model.on('change:locked_class', this.render);
-		// this.model.on('change:code', this.render);
 	},
 
 	render: function () {
@@ -98,12 +95,12 @@ Mastermind.Turn_view = Backbone.View.extend({
 		return code_complete;
 	},
 
-	enableGuess: function () { 
+	setGuessButtonState: function () { 
 		if (this.codeIsValid()) {
-			log('enable guess button');
+			// log('enable guess button');
 			this.model.set('disabled_class', '');
 		} else {
-			log('disable guess button');
+			// log('disable guess button');
 			this.model.set('disabled_class', 'disabled');
 		}
 		this.render();
