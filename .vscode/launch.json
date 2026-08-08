@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch in Brave",
+            "type": "chrome",
+            "request": "launch",
+            "file": "${workspaceFolder}/index.html",
+            "runtimeExecutable": "/usr/bin/brave",
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true,
+            "urlFilter": "*",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        }
+    ]
+}
