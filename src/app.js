@@ -1,6 +1,6 @@
 var Mastermind = {
 
-		colors: ['one', 'two', 'three', 'four', 'five', 'six'],
+		colors: ['zero', 'one', 'two', 'three', 'four', 'five', 'six'],
 
 		init: function () {
 			this.GameView = new this.Game_view({model: new this.Game()});
@@ -75,7 +75,7 @@ Mastermind.Turn_view = Backbone.View.extend({
 			code_array[place] = 'hole';
 		} else {
 			code_array[place] = 'nub ' + color;
-			Mastermind.GameView.allPiecesView.resetNub(); // comment out to allow easy duplicate color placement
+			// Mastermind.GameView.allPiecesView.resetNub(); // comment out to allow easy duplicate color placement
 		}
 		this.model.set({code:code_array});
 		log('code_array', code_array)
@@ -111,8 +111,9 @@ Mastermind.Turn_view = Backbone.View.extend({
 	},
 
 	guessClicked: function (e) {
-		var valid = this.model.get('locked_class') === '' && this.model.get('disabled_class') === '';
-		log('clicked guess button valid =', valid);
+		var valid = this.model.get('locked_class') === '' && 
+			this.model.get('disabled_class') === '';
+		// log('clicked guess button valid =', valid);
 		if (valid) {
 			this.goGuess();
 		}
