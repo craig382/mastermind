@@ -76,7 +76,7 @@ Mastermind.Turn_view = Backbone.View.extend({
 
 			code_array[place] = 'nub ' + color;
 			this.model.set({code:code_array});
-			Mastermind.GameView.allPiecesView.resetNub();
+			// Mastermind.GameView.allPiecesView.resetNub();
 		}
 	},
 	
