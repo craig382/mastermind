@@ -109,19 +109,16 @@ div#allPieces {
 	height:35px;
 	bottom:10px;
 }
-/*div#current_piece {
- 	top:20px;
-	position:absolute;
-	left:5%;
- }*/
 div#gameOver {
 	width:100%;
-	top:124px;
+	/* top:124px; */
 	text-align: center;
-	position:absolute;
-	padding:20px 0;
-	left:0;
-	height:80.1%;
+	/* position:absolute; */
+	/* padding:20px 0; */
+	/* left:0; */
+	/* height:80.1%; */
+	height:50px;
+	/* font-size:3em; */
 	font-size:3em;
 	display:none;
 }
