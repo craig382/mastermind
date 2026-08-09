@@ -3,7 +3,7 @@
 
 A web app to play mastermind. Written in Backbone.js.
 
-[Play Craig's Mastermind Game](http://crraig382.github.io/mastermind/)
+[Play Craig's Mastermind Game](http://craig382.github.io/mastermind/)
 
 [Craig's Mastermind Game Source Code](https://github.com/craig382/mastermind)
 
