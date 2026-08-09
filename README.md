@@ -6,7 +6,7 @@ A simple web app to demo some core features of Backbone.js.
 [Demo](http://crraig382.github.io/mastermind/)
 
 https://github.com/craig382/mastermind Change Log:
-
+1. The player can use future turns as a scratchpad for working out the secret code.
 
 Forked from bobbyroe/Mastermind_demo
 [Bobby Roe's Mastermind Demo](http://bobbyroe.github.io/Mastermind_demo/)

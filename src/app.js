@@ -17,7 +17,7 @@ Mastermind.Turn = Backbone.Model.extend({
 		hint_string: '&middot;&middot;&middot;',
 		alt_class: '', 	// presentation
 		disabled_class: 'disabled', // for the guess button
-		locked_class: 'locked', // is the space a bug?
+		locked_class: 'locked', 
 		button_text: 'reveal code' // for the solution view
 	}
 });
@@ -107,7 +107,7 @@ Mastermind.Turn_view = Backbone.View.extend({
 	},
 
 	guessClicked: function (e) {
-		var valid = this.model.get('locked_class') === '' && 
+		var valid = this.model.get('locked_class') === 'active' && 
 			this.model.get('disabled_class') === '';
 		// log('clicked guess button valid =', valid);
 		if (valid) {
@@ -292,7 +292,7 @@ Mastermind.Game_view = Backbone.View.extend({
 		for (var i = 0; i < this.model.get('num_turns'); i +=1 ) {
 			// initialize the model
 			class_name = (i % 2) ? 'alt' : '';
-			locked_class = (i !== 0) ? 'locked' : '';
+			locked_class = (i !== 0) ? 'locked' : 'active';
 			turn_model = new Mastermind.Turn({alt_class:class_name, locked_class:locked_class, id:i});
 			
 			cur_turn = new Mastermind.Turn_view({model:turn_model});
@@ -402,7 +402,7 @@ Mastermind.Game_view = Backbone.View.extend({
 			this.model.set('win',false);
 		} else {
 			log(this.model.get('turns_remaining'), 'turns left');
-			this.getCurrentTurn().set('locked_class','');
+			this.getCurrentTurn().set('locked_class','active');
 		}
 	},
 
