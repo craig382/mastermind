@@ -66,6 +66,12 @@ Mastermind.Turn_view = Backbone.View.extend({
 	},
 
 	placePiece: function (color, place) {
+		// Do not allow placePiece in a frozen (past) turn.
+		// Do allow placePiece for active (current) and 
+		// locked (future) turns.
+		// The player can use locked (future) turns 
+		// as a scratch pad to plan their next guess.
+		if (this.model.get('locked_class') === 'frozen') { return; }
 		log('place piece',color,place);
 		var code_array = this.model.get('code').slice(0);
 		if (color === 'zero') {
