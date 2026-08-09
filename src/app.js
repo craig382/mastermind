@@ -7,7 +7,6 @@ var Mastermind = {
 		}
 	},
 	log = console.log.bind(console);
-	// log = function() { /* do nothing. */ };
 
 // model for TurnView & SolutionView
 Mastermind.Turn = Backbone.Model.extend({
@@ -72,7 +71,7 @@ Mastermind.Turn_view = Backbone.View.extend({
 		// The player can use locked (future) turns 
 		// as a scratch pad to plan their next guess.
 		if (this.model.get('locked_class') === 'frozen') { return; }
-		log('place piece',color,place);
+		// log('place piece',color,place);
 		var code_array = this.model.get('code').slice(0);
 		if (color === 'zero') {
 			code_array[place] = 'hole';
@@ -80,7 +79,7 @@ Mastermind.Turn_view = Backbone.View.extend({
 			code_array[place] = 'nub ' + color;
 		}
 		this.model.set({code:code_array});
-		log('code_array', code_array)
+		// log('code_array', code_array)
 	},
 	
 	holeClicked: function (e) {
@@ -153,8 +152,8 @@ Mastermind.Solution_view = Backbone.View.extend({
 	},
 
 	newSolution: function () {
-		// Color zero is not it color.
-		// Colr zero means "remove color" or "reset color".
+		// Color zero is not a color.
+		// Color zero means "remove color" or "reset color".
 		// Subtract 1 because color zero cannot be part of the code.
  		var num_colors = Mastermind.colors.length-1,
 			cur_color = -1,
@@ -168,7 +167,7 @@ Mastermind.Solution_view = Backbone.View.extend({
 			solution.push(cur_color);
 		}
 		this.model.set({code: solution});
-		log('newSolution:', solution);
+		// log('newSolution:', solution);
 	},
 
 	render: function () {
@@ -407,7 +406,7 @@ Mastermind.Game_view = Backbone.View.extend({
 		} else if (this.model.get('turns_remaining') === 0) {
 			this.model.set('win',false);
 		} else {
-			log(this.model.get('turns_remaining'), 'turns left');
+			// log('turns_remaining: ', this.model.get('turns_remaining'));
 			this.getCurrentTurn().set('locked_class','active');
 		}
 	},
