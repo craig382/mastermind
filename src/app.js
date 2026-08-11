@@ -13,7 +13,6 @@ Mastermind.Turn = Backbone.Model.extend({
 	defaults: {
 		id: -1,
 		code: ['hole', 'hole', 'hole', 'hole'],
-		// hint_string: '&middot;&middot;&middot;',
 		hint_string: '',
 		alt_class: '', 	// presentation
 		disabled_class: 'disabled', // for the guess button
@@ -50,7 +49,7 @@ Mastermind.Turn_view = Backbone.View.extend({
 	initialize: function () {
 		_.bindAll(this, 'render', 'placePiece');
 
-		this.model.on('change:code', this.setGuessButtonState, this);
+		this.model.on('change:code', this.render);
 		this.model.on('change:hint_string', this.render);
 		this.model.on('change:locked_class', this.render);
 	},
@@ -71,8 +70,8 @@ Mastermind.Turn_view = Backbone.View.extend({
 		// locked (future) turns.
 		// The player can use locked (future) turns 
 		// as a scratch pad to plan their next guess.
+		log('place piece',color,place);
 		if (this.model.get('locked_class') === 'frozen') { return; }
-		// log('place piece',color,place);
 		var code_array = this.model.get('code').slice(0);
 		if (color === 'zero') {
 			code_array[place] = 'hole';
@@ -80,7 +79,7 @@ Mastermind.Turn_view = Backbone.View.extend({
 			code_array[place] = 'nub ' + color;
 		}
 		this.model.set({code:code_array});
-		// log('code_array', code_array)
+		log('code_array', code_array)
 	},
 	
 	holeClicked: function (e) {
@@ -101,24 +100,20 @@ Mastermind.Turn_view = Backbone.View.extend({
 		return code_complete;
 	},
 
-	setGuessButtonState: function () { 
-		if (this.codeIsValid()) {
-			// log('enable guess button');
-			this.model.set('disabled_class', '');
-		} else {
-			// log('disable guess button');
-			this.model.set('disabled_class', 'disabled');
-		}
+	hideTurnButton: function () { 
+		this.model.set('disabled_class','hidden');
+		this.render();
+	},
+
+	showTurnButton: function () { 
+		this.model.set('disabled_class', '');
 		this.render();
 	},
 
 	guessClicked: function (e) {
-		var valid = this.model.get('locked_class') === 'active' && 
-			this.model.get('disabled_class') === '';
-		// log('clicked guess button valid =', valid);
-		if (valid) {
-			this.goGuess();
-		}
+		if (this.model.get('locked_class') !== 'active') { return; }
+		if (this.codeIsValid() === false) { return; }
+		this.goGuess();
 	},
 
 	goGuess: function (guess_array) {
@@ -128,7 +123,7 @@ Mastermind.Turn_view = Backbone.View.extend({
 
 	freezeRow: function () {
 		this.model.set('locked_class','frozen');
-		this.model.set('disabled_class','hidden');
+		this.hideTurnButton();
 	}
 	
 });
@@ -273,7 +268,6 @@ Mastermind.Game_view = Backbone.View.extend({
 	events: { /* see initialize */ },
 
 	initialize: function () {
-		_.bindAll(this,'keyPressed');
 		this.turns = new Mastermind.Turn_collection();
 		this.solution = new Mastermind.Turn({locked_class:'hidden'});
 		this.solutionView = new Mastermind.Solution_view({model:this.solution});
@@ -283,9 +277,6 @@ Mastermind.Game_view = Backbone.View.extend({
 		this.resetBoard(); // START
 
 		this.model.on('change:win',this.gameOver,this);
-
-		$(document).off('keydown'); // make sure not to attach the listener twice
-		$(document).on('keydown',this.keyPressed); // catch all keypresses
 	},
 
 	resetBoard: function () {
@@ -294,13 +285,19 @@ Mastermind.Game_view = Backbone.View.extend({
 			cur_turn = '',
 			class_name = '',
 			locked_class = '';
+			disabled_class = '';
 
 		for (var i = 0; i < this.model.get('num_turns'); i +=1 ) {
 			// initialize the model
 			class_name = (i % 2) ? 'alt' : '';
-			locked_class = (i !== 0) ? 'locked' : 'active';
-			turn_model = new Mastermind.Turn({alt_class:class_name, locked_class:locked_class, id:i});
-			
+			if (i === 0) { 
+				locked_class = 'active';
+				disabled_class = ''; 
+			} else { 
+				locked_class = 'locked';
+				disabled_class = 'hidden'; 
+			}
+			turn_model = new Mastermind.Turn({alt_class:class_name, locked_class:locked_class, disabled_class:disabled_class, id:i});
 			cur_turn = new Mastermind.Turn_view({model:turn_model});
 			turns_array.push(turn_model);
 			this.turn_views.push(cur_turn);
@@ -311,6 +308,7 @@ Mastermind.Game_view = Backbone.View.extend({
 		this.turns.reset(turns_array);
 
 		this.render();
+		log('resetBoard executed');
 	},
 
 	render: function () { // only fired when game is initialized
@@ -322,46 +320,6 @@ Mastermind.Game_view = Backbone.View.extend({
 			// this.turns.at(i).set('',0);
 		}
 		$(this.board_el).html(html_els_array);
-	},
-
-	keyPressed: function (e) {
-		var k = e.keyCode,
-			keys = { /* select the color */
-				81:{ k:'one' }, // Q
-				87:{ k:'two' }, // W
-				69:{ k:'three' }, // E
-				82:{ k:'four' }, // R
-				84:{ k:'five' }, // T
-				89:{ k:'six' }, // Y
-				/* select the slot */
-				49: { k:0 }, // 1
-				50: { k:1 }, // 2
-				51: { k:2 }, // 3
-				52: { k:3 } // 4
-			},
-			ENTER = 13,
-			ESC = 27,
-			cur_turn_view = this.turn_views[this.getCurrentTurn().get('id')],
-			key_obj;
-
-		key_obj = keys[k];
-		if (typeof key_obj !== 'undefined') {
-			if (typeof key_obj.k === 'string') { 
-				this.allPiecesView.setNub(key_obj.k); 
-			}
-			if (typeof key_obj.k === 'number') { 
-				// log('keyPressed',this.allPiecesView.getNub(), key_obj.k);
-				cur_turn_view.placePiece(this.allPiecesView.getNub(), key_obj.k);
-			}
-		} else {
-			if (k === ENTER) {
-				cur_turn_view.goGuess();
-			}
-			if (k === ESC) {
-				this.quit();
-			}
-		}
-		return false; 
 	},
 
 	checkGuess: function (guess_array) {
@@ -408,7 +366,9 @@ Mastermind.Game_view = Backbone.View.extend({
 			this.model.set('win',false);
 		} else {
 			// log('turns_remaining: ', this.model.get('turns_remaining'));
-			this.getCurrentTurn().set('locked_class','active');
+			t = this.getCurrentTurn();
+			t.set('disabled_class',''); // show the guess button`
+			t.set('locked_class','active'); // unlock the next turn
 		}
 	},
 
