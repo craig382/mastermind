@@ -13,11 +13,12 @@ Mastermind.Turn = Backbone.Model.extend({
 	defaults: {
 		id: -1,
 		code: ['hole', 'hole', 'hole', 'hole'],
-		hint_string: '&middot;&middot;&middot;',
+		// hint_string: '&middot;&middot;&middot;',
+		hint_string: '',
 		alt_class: '', 	// presentation
 		disabled_class: 'disabled', // for the guess button
 		locked_class: 'locked', 
-		button_text: 'reveal code' // for the solution view
+		button_text: 'quit' // for the solution view
 	}
 });
 
@@ -190,7 +191,7 @@ Mastermind.Solution_view = Backbone.View.extend({
 
 	revealClicked: function (e) {
 		e.preventDefault();
-		if (this.model.get('button_text') ==='reveal code') {
+		if (this.model.get('button_text') ==='quit') {
 			Mastermind.GameView.quit();
 		} else {
 			Mastermind.GameView.restart();
@@ -265,7 +266,7 @@ Mastermind.Game_view = Backbone.View.extend({
 
 	el: 'div#game',
 	board_el: 'ul#board',
-	header_template: '<div id="header"><h1>Mastermind</h1></div>',
+	header_template: '<div id="header">Mastermind</div>',
 	gameOver_el: 'div#gameOver',
 	gameOver_template: '<div id="gameOver"></div>',
 
@@ -368,10 +369,10 @@ Mastermind.Game_view = Backbone.View.extend({
 			guess_copy = guess_array.slice(0),
 			num_black = 0,
 			num_white = 0,
-			num_colors = 4;
+			code_length = 4;
 
 		// check for exact matches
-		for (var i = 0; i < num_colors; i += 1) {
+		for (var i = 0; i < code_length; i += 1) {
 			if (guess_copy[i] === solution_copy[i]) {
 				num_black += 1;
 				guess_copy[i] ='x';
@@ -379,8 +380,8 @@ Mastermind.Game_view = Backbone.View.extend({
 			}
 		}
 		// check for color match only
-		for (var j = 0; j < num_colors; j += 1) {
-			for (var k = 0; k < num_colors; k += 1) {
+		for (var j = 0; j < code_length; j += 1) {
+			for (var k = 0; k < code_length; k += 1) {
 				if (guess_copy[j] === solution_copy[k]) {
 					num_white += 1;
 					guess_copy[j] = 'x';

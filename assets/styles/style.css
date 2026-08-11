@@ -17,9 +17,8 @@ body {
 	color:#e0e0e0;
 }
 div#header {
-	width:400px;
-	padding:0 10px 0 0;
-	margin:20px auto 0;
+	width:auto;
+	font-size:3em;
 	text-align: center;
 	background-color: #222;
 }
@@ -28,7 +27,7 @@ h1 {
 	color:#BBB;
 }
 div#game {
-	width:400px;
+	width:fit-content;
 	position:relative;
 	margin:0px auto;
 	height:auto;
@@ -140,7 +139,8 @@ div#presentation {
 }
 /* guess button */
 input.go {
-	width:60px;
+	width:fit-content;
+	padding: 0 10px;
 	text-transform: uppercase;
 	margin-left:10px;
 	height:28px;
@@ -165,7 +165,7 @@ input.go.hidden {
 }
 span.hint {
 	font-size: 1.5em;
-	float:right;
+	float:left;
 }
 p.hint {
 	margin-left:10px;
@@ -190,7 +190,8 @@ div.turn#solution div.pieces.hidden { /* solution */
 	display: none;
 }
 input#reveal {
-	width:120px;
+	width:fit-content;
+	padding: 0 10px;
 	text-transform: uppercase;
 	height:28px;
     font-weight:bold;
