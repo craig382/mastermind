@@ -1,14 +1,27 @@
+/**
+ * @typedef {any} Mastermind_module
+ */
+/** @type {Mastermind_module} */
 var Mastermind = {
 
 		colors: ['zero', 'one', 'two', 'three', 'four', 'five', 'six'],
 
+		/**
+		 * Initialize the game by constructing the main game view.
+		 * @returns {void}
+		 */
 		init: function () {
+			// Create the primary game view and pass in a new game model.
 			this.GameView = new this.Game_view({model: new this.Game()});
 		}
 	},
 	log = console.log.bind(console);
 
-// model for TurnView & SolutionView
+/**
+ * Model shared by both the turn rows and the solution row.
+ * It stores the current code state, hint text, display classes,
+ * and whether the row is active, locked, or frozen.
+ */
 Mastermind.Turn = Backbone.Model.extend({
 	defaults: {
 		id: -1,
@@ -64,6 +77,11 @@ Mastermind.Turn_view = Backbone.View.extend({
 		return this.el;
 	},
 
+	/**
+	 * Place a piece (or, when frozen, set the shared nub color).
+	 * @param {string} color
+	 * @param {number|string} place
+	 */
 	placePiece: function (color, place) {
 		// Do not allow placePiece in a frozen (past) turn.
 		// Do allow placePiece for active (current) and 
@@ -71,23 +89,32 @@ Mastermind.Turn_view = Backbone.View.extend({
 		// The player can use locked (future) turns 
 		// as a scratch pad to plan their next guess.
 		log('place piece',color,place);
-		if (this.model.get('locked_class') === 'frozen') { return; }
 		var code_array = this.model.get('code').slice(0);
-		if (color === 'zero') {
-			code_array[place] = 'hole';
+		if (this.model.get('locked_class') === 'frozen') {
+			// set the nub color to the color clicked in the frozen turn
+			Mastermind.GameView.allPiecesView.setNub(code_array[place]);
 		} else {
-			code_array[place] = 'nub ' + color;
+			if (color === 'zero') {
+				code_array[place] = 'hole';
+			} else {
+				code_array[place] = 'nub ' + color;
+			}
+			this.model.set({code:code_array});
+			log('code_array', code_array);
 		}
-		this.model.set({code:code_array});
-		log('code_array', code_array)
 	},
 	
+	/**
+	 * Handle click on a hole in a turn row.
+	 * @param {Event} e
+	 */
 	holeClicked: function (e) {
 		var hole_index = $(e.currentTarget).attr('id'),
 			color_class = Mastermind.GameView.allPiecesView.getNub();
 		this.placePiece(color_class, hole_index);
 	},
 
+	/** Check whether the turn's code has no holes. @returns {boolean} */
 	codeIsValid: function () {
 		var code_complete = false,
 			code_array = this.model.get('code'),
@@ -110,12 +137,20 @@ Mastermind.Turn_view = Backbone.View.extend({
 		this.render();
 	},
 
+	/**
+	 * User clicked the guess button for this turn.
+	 * @param {Event} e
+	 */
 	guessClicked: function (e) {
 		if (this.model.get('locked_class') !== 'active') { return; }
 		if (this.codeIsValid() === false) { return; }
 		this.goGuess();
 	},
 
+	/**
+	 * Execute the guess flow for this turn.
+	 * @param {Array<string>} guess_array
+	 */
 	goGuess: function (guess_array) {
 		this.freezeRow();
 		Mastermind.GameView.checkGuess(this.model.get('code'));
@@ -147,18 +182,18 @@ Mastermind.Solution_view = Backbone.View.extend({
 		this.model.on('change:locked_class', this.render, this);
 	},
 
-	newSolution: function () {
+ 	newSolution: function () {
 		// Color zero is not a color.
 		// Color zero means "remove color" or "reset color".
 		// Subtract 1 because color zero cannot be part of the code.
- 		var num_colors = Mastermind.colors.length-1,
-			cur_color = -1,
+		var num_colors = Mastermind.colors.length-1,
+			cur_color = '',
 			solution = [];
 
 		for (var i = 0; i < 4; i += 1) {
 			// Add 1 because random_index starts at 0 but 
 			// the first real color is 1 (not 0).
-			random_index = Math.floor(Math.random()*num_colors + 1);
+			var random_index = Math.floor(Math.random()*num_colors + 1);
 			cur_color = 'nub ' + Mastermind.colors[random_index];
 			solution.push(cur_color);
 		}
@@ -166,14 +201,15 @@ Mastermind.Solution_view = Backbone.View.extend({
 		// log('newSolution:', solution);
 	},
 
-	render: function () {
-		var solution_template = $(this.template).html();
-			solution_html = _.template(solution_template, this.model.toJSON());
+		render: function () {
+			var solution_template = $(this.template).html(),
+				solution_html = _.template(solution_template, this.model.toJSON());
 
-		this.$el.html(solution_html);
+			this.$el.html(solution_html);
 		return this.el;
 	},
 
+	/** @param {boolean} game_won */
 	setSolved: function (game_won) {
 		var end_text = (game_won) ? 'you won! :D' : 'you lost!!!';
 		this.model.set('button_text','New Game');
@@ -184,6 +220,10 @@ Mastermind.Solution_view = Backbone.View.extend({
 		return this.model.get('code');
 	},
 
+	/**
+	 * Reveal or restart action from the solution view.
+	 * @param {Event} e
+	 */
 	revealClicked: function (e) {
 		e.preventDefault();
 		if (this.model.get('button_text') ==='quit') {
@@ -224,6 +264,10 @@ Mastermind.AllPieces_view = Backbone.View.extend({
 		$(this.cur_piece_el).html(nub_copy);
 	},
 
+	/**
+	 * User clicked a nub color in the palette.
+	 * @param {Event} e
+	 */
 	nubClick: function (e) {
 		var classes_string = $(e.currentTarget).attr('class'),
 			classes_array = classes_string.split(' '),
@@ -232,12 +276,19 @@ Mastermind.AllPieces_view = Backbone.View.extend({
 			this.setNub(nub_class);	
 	},
 
+	/** @param {string} nub_class */
 	setNub: function (nub_class) {
-		this.model.set('nub_class', nub_class);	
+		log('setNub, nub_class = ', nub_class);
+		this.model.set('nub_class', nub_class); 	
 	},
 
+	/**
+	 * Get current nub class.
+	 * @param {string=} nub_class optional (ignored)
+	 * @returns {string}
+	 */
 	getNub: function (nub_class) {
-		return this.model.get('nub_class');	
+		return this.model.get('nub_class'); 	
 	},
 
 	resetNub: function () {
@@ -284,7 +335,7 @@ Mastermind.Game_view = Backbone.View.extend({
 			turn_model = {},
 			cur_turn = '',
 			class_name = '',
-			locked_class = '';
+			locked_class = '',
 			disabled_class = '';
 
 		for (var i = 0; i < this.model.get('num_turns'); i +=1 ) {
@@ -322,6 +373,10 @@ Mastermind.Game_view = Backbone.View.extend({
 		$(this.board_el).html(html_els_array);
 	},
 
+	/**
+	 * Check a guess array against the solution.
+	 * @param {Array<string>} guess_array
+	 */
 	checkGuess: function (guess_array) {
 		var solution_copy = this.solutionView.getCode().slice(0),
 			guess_copy = guess_array.slice(0),
@@ -350,12 +405,17 @@ Mastermind.Game_view = Backbone.View.extend({
 		this.handleResults(num_black,num_white);
 	},
 
-	handleResults: function (num_black,num_white) {
+	/**
+	 * Handle guess results: update hints and advance turns.
+	 * @param {number} num_black
+	 * @param {number} num_white
+	 */
+	handleResults: function (num_black, num_white) {
 
 		// display the hints / do next turn
-		hint_string = '<p class="hint b">' + num_black + '</p><p class="hint w">' + num_white + '</p>';
+		var hint_string = '<p class="hint b">' + num_black + '</p><p class="hint w">' + num_white + '</p>';
 		this.getCurrentTurn().set('hint_string', hint_string);
-		
+
 		// decrement turns_remaining // (this.getCurrentTurn === next turn)
 		this.model.set('turns_remaining', this.model.get('turns_remaining') - 1);
 
@@ -366,8 +426,8 @@ Mastermind.Game_view = Backbone.View.extend({
 			this.model.set('win',false);
 		} else {
 			// log('turns_remaining: ', this.model.get('turns_remaining'));
-			t = this.getCurrentTurn();
-			t.set('disabled_class',''); // show the guess button`
+			var t = this.getCurrentTurn();
+			t.set('disabled_class',''); // show the guess button
 			t.set('locked_class','active'); // unlock the next turn
 		}
 	},

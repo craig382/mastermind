@@ -7,9 +7,11 @@
             "request": "launch",
             "file": "${workspaceFolder}/index.html",
             "runtimeExecutable": "/usr/bin/brave",
+            "runtimeArgs": [
+                "--remote-debugging-port=9222"
+            ],
             "webRoot": "${workspaceFolder}",
-            "sourceMaps": true,
-            "urlFilter": "*",
+            "sourceMaps": false,
             "skipFiles": [
                 "<node_internals>/**"
             ]
