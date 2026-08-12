@@ -1,7 +1,4 @@
-/**
- * @typedef {any} Mastermind_module
- */
-/** @type {Mastermind_module} */
+/** @type {any} */
 var Mastermind = {
 
 		colors: ['zero', 'one', 'two', 'three', 'four', 'five', 'six'],
@@ -71,7 +68,7 @@ Mastermind.Turn_view = Backbone.View.extend({
 		var turn_template = $(this.template).html(),
 			turn_html = '';
 
-		turn_html = _.template(turn_template, this.model.toJSON());
+		turn_html = _.template(turn_template, this.model.toJSON()).toString();
 		this.$el.html(turn_html);
 
 		return this.el;
@@ -109,6 +106,7 @@ Mastermind.Turn_view = Backbone.View.extend({
 	 * @param {Event} e
 	 */
 	holeClicked: function (e) {
+		// @ts-ignore
 		var hole_index = $(e.currentTarget).attr('id'),
 			color_class = Mastermind.GameView.allPiecesView.getNub();
 		this.placePiece(color_class, hole_index);
@@ -252,12 +250,14 @@ Mastermind.AllPieces_view = Backbone.View.extend({
 		'click div.nub': 'nubClick'
 	},
 
+
 	initialize: function () {
 		this.model = new Mastermind.AllPieces();
 		this.model.on('change:nub_class', this.render, this);
 
 		this.render(); // reset the piece div
 	},
+
 
 	render: function () {
 		var nub_copy = _.template(this.piece_template, this.model.attributes);
@@ -269,6 +269,7 @@ Mastermind.AllPieces_view = Backbone.View.extend({
 	 * @param {Event} e
 	 */
 	nubClick: function (e) {
+		// @ts-ignore
 		var classes_string = $(e.currentTarget).attr('class'),
 			classes_array = classes_string.split(' '),
 			nub_class = classes_array[2]; // this is a hack
@@ -370,6 +371,7 @@ Mastermind.Game_view = Backbone.View.extend({
 			html_els_array.push(this.turn_views[i].render());
 			// this.turns.at(i).set('',0);
 		}
+		// @ts-ignore
 		$(this.board_el).html(html_els_array);
 	},
 
