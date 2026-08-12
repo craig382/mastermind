@@ -22,7 +22,7 @@ var Mastermind = {
 Mastermind.Turn = Backbone.Model.extend({
 	defaults: {
 		id: -1,
-		code: ['hole', 'hole', 'hole', 'hole'],
+		code: ['nub zero', 'nub zero', 'nub zero', 'nub zero'],
 		hint_string: '',
 		alt_class: '', 	// presentation
 		disabled_class: 'disabled', // for the guess button
@@ -91,11 +91,7 @@ Mastermind.Turn_view = Backbone.View.extend({
 			// set the nub color to the color clicked in the frozen turn
 			Mastermind.GameView.allPiecesView.setNub(code_array[place]);
 		} else {
-			if (color === 'zero') {
-				code_array[place] = 'hole';
-			} else {
-				code_array[place] = 'nub ' + color;
-			}
+			code_array[place] = 'nub ' + color;
 			this.model.set({code:code_array});
 			log('code_array', code_array);
 		}
@@ -119,7 +115,7 @@ Mastermind.Turn_view = Backbone.View.extend({
 			num_holes = code_array.length;
 
 		for (var i = 0; i < code_array.length; i += 1) {
-			if (code_array[i] !== 'hole') { num_holes -= 1; }
+			if (code_array[i] !== 'nub zero') { num_holes -= 1; }
 		}
 		code_complete = (num_holes === 0);
 		return code_complete;
