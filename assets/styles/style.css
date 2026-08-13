@@ -66,17 +66,26 @@ div.pieces {
 	float:none;
 	display: inline;
 }
+div#current_piece {
+	width:30px;
+	margin-right:15px;
+	float:left;
+}
 div.piece {
 	width:30px;
 	margin-right:15px;
 	height: 30px;
 	float:left;
-	border:3px solid #000;
+	border:1px solid #000;
 	background-color: #000;
 	color:#fff;
 	border-radius: 15px;
 	font-weight:bold;
-	font-size:0.8em;
+	font-size:1em;
+	align-items: center;
+	justify-content: center;
+	display: flex;
+	cursor: pointer;
 
 }
 div.piece-spacer {
@@ -86,24 +95,32 @@ div.piece-spacer {
 }
 div.piece.X {
 	border-color: #000;
+	background-color: #000;
+	color:#000;
 }
 div.piece.A {
 	border-color: #090;
+	background-color: #090;
 }
 div.piece.B {
 	border-color: #900;
-}
+	background-color: #900;
+	}
 div.piece.C {
 	border-color: #009;
+	background-color: #009;
 }
 div.piece.D {
 	border-color: #990;
+	background-color: #990;
 }
 div.piece.E {
 	border-color: #90F;
+	background-color: #90F;
 }
 div.piece.F {
 	border-color: #940;
+	background-color: #940;
 }
 div#allPieces {
 	width:fit-content;

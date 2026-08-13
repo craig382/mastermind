@@ -243,6 +243,7 @@ Mastermind.AllPieces_view = Backbone.View.extend({
 	el: 'div#allPieces',
 	cur_piece_el: 'div#current_piece',
 	piece_template: '<div class="piece <%= nub_class %>"><%= nub_class %></div>',
+	nub_template: '<div id="current_piece" class="piece <%= nub_class %>"><%= nub_class %></div>',
 	events: {
 		'click div.piece': 'nubClicked'
 	},
@@ -253,6 +254,7 @@ Mastermind.AllPieces_view = Backbone.View.extend({
 		this.model.on('change:nub_class', this.render, this);
 
 		this.render(); // reset the piece div
+		// this.resetNub(); // reset the nub to X
 	},
 
 
