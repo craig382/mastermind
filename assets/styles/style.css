@@ -4,8 +4,6 @@
 * { 
 	margin:0;
 	padding:0;
-	-moz-box-sizing: border-box; 
-    -webkit-box-sizing: border-box; 
     box-sizing: border-box; 
 }
 body {
@@ -223,16 +221,6 @@ input#reveal:hover {
 	color:#FFF;
     background-color:#20557c;
     border-color:#4880a3;
-}
-/*    */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-    /* display: none; <- Crashes Chrome on hover */
-    -webkit-appearance: none;
-    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
-}
-input[type=number]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
 }
 
 
