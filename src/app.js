@@ -1,7 +1,7 @@
 /** @type {any} */
 var Mastermind = {
 
-		colors: ['zero', 'one', 'two', 'three', 'four', 'five', 'six'],
+		colors: ['A', 'B', 'C', 'D', 'E', 'F', 'X'],
 
 		/**
 		 * Initialize the game by constructing the main game view.
@@ -22,7 +22,7 @@ var Mastermind = {
 Mastermind.Turn = Backbone.Model.extend({
 	defaults: {
 		id: -1,
-		code: ['zero', 'zero', 'zero', 'zero'],
+		code: ['X', 'X', 'X', 'X'],
 		hint_string: '',
 		alt_class: '', 	// presentation
 		disabled_class: 'disabled', // for the guess button
@@ -118,7 +118,7 @@ Mastermind.Turn_view = Backbone.View.extend({
 			num_holes = code_array.length;
 
 		for (var i = 0; i < code_array.length; i += 1) {
-			if (code_array[i] !== 'zero') { num_holes -= 1; }
+			if (code_array[i] !== 'X') { num_holes -= 1; }
 		}
 		code_complete = (num_holes === 0);
 		return code_complete;
@@ -180,17 +180,15 @@ Mastermind.Solution_view = Backbone.View.extend({
 	},
 
  	newSolution: function () {
-		// Color zero is not a color.
-		// Color zero means "remove color" or "reset color".
-		// Subtract 1 because color zero cannot be part of the code.
+		// Color X is not a color.
+		// Color X means "remove color" or "no color".
+		// Subtract 1 because color X cannot be part of the code.
 		var num_colors = Mastermind.colors.length-1,
 			cur_color = '',
 			solution = [];
 
 		for (var i = 0; i < 4; i += 1) {
-			// Add 1 because random_index starts at 0 but 
-			// the first real color is 1 (not 0).
-			var random_index = Math.floor(Math.random()*num_colors + 1);
+			var random_index = Math.floor(Math.random()*num_colors);
 			cur_color = Mastermind.colors[random_index];
 			solution.push(cur_color);
 		}
@@ -237,7 +235,7 @@ Mastermind.Solution_view = Backbone.View.extend({
 *************************************************************************************************/
 Mastermind.AllPieces = Backbone.Model.extend({ 
 	defaults: {
-		nub_class: 'zero'
+		nub_class: 'X'
 	}
 });
 
@@ -289,7 +287,7 @@ Mastermind.AllPieces_view = Backbone.View.extend({
 	},
 
 	resetNub: function () {
-		this.setNub('zero');	
+		this.setNub('X');	
 	}
 });
 

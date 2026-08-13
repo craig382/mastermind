@@ -80,31 +80,31 @@ div.piece-spacer {
 	height:30px;
 	float:left;
 }
-div.piece.zero {
+div.piece.X {
 	border-color: #000;
 	background-image: -webkit-radial-gradient(95% 95%, circle cover, #404040, #000 100%);
 }
-div.piece.one {
+div.piece.A {
 	border-color: #090;
 	background-image: -webkit-radial-gradient(5% 5%, circle cover, #0F4, #020 100%);
 }
-div.piece.two {
+div.piece.B {
 	border-color: #900;
 	background-image: -webkit-radial-gradient(5% 5%, circle cover, #F30, #200 100%);
 }
-div.piece.three {
+div.piece.C {
 	border-color: #009;
 	background-image: -webkit-radial-gradient(5% 5%, circle cover, #09F, #002 100%);
 }
-div.piece.four {
+div.piece.D {
 	border-color: #990;
 	background-image: -webkit-radial-gradient(5% 5%, circle cover, #FF0, #220 100%);
 }
-div.piece.five {
+div.piece.E {
 	border-color: #90F;
 	background-image: -webkit-radial-gradient(5% 5%, circle cover, #90F, #102 100%);
 }
-div.piece.six {
+div.piece.F {
 	border-color: #940;
 	background-image: -webkit-radial-gradient(5% 5%, circle cover, #F90, #210 100%);
 }

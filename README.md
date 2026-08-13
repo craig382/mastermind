@@ -9,8 +9,9 @@ A web app to play mastermind. Written in Backbone.js.
 
 ## Change Log:
 1. The player can use future turns as a scratchpad for working out the secret code.
-2. Changed the appearance and location of the end game "you won" or "you lost" message. It no longer obscures the player's completed game.
-3. Color palette improvements. Moved the current color selected nub into the color palette. And added a "remove color" nub to the color palette. The current color nub now keeps its color until it is changed to a new color which makes placing duplicate colors easier. (The old behavior was that the current color automatically reset to no color after each color placement.) Also, the color palette is now at the bottom of the board (instead of the bottom of the screen).
+2. The player can pick a color from the color palette or past turns.
+3. Changed the appearance and location of the end game "you won" or "you lost" message. It no longer obscures the player's completed game.
+4. Color palette improvements. Moved the current color selected nub into the color palette. And added a "remove color" nub to the color palette. The current color nub now keeps its color until it is changed to a new color which makes placing duplicate colors easier. (The old behavior was that the current color automatically reset to no color after each color placement.) Also, the color palette is now at the bottom of the board (instead of the bottom of the screen).
 
 ## Future Changes?:
 - Add a timer and show game play time in the "you won" message.
@@ -20,16 +21,6 @@ A web app to play mastermind. Written in Backbone.js.
 - Add color palette hint that shows number of colors that the secret code contains.
 - Add a bot that gives analysis of the top 5 remaining guesses for each turn given the player's turn history up to that point. The bot should also give its solution from the start (if the bot were to play the game by itself, how many moves it required in total and what each of those moves were, and how many possible solutions were left after each of its moves). Of course, the bot is not allowed to know the secret code. It is only allowed to make guesses based on the black and white peg feedback it receives.
 - Add row hints on frozen rows that every time you change the code on the active row, it shows the black and white peg results vs the active code (only when each differs from the true black and white peg (vs the secret code) row hint).
-
-## Forked from bobbyroe/Mastermind_demo
-
-Thank you Bobby Roe!
-
-[Bobby Roe's Mastermind Source Code](https://github.com/bobbyroe/Mastermind_demo)
-
-[Play Bobby Roe's Mastermind Demo](http://bobbyroe.github.io/Mastermind_demo/)
-
-[Bobby Roe's slideshare "Backbone.js – an introduction"](https://www.slideshare.net/slideshow/backbonejs-an-introduction-14284042/14284042)
 
 ## Development setup
 
@@ -46,5 +37,27 @@ This installs local type declarations for Backbone, jQuery, and Underscore, whic
 After `npm install`, reload the editor or window so the TypeScript server picks up the new types.
 
 The repository intentionally ignores `node_modules/`; this folder is only needed for local development and should not be published to GitHub Pages.
+
+## Mastermind Strategies
+
+### ABBC, DDEE Openers
+- Usually solves in 4, 5, or 6.
+
+### ABCD, EEFF Opener
+- ABCD = 1 eliminates 3 colors. Follow with EEFF = b, then A | B | C | D: is quadruple for b = 0, triplicate for b = 1, duplicate for b = 2, or single for b = 3.
+- ABCD = 2 leaves 0, 1 or 2 colors. Follow with EEFF = b.
+- ABCD = 3 leaves 0 (2 singles and 1 duplicate) or 1 (3 singles) color. Thus guess 2 should not have duplicate of E or F. Make guess 2 a valid combination of ABEF. ABEF = b = 1 (e.g. ACCD) | 2 (e.g. ABCD) | 3 (e.g. ABED). b = 0 | 4 is impossilbe.
+- ABCD = 4 eliminates the remaining 2 colors. Try another combination of ABCD for guess 2.
+- ABCD = 0 eliminates 4 colors. Follow with EEFF = b, then E | F is: quadruple for b = 2; or triplicate for b = 3; for b = 4, E and F are both duplicate. 
+
+## Forked from bobbyroe/Mastermind_demo
+
+Thank you Bobby Roe!
+
+[Bobby Roe's Mastermind Source Code](https://github.com/bobbyroe/Mastermind_demo)
+
+[Play Bobby Roe's Mastermind Demo](http://bobbyroe.github.io/Mastermind_demo/)
+
+[Bobby Roe's slideshare "Backbone.js – an introduction"](https://www.slideshare.net/slideshow/backbonejs-an-introduction-14284042/14284042)
 
 
