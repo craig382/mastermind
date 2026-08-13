@@ -71,9 +71,9 @@ div.piece {
 	margin-right:15px;
 	height: 30px;
 	float:left;
-	border:1px solid #000;
+	border:3px solid #000;
 	background-color: #000;
-	-webkit-border-radius: 15px;
+	border-radius: 15px;
 }
 div.piece-spacer {
 	width:15px;
@@ -82,31 +82,24 @@ div.piece-spacer {
 }
 div.piece.X {
 	border-color: #000;
-	background-image: -webkit-radial-gradient(95% 95%, circle cover, #404040, #000 100%);
 }
 div.piece.A {
 	border-color: #090;
-	background-image: -webkit-radial-gradient(5% 5%, circle cover, #0F4, #020 100%);
 }
 div.piece.B {
 	border-color: #900;
-	background-image: -webkit-radial-gradient(5% 5%, circle cover, #F30, #200 100%);
 }
 div.piece.C {
 	border-color: #009;
-	background-image: -webkit-radial-gradient(5% 5%, circle cover, #09F, #002 100%);
 }
 div.piece.D {
 	border-color: #990;
-	background-image: -webkit-radial-gradient(5% 5%, circle cover, #FF0, #220 100%);
 }
 div.piece.E {
 	border-color: #90F;
-	background-image: -webkit-radial-gradient(5% 5%, circle cover, #90F, #102 100%);
 }
 div.piece.F {
 	border-color: #940;
-	background-image: -webkit-radial-gradient(5% 5%, circle cover, #F90, #210 100%);
 }
 div#allPieces {
 	width:fit-content;
@@ -150,7 +143,7 @@ input.go {
     color:#E0E0E0;
     background-color:#2d79b1;
     border:none;
-    -webkit-border-radius: 4px;
+    border-radius: 4px;
 }
 input.go:hover {
 	color:#FFF;
@@ -202,7 +195,7 @@ input#reveal {
     background-color:#2d79b1;
     border:none;
     /* border:4px #5fa8d6 solid; */
-    -webkit-border-radius: 4px;
+    border-radius: 4px;
 }
 input#reveal:hover {
 	color:#FFF;
