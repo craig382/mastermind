@@ -92,7 +92,7 @@ div.piece-spacer {
 	float:left;
 }
 div.piece.X {
-	border-color: #000;
+	border-color: #AAA;
 	background-color: #000;
 	color:#000;
 }
