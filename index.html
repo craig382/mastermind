@@ -18,15 +18,15 @@
     </div>
     <div id="allPieces">
         <div class="pieces">
-            <div id="current_piece" class="piece X"></div>
+            <div id="current_piece" class="piece X">X</div>
             <div class="piece X"></div>
             <!-- <div class="piece-spacer"></div> -->
-            <div class="piece A"></div>
-            <div class="piece B"></div>
-            <div class="piece C"></div>
-            <div class="piece D"></div>
-            <div class="piece E"></div>
-            <div class="piece F"></div>
+            <div class="piece A">A</div>
+            <div class="piece B">B</div>
+            <div class="piece C">C</div>
+            <div class="piece D">D</div>
+            <div class="piece E">E</div>
+            <div class="piece F">F</div>
         </div>
     </div>
     <div id="presentation"><a href="http://www.slideshare.net/bobbyroe/backbonejs-an-introduction-14284042">Backbone.js - an Introduction</a></div>
@@ -37,7 +37,7 @@
             
             <input class="go <%= disabled_class %>" type="submit" value="guess"/>
             <div class="pieces">
-                <% _.each(code, function(p,i) { %><div class="piece <%= p %>" id="<%= i %>"></div><% }); %>
+                <% _.each(code, function(p,i) { %><div class="piece <%= p %>" id="<%= i %>" value="<%= p %>"><%= p %></div><% }); %>
             </div>
             <span class="hint"><%= hint_string %></span> 
         </div>
@@ -47,7 +47,7 @@
         <div class="turn" id="solution">
         
         <div class="pieces <%= locked_class %>">
-            <% _.each(code, function(p,i) { %><div class="piece <%= p %>" id="<%= i %>"></div><% }); %>
+            <% _.each(code, function(p,i) { %><div class="piece <%= p %>" id="<%= i %>"><%= p %></div><% }); %>
         </div>
         <input id="reveal" type="submit" value="<%= button_text %>"/>
         </div>

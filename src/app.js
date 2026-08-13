@@ -242,7 +242,7 @@ Mastermind.AllPieces = Backbone.Model.extend({
 Mastermind.AllPieces_view = Backbone.View.extend({
 	el: 'div#allPieces',
 	cur_piece_el: 'div#current_piece',
-	piece_template: '<div class="piece <%= nub_class %>"></div>',
+	piece_template: '<div class="piece <%= nub_class %>"><%= nub_class %></div>',
 	events: {
 		'click div.piece': 'nubClicked'
 	},
@@ -274,7 +274,7 @@ Mastermind.AllPieces_view = Backbone.View.extend({
 
 	/** @param {string} nub_class */
 	setNub: function (nub_class) {
-		// log('setNub, nub_class = ', nub_class);
+		log('setNub, nub_class = ', nub_class);
 		this.model.set('nub_class', nub_class); 	
 	},
 
