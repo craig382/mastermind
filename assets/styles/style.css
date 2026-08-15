@@ -38,10 +38,12 @@ ul {
 }
 div.turn {
 	width:100%;
-	padding:5px 10px;
-	height:50px;
+	padding:0px 10px;
+	height:auto;
+	min-height: 54px;
 	background-color: #555;
 	align-items: center;
+	justify-content: left;
 	display: flex;
 }
 div.turn.alt {
@@ -66,7 +68,7 @@ span.guess {
 /* peg piece holes */
 div.pieces {
 	display: inline-flex;
-	padding: 5px 0 5px 5px;
+	padding: 5px;
 }
 div#current_piece {
 	width:auto;
@@ -124,6 +126,7 @@ div#allPieces {
 	width:fit-content;
 	position:relative;
 	margin:10px auto;
+	padding:5px 0 5px 5px;
 	height:auto;
 	display:block;
 	border:1px solid;
@@ -133,7 +136,6 @@ div#gameOver {
 	align-items: center;
 	justify-content: center;
 	padding: 10px 0;
-	/* height:65px; */
 	font-size:2em;
 	display:none;
 }
@@ -150,7 +152,7 @@ div#gameOver.win {
 div#presentation {
 	width:300px;
 	text-align:center;
-	margin:0 auto;
+	margin:10px auto;
 	padding:10px 10px;
 	border:1px solid;
 }
@@ -159,7 +161,7 @@ input {
 	width:fit-content;
 	padding: 5px 10px;
 	text-transform: uppercase;
-	margin-left:10px;
+	margin:auto 5px auto auto;
     font-weight:bold;
     font-size:0.8em;
     cursor: pointer;
@@ -167,7 +169,6 @@ input {
     background-color:#2d79b1;
     border: none;
     border-radius: 4px;
-	display: inline-block;
 }
 input.go:hover {
 	color:#FFF;
@@ -198,8 +199,6 @@ span.hint.done { /* unused */
 	color:#FFF;
 }
 div.turn#solution {
-	width:100%;
-	font-size: 1.5em;
 	background-color: #000;
 	border:1px #555 solid;
 }
