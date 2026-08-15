@@ -125,7 +125,7 @@ Mastermind.Turn_view = Backbone.View.extend({
 	},
 
 	hideTurnButton: function () { 
-		this.model.set('disabled_class','hidden');
+		this.model.set('disabled_class', 'hidden');
 		this.render();
 	},
 
@@ -146,9 +146,8 @@ Mastermind.Turn_view = Backbone.View.extend({
 
 	/**
 	 * Execute the guess flow for this turn.
-	 * @param {Array<string>} guess_array
 	 */
-	goGuess: function (guess_array) {
+	goGuess: function () {
 		this.freezeRow();
 		Mastermind.GameView.checkGuess(this.model.get('code'));
 	},
@@ -156,7 +155,12 @@ Mastermind.Turn_view = Backbone.View.extend({
 	freezeRow: function () {
 		this.model.set('locked_class','frozen');
 		this.hideTurnButton();
-	}
+	},
+
+	activateRow: function () {
+		this.model.set('locked_class','active');
+		this.showTurnButton();
+	}	
 	
 });
 
@@ -206,7 +210,6 @@ Mastermind.Solution_view = Backbone.View.extend({
 
 	/** @param {boolean} game_won */
 	setSolved: function (game_won) {
-		var end_text = (game_won) ? 'you won! :D' : 'you lost!!!';
 		this.model.set('button_text','New Game');
 		this.model.set('locked_class','');
 	},
@@ -422,10 +425,7 @@ Mastermind.Game_view = Backbone.View.extend({
 		} else if (this.model.get('turns_remaining') === 0) {
 			this.model.set('win',false);
 		} else {
-			// log('turns_remaining: ', this.model.get('turns_remaining'));
-			var t = this.getCurrentTurn();
-			t.set('disabled_class',''); // show the guess button
-			t.set('locked_class','active'); // unlock the next turn
+			this.getCurrentTurnView().activateRow();
 		}
 	},
 
@@ -433,22 +433,25 @@ Mastermind.Game_view = Backbone.View.extend({
 		var cur_turn = this.getCurrentTurn(),
 			prev_id = cur_turn.get('id') - 1,
 			prev_turn = this.turns.get(prev_id);
-			
 		return prev_turn;
 	},
 
 	getCurrentTurn: function () {
 		var turn_index = this.model.get('num_turns') - this.model.get('turns_remaining'),
 			cur_turn = this.turns.at(turn_index);
-
 		return cur_turn;
+	},
+
+	getCurrentTurnView: function () {
+		var turn_index = this.model.get('num_turns') - this.model.get('turns_remaining'),
+			cur_turn_view = this.turn_views.at(turn_index);
+		return cur_turn_view;
 	},
 
 	getNextTurn: function () {
 		var cur_turn = this.getCurrentTurn(),
 			next_id = cur_turn.get('id') + 1,
 			next_turn = this.turns.get(next_id);
-			
 		return next_turn;
 	},
 
@@ -466,6 +469,9 @@ Mastermind.Game_view = Backbone.View.extend({
 		} else {
 			$(this.gameOver_el).text('you lost.');
 			$(this.gameOver_el).addClass('lose');
+			var t = this.getCurrentTurn();
+			t.set('disabled_class','hidden'); // hide the guess button
+			t.set('locked_class','frozen'); // freeze the current turn
 		}
 	},
 

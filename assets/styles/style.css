@@ -4,7 +4,7 @@
 * { 
 	margin:0;
 	padding:0;
-    box-sizing: border-box; 
+	box-sizing: border-box; 
 }
 body {
 	padding:0;
@@ -13,10 +13,12 @@ body {
 	font-family:Helvetica, Arial, sans-serif;
 	background-color: #101010;
 	color:#e0e0e0;
+	display:block;
 }
 div#header {
 	width:auto;
-	font-size:3em;
+	padding:5px 0;
+	font-size:2.5em;
 	text-align: center;
 	background-color: #222;
 }
@@ -36,9 +38,11 @@ ul {
 }
 div.turn {
 	width:100%;
-	padding:10px;
+	padding:5px 10px;
 	height:50px;
 	background-color: #555;
+	align-items: center;
+	display: flex;
 }
 div.turn.alt {
 	background-color: #666;
@@ -60,36 +64,32 @@ span.guess {
 }
 
 /* peg piece holes */
-div.pieces { 
-	float:none;
-	display: inline;
+div.pieces {
+	display: inline-flex;
+	padding: 5px 0 5px 5px;
 }
 div#current_piece {
-	width:30px;
-	margin-right:15px;
+	width:auto;
+	margin-right: 10px;
 	float:left;
+	display:block;
 }
 div.piece {
-	width:30px;
-	margin-right:15px;
-	height: 30px;
+	width:40px;
+	margin-right:5px;
+	height: 40px;
 	float:left;
 	border:1px solid #000;
 	background-color: #000;
 	color:#fff;
-	border-radius: 15px;
+	border-radius: 20px;
 	font-weight:bold;
 	font-size:1em;
 	align-items: center;
 	justify-content: center;
-	display: flex;
+	display: inline-flex;
 	cursor: pointer;
 
-}
-div.piece-spacer {
-	width:15px;
-	height:30px;
-	float:left;
 }
 div.piece.X {
 	border-color: #AAA;
@@ -123,24 +123,27 @@ div.piece.F {
 div#allPieces {
 	width:fit-content;
 	position:relative;
-	padding:10px 0px 0px 0px;
-	margin:auto;
-	height:50px;
+	margin:10px auto;
+	height:auto;
+	display:block;
+	border:1px solid;
 }
 div#gameOver {
 	width:100%;
-	text-align: center;
-	height:65px;
-	font-size:3em;
+	align-items: center;
+	justify-content: center;
+	padding: 10px 0;
+	/* height:65px; */
+	font-size:2em;
 	display:none;
 }
 div#gameOver.lose {
-	display: block;
+	display: flex;
 	color:#F00;
 	background-color: rgba(64,0,0,0.9);
 }
 div#gameOver.win {
-	display:block;
+	display:flex;
 	color:#0F0;
 	background-color: rgba(0,64,0,0.9);
 }
@@ -148,22 +151,23 @@ div#presentation {
 	width:300px;
 	text-align:center;
 	margin:0 auto;
+	padding:10px 10px;
+	border:1px solid;
 }
 /* guess button */
-input.go {
+input {
 	width:fit-content;
-	padding: 0 10px;
+	padding: 5px 10px;
 	text-transform: uppercase;
 	margin-left:10px;
-	height:28px;
     font-weight:bold;
     font-size:0.8em;
     cursor: pointer;
     color:#E0E0E0;
     background-color:#2d79b1;
-    border:none;
+    border: none;
     border-radius: 4px;
-	display:inline;
+	display: inline-block;
 }
 input.go:hover {
 	color:#FFF;
@@ -201,26 +205,6 @@ div.turn#solution {
 }
 div.turn#solution div.pieces.hidden { /* solution */
 	display: none;
-}
-input#reveal {
-	width:fit-content;
-	padding: 0 10px;
-	text-transform: uppercase;
-	height:28px;
-    font-weight:bold;
-    font-size:0.6em;
-    float:right;
-    cursor: pointer;
-    color:#E0E0E0;
-    background-color:#2d79b1;
-    border:none;
-    /* border:4px #5fa8d6 solid; */
-    border-radius: 4px;
-}
-input#reveal:hover {
-	color:#FFF;
-    background-color:#20557c;
-    border-color:#4880a3;
 }
 
 
