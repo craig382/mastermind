@@ -23,10 +23,10 @@ type TurnModel = {
 type GameModel = {
     get(key: 'num_turns'): number;
     get(key: 'turns_remaining'): number;
-    get(key: 'win'): boolean | undefined;
+    get(key: 'status'): GameStatus;
     get(key: string): any;
     set(key: 'turns_remaining', value: number): any;
-    set(key: 'win', value: boolean): any;
+    set(key: 'status', value: GameStatus): any;
     set(key: string, value: any): any;
 };
 
@@ -58,6 +58,7 @@ type DisabledClass = '' | 'hidden' | 'disabled';
 type NubClass = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'X';
 type GuessMark = 'x' | 'z';
 type ButtonText = 'quit' | 'New Game';
+type GameStatus = 'notStarted' | 'inPlay' | 'won' | 'lost';
 
 /** @type {any} */
 var Mastermind: any = {
@@ -381,7 +382,7 @@ Mastermind.Game = Backbone.Model.extend({
     defaults: {
         num_turns: 10,
         turns_remaining: 10,
-        win: undefined
+        status: 'notStarted'
     }
 });
 
@@ -402,9 +403,13 @@ Mastermind.Game_view = Backbone.View.extend({
         this.allPiecesView = new Mastermind.AllPieces_view();
         this.turn_views = [] as Array<TurnViewInstance>;
 
+        this.model.on('change:status',this.gameOver,this);
+
         this.resetBoard(); // START
 
-        this.model.on('change:win',this.gameOver,this);
+        // Keep current behavior: game begins immediately for now.
+        // A future change can keep this as notStarted until user clicks New Game.
+        this.model.set('status', 'inPlay');
     },
 
     resetBoard: function (): void {
@@ -485,9 +490,9 @@ Mastermind.Game_view = Backbone.View.extend({
         game.set('turns_remaining', game.get('turns_remaining') - 1);
 
         if (num_black === 4) {
-            game.set('win',true);
+            game.set('status','won');
         } else if (game.get('turns_remaining') === 0) {
-            game.set('win',false);
+            game.set('status','lost');
         } else {
             var t: TurnModel = this.getCurrentTurn();
             t.set('disabled_class','');
@@ -521,14 +526,17 @@ Mastermind.Game_view = Backbone.View.extend({
 
     quit: function (): void {
         var game = this.model as GameModel;
-        game.set('win', false);
+        game.set('status', 'lost');
     },
 
     gameOver: function (): void {
         var game = this.model as GameModel;
-        var you_won: boolean | undefined = game.get('win');
+        var status: GameStatus = game.get('status');
+        if (status === 'notStarted' || status === 'inPlay') { return; }
+
+        var you_won = (status === 'won');
         this.solutionView.setSolved(you_won);
-        if (you_won) {
+        if (status === 'won') {
             this.getPreviousTurn().set('locked_class', 'correct');
             $(this.gameOver_el).text('you won!');
             $(this.gameOver_el).addClass('win');

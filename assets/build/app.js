@@ -266,7 +266,7 @@ Mastermind.Game = Backbone.Model.extend({
     defaults: {
         num_turns: 10,
         turns_remaining: 10,
-        win: undefined
+        status: 'notStarted'
     }
 });
 Mastermind.Game_view = Backbone.View.extend({
@@ -282,8 +282,11 @@ Mastermind.Game_view = Backbone.View.extend({
         this.solutionView = new Mastermind.Solution_view({ model: this.solution });
         this.allPiecesView = new Mastermind.AllPieces_view();
         this.turn_views = [];
+        this.model.on('change:status', this.gameOver, this);
         this.resetBoard(); // START
-        this.model.on('change:win', this.gameOver, this);
+        // Keep current behavior: game begins immediately for now.
+        // A future change can keep this as notStarted until user clicks New Game.
+        this.model.set('status', 'inPlay');
     },
     resetBoard: function () {
         var game = this.model;
@@ -344,10 +347,10 @@ Mastermind.Game_view = Backbone.View.extend({
         this.getCurrentTurn().set('hint_string', hint_string);
         game.set('turns_remaining', game.get('turns_remaining') - 1);
         if (num_black === 4) {
-            game.set('win', true);
+            game.set('status', 'won');
         }
         else if (game.get('turns_remaining') === 0) {
-            game.set('win', false);
+            game.set('status', 'lost');
         }
         else {
             var t = this.getCurrentTurn();
@@ -369,13 +372,17 @@ Mastermind.Game_view = Backbone.View.extend({
     },
     quit: function () {
         var game = this.model;
-        game.set('win', false);
+        game.set('status', 'lost');
     },
     gameOver: function () {
         var game = this.model;
-        var you_won = game.get('win');
+        var status = game.get('status');
+        if (status === 'notStarted' || status === 'inPlay') {
+            return;
+        }
+        var you_won = (status === 'won');
         this.solutionView.setSolved(you_won);
-        if (you_won) {
+        if (status === 'won') {
             this.getPreviousTurn().set('locked_class', 'correct');
             $(this.gameOver_el).text('you won!');
             $(this.gameOver_el).addClass('win');
