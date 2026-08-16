@@ -11,7 +11,8 @@ var Mastermind = {
         // Create the primary game view and pass in a new game model.
         this.GameView = new this.Game_view({ model: new this.Game() });
     }
-}, log = console.log.bind(console);
+};
+var log = console.log.bind(console);
 function getGameView() {
     return Mastermind.GameView;
 }
@@ -29,6 +30,21 @@ function getGameModel(view) {
 }
 function asGameView(view) {
     return view;
+}
+function createTurn(attrs = {}) {
+    return new Mastermind.Turn(attrs);
+}
+function createTurnCollection() {
+    return new Mastermind.Turn_collection();
+}
+function createTurnView(model) {
+    return new Mastermind.Turn_view({ model: model });
+}
+function createSolutionView(model) {
+    return new Mastermind.Solution_view({ model: model });
+}
+function createAllPiecesView() {
+    return new Mastermind.AllPieces_view();
 }
 /**
  * Model shared by both the turn rows and the solution row.
@@ -71,7 +87,8 @@ Mastermind.Turn_view = Backbone.View.extend({
         this.model.on('change:locked_class', this.render);
     },
     render: function () {
-        var turn_template = $(this.template).html(), turn_html = '';
+        var turn_template = $(this.template).html();
+        var turn_html = '';
         turn_html = _.template(turn_template, this.model.toJSON()).toString();
         this.$el.html(turn_html);
         return this.el;
@@ -109,14 +126,19 @@ Mastermind.Turn_view = Backbone.View.extend({
     holeClicked: function (e) {
         // log('holeClicked');
         var gameView = getGameView();
-        var target = e.currentTarget, hole_id = target ? ($(target).attr('id') || '0') : '0', hole_index = parseInt(hole_id, 10), color_class = gameView.allPiecesView.getNub();
+        var target = e.currentTarget;
+        var hole_id = target ? ($(target).attr('id') || '0') : '0';
+        var hole_index = parseInt(hole_id, 10);
+        var color_class = gameView.allPiecesView.getNub();
         // log('holeClicked: hole_index = ', hole_index, ' color_class = ' 	, color_class);
         this.placePiece(color_class, hole_index);
     },
     /** Check whether the turn's code has no holes. @returns {boolean} */
     codeIsValid: function () {
         var turnModel = getTurnModel(this);
-        var code_complete = false, code_array = turnModel.get('code'), num_holes = code_array.length;
+        var code_complete = false;
+        var code_array = turnModel.get('code');
+        var num_holes = code_array.length;
         for (var i = 0; i < code_array.length; i += 1) {
             if (code_array[i] !== 'X') {
                 num_holes -= 1;
@@ -139,7 +161,7 @@ Mastermind.Turn_view = Backbone.View.extend({
      * User clicked the guess button for this turn.
      * @param {Event} e
      */
-    guessClicked: function (e) {
+    guessClicked: function (_e) {
         var turnModel = getTurnModel(this);
         if (turnModel.get('locked_class') !== 'active') {
             return;
@@ -190,7 +212,10 @@ Mastermind.Solution_view = Backbone.View.extend({
         // Subtract 1 because color X cannot be part of the code.
         var playable_colors = Mastermind.colors.filter(function (c) {
             return c !== 'X';
-        }), num_colors = playable_colors.length, cur_color = 'A', solution = [];
+        });
+        var num_colors = playable_colors.length;
+        var cur_color = 'A';
+        var solution = [];
         for (var i = 0; i < 4; i += 1) {
             var random_index = Math.floor(Math.random() * num_colors);
             cur_color = playable_colors[random_index];
@@ -200,12 +225,13 @@ Mastermind.Solution_view = Backbone.View.extend({
         log('newSolution:', solution);
     },
     render: function () {
-        var solution_template = $(this.template).html(), solution_html = _.template(solution_template, this.model.toJSON());
+        var solution_template = $(this.template).html();
+        var solution_html = _.template(solution_template, this.model.toJSON());
         this.$el.html(solution_html);
         return this.el;
     },
-    /** @param {boolean} game_won */
-    setSolved: function (game_won) {
+    /** @param {boolean} _game_won */
+    setSolved: function (_game_won) {
         var solutionModel = getSolutionModel(this);
         solutionModel.set('button_text', 'New Game');
         solutionModel.set('locked_class', '');
@@ -262,7 +288,9 @@ Mastermind.AllPieces_view = Backbone.View.extend({
      */
     nubClicked: function (e) {
         // log('nubClick');
-        var target = e.currentTarget, classes = target ? ($(target).attr('class') || '') : '', nub_class = (classes.split(' ')[1] || 'X');
+        var target = e.currentTarget;
+        var classes = target ? ($(target).attr('class') || '') : '';
+        var nub_class = (classes.split(' ')[1] || 'X');
         this.setNub(nub_class);
     },
     /** @param {string} nub_class */
@@ -302,10 +330,10 @@ Mastermind.Game_view = Backbone.View.extend({
     events: { /* see initialize */},
     initialize: function () {
         var gameView = asGameView(this);
-        gameView.turns = new Mastermind.Turn_collection();
-        gameView.solution = new Mastermind.Turn({ locked_class: 'hidden' });
-        gameView.solutionView = new Mastermind.Solution_view({ model: gameView.solution });
-        gameView.allPiecesView = new Mastermind.AllPieces_view();
+        gameView.turns = createTurnCollection();
+        gameView.solution = createTurn({ locked_class: 'hidden' });
+        gameView.solutionView = createSolutionView(gameView.solution);
+        gameView.allPiecesView = createAllPiecesView();
         gameView.turn_views = [];
         this.model.on('change:status', this.gameOver, this);
         this.resetBoard(); // START
@@ -331,8 +359,8 @@ Mastermind.Game_view = Backbone.View.extend({
                 locked_class = 'locked';
                 disabled_class = 'hidden';
             }
-            var turn_model = new Mastermind.Turn({ alt_class: class_name, locked_class: locked_class, disabled_class: disabled_class, id: i });
-            var cur_turn = new Mastermind.Turn_view({ model: turn_model });
+            var turn_model = createTurn({ alt_class: class_name, locked_class: locked_class, disabled_class: disabled_class, id: i });
+            var cur_turn = createTurnView(turn_model);
             turns_array.push(turn_model);
             gameView.turn_views.push(cur_turn);
         }
@@ -354,7 +382,11 @@ Mastermind.Game_view = Backbone.View.extend({
     },
     checkGuess: function (guess_array) {
         var gameView = asGameView(this);
-        var solution_copy = gameView.solutionView.getCode().slice(0), guess_copy = guess_array.slice(0), num_black = 0, num_white = 0, code_length = 4;
+        var solution_copy = gameView.solutionView.getCode().slice(0);
+        var guess_copy = guess_array.slice(0);
+        var num_black = 0;
+        var num_white = 0;
+        var code_length = 4;
         for (var i = 0; i < code_length; i += 1) {
             if (guess_copy[i] === solution_copy[i]) {
                 num_black += 1;
@@ -394,19 +426,25 @@ Mastermind.Game_view = Backbone.View.extend({
     getPreviousTurn: function () {
         var gameView = asGameView(this);
         var turns = gameView.turns;
-        var cur_turn = this.getCurrentTurn(), prev_id = cur_turn.get('id') - 1, prev_turn = turns.get(prev_id);
+        var cur_turn = this.getCurrentTurn();
+        var prev_id = cur_turn.get('id') - 1;
+        var prev_turn = turns.get(prev_id);
         return prev_turn;
     },
     getCurrentTurn: function () {
         var gameView = asGameView(this);
         var turns = gameView.turns;
-        var game = getGameModel(this), turn_index = game.get('num_turns') - game.get('turns_remaining'), cur_turn = turns.at(turn_index);
+        var game = getGameModel(this);
+        var turn_index = game.get('num_turns') - game.get('turns_remaining');
+        var cur_turn = turns.at(turn_index);
         return cur_turn;
     },
     getNextTurn: function () {
         var gameView = asGameView(this);
         var turns = gameView.turns;
-        var cur_turn = this.getCurrentTurn(), next_id = cur_turn.get('id') + 1, next_turn = turns.get(next_id);
+        var cur_turn = this.getCurrentTurn();
+        var next_id = cur_turn.get('id') + 1;
+        var next_turn = turns.get(next_id);
         return next_turn;
     },
     quit: function () {
