@@ -175,7 +175,7 @@ Mastermind.Solution_view = Backbone.View.extend({
     },
     /** @param {boolean} game_won */
     setSolved: function (game_won) {
-        this.model.set('button_text', 'New Game');
+        this.model.set('button_text', 'New Game 1');
         this.model.set('locked_class', '');
     },
     getCode: function () {

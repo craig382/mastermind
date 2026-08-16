@@ -66,4 +66,13 @@ Thank you Bobby Roe!
 
 [Bobby Roe's slideshare "Backbone.js – an introduction"](https://www.slideshare.net/slideshow/backbonejs-an-introduction-14284042/14284042)
 
+## VS Code launch & dev server
+
+- The VS Code launch configuration included in this repo starts a background task before opening Brave. That task currently uses Python's static server (`python3 -m http.server 8080`) because the system `npm` binary on this machine was failing when invoked from tasks.
+- Behavior: the background task waits until the server prints its ready message, then the `Launch in Brave` debug configuration opens `http://127.0.0.1:8080/`.
+- To restore an npm-based preLaunchTask (if your `npm` is healthy):
+	- edit `.vscode/tasks.json` to run `npm run serve` (label it `npm: serve`), and
+	- edit `.vscode/launch.json` to set `preLaunchTask` to `npm: serve`.
+- Alternatively, run `npm run serve` manually in a terminal and then use the existing `Launch in Brave` configuration.
+
 

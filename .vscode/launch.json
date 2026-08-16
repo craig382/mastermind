@@ -2,20 +2,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch in Brave (serve + debug)",
-            "type": "pwa-chrome",
+            "name": "Launch in Brave",
+            "type": "chrome",
             "request": "launch",
-            "url": "http://localhost:8080/index.html",
+            "url": "http://127.0.0.1:8080/",
             "runtimeExecutable": "/usr/bin/brave",
             "runtimeArgs": [
                 "--remote-debugging-port=9222"
             ],
             "webRoot": "${workspaceFolder}",
-            "sourceMaps": false,
+            "sourceMaps": true,
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "preLaunchTask": "npm: serve"
+            "preLaunchTask": "dev: watch+serve"
         }
     ]
 }
