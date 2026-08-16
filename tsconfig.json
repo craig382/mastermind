@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "es2015",
+    "outDir": "assets/build",
+    "rootDir": "src",
+    "allowJs": true,
+    "checkJs": false,
+    "strict": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*", "types/**/*"],
+  "exclude": ["node_modules", "assets/build", "src/**/*.bak.js"]
+}

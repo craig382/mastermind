@@ -4,7 +4,10 @@
   "description": "===============",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p .",
+    "watch": "tsc -p . --watch",
+    "serve": "npx http-server ./ -p 8080 -c-1"
   },
   "repository": {
     "type": "git",
@@ -21,6 +24,7 @@
   "devDependencies": {
     "@types/backbone": "^1.4.23",
     "@types/jquery": "^4.0.1",
-    "@types/underscore": "^1.13.0"
+    "@types/underscore": "^1.13.0",
+    "typescript": "^7.0.2"
   }
 }

@@ -22,6 +22,12 @@ A web app to play mastermind. Written in Backbone.js.
 - Add a bot that gives analysis of the top 5 remaining guesses for each turn given the player's turn history up to that point. The bot should also give its solution from the start (if the bot were to play the game by itself, how many moves it required in total and what each of those moves were, and how many possible solutions were left after each of its moves). Of course, the bot is not allowed to know the secret code. It is only allowed to make guesses based on the black and white peg feedback it receives.
 - Add row hints on frozen rows that every time you change the code on the active row, it shows the black and white peg results vs the active code (only when each differs from the true black and white peg (vs the secret code) row hint).
 
+## Development Setup After Conversion to TypeScript
+
+`npm run serve`
+
+
+
 ## Development setup
 
 This project now includes a minimal `package.json` for editor and type support.
