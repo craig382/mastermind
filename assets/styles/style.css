@@ -170,7 +170,7 @@ input {
     border: none;
     border-radius: 4px;
 }
-input.go:hover {
+input:hover {
 	color:#FFF;
     background-color:#20557c;
 }

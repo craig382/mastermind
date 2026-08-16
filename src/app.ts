@@ -11,12 +11,23 @@ type TurnModel = {
     get(key: 'id'): number;
     get(key: 'locked_class'): LockedClass;
     get(key: 'disabled_class'): DisabledClass;
+    get(key: 'hint_string'): string;
+    get(key: 'button_text'): ButtonText;
     get(key: string): any;
     set(key: 'disabled_class', value: DisabledClass): any;
     set(key: 'locked_class', value: LockedClass): any;
     set(key: 'hint_string', value: string): any;
     set(key: 'code', value: Array<NubClass>): any;
-    set(attrs: { code: Array<NubClass> }): any;
+    set(key: 'button_text', value: ButtonText): any;
+    set(attrs: Partial<{
+        id: number;
+        code: Array<NubClass>;
+        hint_string: string;
+        alt_class: string;
+        disabled_class: DisabledClass;
+        locked_class: LockedClass;
+        button_text: ButtonText;
+    }>): any;
     set(key: string, value: any): any;
 };
 
@@ -27,16 +38,27 @@ type GameModel = {
     get(key: string): any;
     set(key: 'turns_remaining', value: number): any;
     set(key: 'status', value: GameStatus): any;
+    set(attrs: Partial<{
+        num_turns: number;
+        turns_remaining: number;
+        status: GameStatus;
+    }>): any;
     set(key: string, value: any): any;
 };
 
 type SolutionModel = {
     get(key: 'code'): Array<NubClass>;
     get(key: 'button_text'): ButtonText;
+    get(key: 'locked_class'): LockedClass;
     get(key: string): any;
     set(key: 'code', value: Array<NubClass>): any;
     set(key: 'button_text', value: ButtonText): any;
     set(key: 'locked_class', value: LockedClass): any;
+    set(attrs: Partial<{
+        code: Array<NubClass>;
+        button_text: ButtonText;
+        locked_class: LockedClass;
+    }>): any;
     set(key: string, value: any): any;
 };
 
@@ -44,6 +66,9 @@ type AllPiecesModel = {
     get(key: 'nub_class'): NubClass;
     get(key: string): any;
     set(key: 'nub_class', value: NubClass): any;
+    set(attrs: Partial<{
+        nub_class: NubClass;
+    }>): any;
     set(key: string, value: any): any;
 };
 
@@ -52,16 +77,58 @@ type TurnViewInstance = {
     activateRow: () => void;
 };
 
+type AllPiecesViewInstance = {
+    setNub(nub_class: NubClass): void;
+    getNub(): NubClass;
+    resetNub(): void;
+};
+
+type SolutionViewInstance = {
+    render(): Element;
+    getCode(): Array<NubClass>;
+    setSolved(game_won: boolean): void;
+};
+
+type GameViewInstance = {
+    turns: TurnCollectionModel;
+    turn_views: Array<TurnViewInstance>;
+    solution: TurnModel;
+    allPiecesView: AllPiecesViewInstance;
+    solutionView: SolutionViewInstance;
+    checkGuess(guess_array: Array<NubClass>): void;
+    getCurrentTurn(): TurnModel;
+    getPreviousTurn(): TurnModel;
+    quit(): void;
+    restart(): void;
+    handleResults(num_black: number, num_white: number): void;
+    gameOver_el: string;
+};
+
+type TurnCollectionModel = {
+    length: number;
+    reset(models: Array<TurnModel>): any;
+    get(id: number): TurnModel;
+    at(index: number): TurnModel;
+};
+
 type ViewEvent = Event;
 type LockedClass = '' | 'active' | 'locked' | 'frozen' | 'correct' | 'hidden';
 type DisabledClass = '' | 'hidden' | 'disabled';
 type NubClass = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'X';
+type PlayableColor = Exclude<NubClass, 'X'>;
 type GuessMark = 'x' | 'z';
 type ButtonText = 'quit' | 'New Game';
 type GameStatus = 'notStarted' | 'inPlay' | 'won' | 'lost';
 
+type MastermindRoot = {
+    colors: Array<NubClass>;
+    GameView?: GameViewInstance;
+    init(): void;
+    [key: string]: any;
+};
+
 /** @type {any} */
-var Mastermind: any = {
+var Mastermind: MastermindRoot = {
 
 		colors: ['A', 'B', 'C', 'D', 'E', 'F', 'X'],
 
@@ -75,6 +142,30 @@ var Mastermind: any = {
 		}
 	},
 	log = console.log.bind(console);
+
+function getGameView(): GameViewInstance {
+    return Mastermind.GameView as GameViewInstance;
+}
+
+function getTurnModel(view: { model: any }): TurnModel {
+    return view.model as TurnModel;
+}
+
+function getSolutionModel(view: { model: any }): SolutionModel {
+    return view.model as SolutionModel;
+}
+
+function getAllPiecesModel(view: { model: any }): AllPiecesModel {
+    return view.model as AllPiecesModel;
+}
+
+function getGameModel(view: { model: any }): GameModel {
+    return view.model as GameModel;
+}
+
+function asGameView(view: any): GameViewInstance {
+    return view as GameViewInstance;
+}
 
 /**
  * Model shared by both the turn rows and the solution row.
@@ -140,10 +231,11 @@ Mastermind.Turn_view = Backbone.View.extend({
     /**
      * Place a piece (or, when frozen, set the shared nub color).
      * @param {string} color
-     * @param {number|string} place
+     * @param {number} place
      */
-    placePiece: function (color: NubClass, place: number | string): void {
-        var turnModel = this.model as TurnModel;
+    placePiece: function (color: NubClass, place: number): void {
+        var turnModel = getTurnModel(this);
+        var gameView = getGameView();
         // For a frozen (past) turn, set the nub 
         // (the color picker) to the color of the frozen piece.
         // For an active (current) or locked (future) turn, 
@@ -154,7 +246,7 @@ Mastermind.Turn_view = Backbone.View.extend({
         var code_array = turnModel.get('code').slice(0);
         if (turnModel.get('locked_class') === 'frozen') {
             // set the nub color to the color clicked in the frozen turn
-            Mastermind.GameView.allPiecesView.setNub(code_array[place]);
+            gameView.allPiecesView.setNub(code_array[place]);
         } else {
             code_array[place] = color;
             turnModel.set({code:code_array});
@@ -168,16 +260,18 @@ Mastermind.Turn_view = Backbone.View.extend({
      */
     holeClicked: function (e: ViewEvent): void {
         // log('holeClicked');
+        var gameView = getGameView();
         var target = e.currentTarget as Element | null,
-            hole_index = target ? ($(target).attr('id') || '0') : '0',
-            color_class: NubClass = Mastermind.GameView.allPiecesView.getNub();
+            hole_id = target ? ($(target).attr('id') || '0') : '0',
+            hole_index = parseInt(hole_id, 10),
+            color_class: NubClass = gameView.allPiecesView.getNub();
         // log('holeClicked: hole_index = ', hole_index, ' color_class = ' 	, color_class);
         this.placePiece(color_class, hole_index);
     },
 
     /** Check whether the turn's code has no holes. @returns {boolean} */
     codeIsValid: function (): boolean {
-        var turnModel = this.model as TurnModel;
+        var turnModel = getTurnModel(this);
         var code_complete = false,
             code_array = turnModel.get('code'),
             num_holes = code_array.length;
@@ -190,13 +284,13 @@ Mastermind.Turn_view = Backbone.View.extend({
     },
 
     hideTurnButton: function (): void { 
-        var turnModel = this.model as TurnModel;
+        var turnModel = getTurnModel(this);
         turnModel.set('disabled_class', 'hidden');
         this.render();
     },
 
     showTurnButton: function (): void { 
-        var turnModel = this.model as TurnModel;
+        var turnModel = getTurnModel(this);
         turnModel.set('disabled_class', '');
         this.render();
     },
@@ -206,7 +300,7 @@ Mastermind.Turn_view = Backbone.View.extend({
      * @param {Event} e
      */
     guessClicked: function (e: ViewEvent): void {
-        var turnModel = this.model as TurnModel;
+        var turnModel = getTurnModel(this);
         if (turnModel.get('locked_class') !== 'active') { return; }
         if (this.codeIsValid() === false) { return; }
         this.goGuess();
@@ -216,19 +310,20 @@ Mastermind.Turn_view = Backbone.View.extend({
      * Execute the guess flow for this turn.
      */
     goGuess: function (): void {
-        var turnModel = this.model as TurnModel;
+        var turnModel = getTurnModel(this);
+        var gameView = getGameView();
         this.freezeRow();
-        Mastermind.GameView.checkGuess(turnModel.get('code'));
+        gameView.checkGuess(turnModel.get('code'));
     },
 
     freezeRow: function (): void {
-        var turnModel = this.model as TurnModel;
+        var turnModel = getTurnModel(this);
         turnModel.set('locked_class','frozen');
         this.hideTurnButton();
     },
 
     activateRow: function (): void {
-        var turnModel = this.model as TurnModel;
+        var turnModel = getTurnModel(this);
         turnModel.set('locked_class','active');
         this.showTurnButton();
     }    
@@ -255,17 +350,20 @@ Mastermind.Solution_view = Backbone.View.extend({
     },
 
     newSolution: function (): void {
-        var solutionModel = this.model as SolutionModel;
+        var solutionModel = getSolutionModel(this);
         // Color X is not a color.
         // Color X means "remove color" or "no color".
         // Subtract 1 because color X cannot be part of the code.
-        var num_colors = Mastermind.colors.length-1,
-            cur_color: NubClass = 'X',
+        var playable_colors: Array<PlayableColor> = Mastermind.colors.filter(function (c: NubClass): c is PlayableColor {
+                return c !== 'X';
+            }),
+            num_colors = playable_colors.length,
+            cur_color: PlayableColor = 'A',
             solution: Array<NubClass> = [];
 
         for (var i = 0; i < 4; i += 1) {
             var random_index = Math.floor(Math.random()*num_colors);
-            cur_color = Mastermind.colors[random_index];
+            cur_color = playable_colors[random_index];
             solution.push(cur_color);
         }
         solutionModel.set('code', solution);
@@ -282,13 +380,13 @@ Mastermind.Solution_view = Backbone.View.extend({
 
     /** @param {boolean} game_won */
     setSolved: function (game_won: boolean): void {
-        var solutionModel = this.model as SolutionModel;
+        var solutionModel = getSolutionModel(this);
         solutionModel.set('button_text','New Game');
         solutionModel.set('locked_class','');
     },
 
     getCode: function (): Array<NubClass> {
-        var solutionModel = this.model as SolutionModel;
+        var solutionModel = getSolutionModel(this);
         return solutionModel.get('code');
     },
 
@@ -297,12 +395,13 @@ Mastermind.Solution_view = Backbone.View.extend({
      * @param {Event} e
      */
     revealClicked: function (e: ViewEvent): void {
-        var solutionModel = this.model as SolutionModel;
+        var solutionModel = getSolutionModel(this);
+        var gameView = getGameView();
         e.preventDefault();
         if (solutionModel.get('button_text') === 'quit') {
-            Mastermind.GameView.quit();
+            gameView.quit();
         } else {
-            Mastermind.GameView.restart();
+            gameView.restart();
         }
     }
 });
@@ -355,7 +454,7 @@ Mastermind.AllPieces_view = Backbone.View.extend({
 
     /** @param {string} nub_class */
     setNub: function (nub_class: NubClass): void {
-        var allPiecesModel = this.model as AllPiecesModel;
+        var allPiecesModel = getAllPiecesModel(this);
         log('setNub, nub_class = ', nub_class);
         allPiecesModel.set('nub_class', nub_class);    
     },
@@ -365,7 +464,7 @@ Mastermind.AllPieces_view = Backbone.View.extend({
      * @returns {string}
      */
     getNub: function (): NubClass {
-        var allPiecesModel = this.model as AllPiecesModel;
+        var allPiecesModel = getAllPiecesModel(this);
         return allPiecesModel.get('nub_class');    
     },
 
@@ -397,11 +496,12 @@ Mastermind.Game_view = Backbone.View.extend({
     events: { /* see initialize */ },
 
     initialize: function (): void {
-        this.turns = new Mastermind.Turn_collection();
-        this.solution = new Mastermind.Turn({locked_class:'hidden'});
-        this.solutionView = new Mastermind.Solution_view({model:this.solution});
-        this.allPiecesView = new Mastermind.AllPieces_view();
-        this.turn_views = [] as Array<TurnViewInstance>;
+        var gameView = asGameView(this);
+        gameView.turns = new Mastermind.Turn_collection() as TurnCollectionModel;
+        gameView.solution = new Mastermind.Turn({locked_class:'hidden'}) as TurnModel;
+        gameView.solutionView = new Mastermind.Solution_view({model:gameView.solution}) as SolutionViewInstance;
+        gameView.allPiecesView = new Mastermind.AllPieces_view() as AllPiecesViewInstance;
+        gameView.turn_views = [] as Array<TurnViewInstance>;
 
         this.model.on('change:status',this.gameOver,this);
 
@@ -413,17 +513,16 @@ Mastermind.Game_view = Backbone.View.extend({
     },
 
     resetBoard: function (): void {
-        var game = this.model as GameModel;
-        var turns_array: Array<TurnModel> = [],
-            turn_model = {} as TurnModel,
-            cur_turn = {} as TurnViewInstance,
-            class_name: string = '',
-            locked_class: LockedClass = '',
-            disabled_class: DisabledClass = '';
+        var gameView = asGameView(this);
+        var game = getGameModel(this);
+        var turns = gameView.turns;
+        var turns_array: Array<TurnModel> = [];
 
         for (var i = 0; i < game.get('num_turns'); i +=1 ) {
             // initialize the model
-            class_name = (i % 2) ? 'alt' : '';
+            var class_name: string = (i % 2) ? 'alt' : '';
+            var locked_class: LockedClass;
+            var disabled_class: DisabledClass;
             if (i === 0) { 
                 locked_class = 'active';
                 disabled_class = ''; 
@@ -431,33 +530,36 @@ Mastermind.Game_view = Backbone.View.extend({
                 locked_class = 'locked';
                 disabled_class = 'hidden'; 
             }
-            turn_model = new Mastermind.Turn({alt_class:class_name, locked_class:locked_class, disabled_class:disabled_class, id:i});
-            cur_turn = new Mastermind.Turn_view({model:turn_model});
+            var turn_model = new Mastermind.Turn({alt_class:class_name, locked_class:locked_class, disabled_class:disabled_class, id:i}) as TurnModel;
+            var cur_turn = new Mastermind.Turn_view({model:turn_model}) as TurnViewInstance;
             turns_array.push(turn_model);
-            this.turn_views.push(cur_turn);
+            gameView.turn_views.push(cur_turn);
         }
         
         // reset the game over message
         $(this.gameOver_el).attr('class',''); 
-        this.turns.reset(turns_array);
+        turns.reset(turns_array);
 
         this.render();
         log('resetBoard executed');
     },
 
     render: function (): void { // only fired when game is initialized
+        var gameView = asGameView(this);
+        var turns = gameView.turns;
 
-        var html_els_array: Array<string | Element> = [this.header_template, this.gameOver_template, this.solutionView.render()];
+        var html_els_array: Array<string | Element> = [this.header_template, this.gameOver_template, gameView.solutionView.render()];
 
-        for(var i = 0; i < this.turns.length; i += 1) {
-            var turn_view: TurnViewInstance = this.turn_views[i];
+        for(var i = 0; i < turns.length; i += 1) {
+            var turn_view: TurnViewInstance = gameView.turn_views[i];
             html_els_array.push(turn_view.render());
         }
         $(this.board_el).html(html_els_array);
     },
 
     checkGuess: function (guess_array: Array<NubClass>): void {
-        var solution_copy: Array<NubClass | GuessMark> = this.solutionView.getCode().slice(0),
+        var gameView = asGameView(this);
+        var solution_copy: Array<NubClass | GuessMark> = gameView.solutionView.getCode().slice(0),
             guess_copy: Array<NubClass | GuessMark> = guess_array.slice(0),
             num_black: number = 0,
             num_white: number = 0,
@@ -479,13 +581,14 @@ Mastermind.Game_view = Backbone.View.extend({
                 }
             }
         }
-        this.handleResults(num_black,num_white);
+        gameView.handleResults(num_black,num_white);
     },
 
     handleResults: function (num_black: number, num_white: number): void {
-        var game = this.model as GameModel;
+        var gameView = asGameView(this);
+        var game = getGameModel(this);
         var hint_string: string = '<p class="hint b">' + num_black + '</p><p class="hint w">' + num_white + '</p>';
-        this.getCurrentTurn().set('hint_string', hint_string);
+        gameView.getCurrentTurn().set('hint_string', hint_string);
 
         game.set('turns_remaining', game.get('turns_remaining') - 1);
 
@@ -494,55 +597,62 @@ Mastermind.Game_view = Backbone.View.extend({
         } else if (game.get('turns_remaining') === 0) {
             game.set('status','lost');
         } else {
-            var t: TurnModel = this.getCurrentTurn();
+            var t: TurnModel = gameView.getCurrentTurn();
             t.set('disabled_class','');
             t.set('locked_class','active');
         }
     },
 
     getPreviousTurn: function (): TurnModel {
+        var gameView = asGameView(this);
+        var turns = gameView.turns;
         var cur_turn: TurnModel = this.getCurrentTurn(),
             prev_id: number = cur_turn.get('id') - 1,
-            prev_turn = this.turns.get(prev_id);
+            prev_turn = turns.get(prev_id);
             
         return prev_turn;
     },
 
     getCurrentTurn: function (): TurnModel {
-        var game = this.model as GameModel,
+        var gameView = asGameView(this);
+        var turns = gameView.turns;
+        var game = getGameModel(this),
             turn_index: number = game.get('num_turns') - game.get('turns_remaining'),
-            cur_turn = this.turns.at(turn_index);
+            cur_turn = turns.at(turn_index);
 
         return cur_turn;
     },
 
     getNextTurn: function (): TurnModel {
+        var gameView = asGameView(this);
+        var turns = gameView.turns;
         var cur_turn: TurnModel = this.getCurrentTurn(),
             next_id: number = cur_turn.get('id') + 1,
-            next_turn = this.turns.get(next_id);
+            next_turn = turns.get(next_id);
             
         return next_turn;
     },
 
     quit: function (): void {
-        var game = this.model as GameModel;
+        var game = getGameModel(this);
         game.set('status', 'lost');
     },
 
     gameOver: function (): void {
-        var game = this.model as GameModel;
+        var gameView = asGameView(this);
+        var game = getGameModel(this);
         var status: GameStatus = game.get('status');
         if (status === 'notStarted' || status === 'inPlay') { return; }
 
         var you_won = (status === 'won');
-        this.solutionView.setSolved(you_won);
+        gameView.solutionView.setSolved(you_won);
         if (status === 'won') {
-            this.getPreviousTurn().set('locked_class', 'correct');
-            $(this.gameOver_el).text('you won!');
-            $(this.gameOver_el).addClass('win');
+            gameView.getPreviousTurn().set('locked_class', 'correct');
+            $(gameView.gameOver_el).text('you won!');
+            $(gameView.gameOver_el).addClass('win');
         } else {
-            $(this.gameOver_el).text('you lost.');
-            $(this.gameOver_el).addClass('lose');
+            $(gameView.gameOver_el).text('you lost.');
+            $(gameView.gameOver_el).addClass('lose');
         }
     },
 
