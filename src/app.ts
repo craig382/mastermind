@@ -47,10 +47,16 @@ type AllPiecesModel = {
     set(key: string, value: any): any;
 };
 
+type TurnViewInstance = {
+    render: () => Element;
+    activateRow: () => void;
+};
+
 type ViewEvent = Event;
 type LockedClass = '' | 'active' | 'locked' | 'frozen' | 'correct' | 'hidden';
 type DisabledClass = '' | 'hidden' | 'disabled';
 type NubClass = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'X';
+type GuessMark = 'x' | 'z';
 type ButtonText = 'quit' | 'New Game';
 
 /** @type {any} */
@@ -120,7 +126,7 @@ Mastermind.Turn_view = Backbone.View.extend({
         this.model.on('change:locked_class', this.render);
     },
 
-    render: function (): any {
+    render: function (): Element {
         var turn_template = $(this.template).html(),
             turn_html = '';
 
@@ -253,8 +259,8 @@ Mastermind.Solution_view = Backbone.View.extend({
         // Color X means "remove color" or "no color".
         // Subtract 1 because color X cannot be part of the code.
         var num_colors = Mastermind.colors.length-1,
-            cur_color: string = '',
-            solution: Array<string> = [];
+            cur_color: NubClass = 'X',
+            solution: Array<NubClass> = [];
 
         for (var i = 0; i < 4; i += 1) {
             var random_index = Math.floor(Math.random()*num_colors);
@@ -265,7 +271,7 @@ Mastermind.Solution_view = Backbone.View.extend({
         log('newSolution:', solution);
     },
 
-    render: function (): any {
+    render: function (): Element {
         var solution_template = $(this.template).html(),
             solution_html = _.template(solution_template, this.model.toJSON());
 
@@ -394,7 +400,7 @@ Mastermind.Game_view = Backbone.View.extend({
         this.solution = new Mastermind.Turn({locked_class:'hidden'});
         this.solutionView = new Mastermind.Solution_view({model:this.solution});
         this.allPiecesView = new Mastermind.AllPieces_view();
-        this.turn_views = [];
+        this.turn_views = [] as Array<TurnViewInstance>;
 
         this.resetBoard(); // START
 
@@ -405,7 +411,7 @@ Mastermind.Game_view = Backbone.View.extend({
         var game = this.model as GameModel;
         var turns_array: Array<TurnModel> = [],
             turn_model = {} as TurnModel,
-            cur_turn: any = null,
+            cur_turn = {} as TurnViewInstance,
             class_name: string = '',
             locked_class: LockedClass = '',
             disabled_class: DisabledClass = '';
@@ -436,17 +442,18 @@ Mastermind.Game_view = Backbone.View.extend({
 
     render: function (): void { // only fired when game is initialized
 
-        var html_els_array: Array<any> = [this.header_template, this.gameOver_template, this.solutionView.render()];
+        var html_els_array: Array<string | Element> = [this.header_template, this.gameOver_template, this.solutionView.render()];
 
         for(var i = 0; i < this.turns.length; i += 1) {
-            html_els_array.push(this.turn_views[i].render());
+            var turn_view: TurnViewInstance = this.turn_views[i];
+            html_els_array.push(turn_view.render());
         }
         $(this.board_el).html(html_els_array);
     },
 
     checkGuess: function (guess_array: Array<NubClass>): void {
-        var solution_copy: Array<string> = this.solutionView.getCode().slice(0),
-            guess_copy: Array<string> = guess_array.slice(0),
+        var solution_copy: Array<NubClass | GuessMark> = this.solutionView.getCode().slice(0),
+            guess_copy: Array<NubClass | GuessMark> = guess_array.slice(0),
             num_black: number = 0,
             num_white: number = 0,
             code_length: number = 4;

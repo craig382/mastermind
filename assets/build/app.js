@@ -167,7 +167,7 @@ Mastermind.Solution_view = Backbone.View.extend({
         // Color X is not a color.
         // Color X means "remove color" or "no color".
         // Subtract 1 because color X cannot be part of the code.
-        var num_colors = Mastermind.colors.length - 1, cur_color = '', solution = [];
+        var num_colors = Mastermind.colors.length - 1, cur_color = 'X', solution = [];
         for (var i = 0; i < 4; i += 1) {
             var random_index = Math.floor(Math.random() * num_colors);
             cur_color = Mastermind.colors[random_index];
@@ -287,7 +287,7 @@ Mastermind.Game_view = Backbone.View.extend({
     },
     resetBoard: function () {
         var game = this.model;
-        var turns_array = [], turn_model = {}, cur_turn = null, class_name = '', locked_class = '', disabled_class = '';
+        var turns_array = [], turn_model = {}, cur_turn = {}, class_name = '', locked_class = '', disabled_class = '';
         for (var i = 0; i < game.get('num_turns'); i += 1) {
             // initialize the model
             class_name = (i % 2) ? 'alt' : '';
@@ -313,7 +313,8 @@ Mastermind.Game_view = Backbone.View.extend({
     render: function () {
         var html_els_array = [this.header_template, this.gameOver_template, this.solutionView.render()];
         for (var i = 0; i < this.turns.length; i += 1) {
-            html_els_array.push(this.turn_views[i].render());
+            var turn_view = this.turn_views[i];
+            html_els_array.push(turn_view.render());
         }
         $(this.board_el).html(html_els_array);
     },
