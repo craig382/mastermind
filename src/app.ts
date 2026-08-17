@@ -142,7 +142,10 @@ type GameModelConstructor = new () => GameModel;
 type GameViewConstructor = new (options: ViewModelOption<GameModel>) => GameViewInstance;
 
 type MastermindRoot = {
-    colors: Array<NubClass>;
+    codeColors: string;
+    palletColors: string;
+    nColors: number;
+    nCode: number;
     GameView?: GameViewInstance;
     Turn?: TurnConstructor;
     Turn_collection?: TurnCollectionConstructor;
@@ -158,7 +161,10 @@ type MastermindRoot = {
 /** @type {any} */
 var Mastermind: MastermindRoot = {
 
-    colors: ['A', 'B', 'C', 'D', 'E', 'F', 'X'],
+    codeColors: 'ABCDEF',
+    palletColors: 'ABCDEFX',
+    nColors: 6,
+    nCode: 4,
 
     /**
      * Initialize the game by constructing the main game view.
@@ -444,17 +450,13 @@ Mastermind.Solution_view = Backbone.View.extend({
         // Color X is not a color.
         // Color X means "remove color" or "no color".
         // Subtract 1 because color X cannot be part of the code.
-        var playable_colors: Array<PlayableColor> = Mastermind.colors.filter(function (c: NubClass): c is PlayableColor {
-            return c !== 'X';
-        });
-        var num_colors = playable_colors.length;
-        var cur_color: PlayableColor = 'A';
+        var randomColor: string;
         var solution: Array<NubClass> = [];
 
-        for (var i = 0; i < 4; i += 1) {
-            var random_index = Math.floor(Math.random() * num_colors);
-            cur_color = playable_colors[random_index];
-            solution.push(cur_color);
+        for (var i = 0; i < Mastermind.nCode; i += 1) {
+            var randomIndex = Math.floor(Math.random() * Mastermind.nColors);
+            randomColor = Mastermind.codeColors[randomIndex];
+            solution.push(randomColor);
         }
         solutionModel.set('code', solution);
         log('newSolution:', solution);

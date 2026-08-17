@@ -2,7 +2,10 @@
 /* Minimal TypeScript scaffold: use `declare var` for external globals. */
 /** @type {any} */
 var Mastermind = {
-    colors: ['A', 'B', 'C', 'D', 'E', 'F', 'X'],
+    codeColors: 'ABCDEF',
+    palletColors: 'ABCDEFX',
+    nColors: 6,
+    nCode: 4,
     /**
      * Initialize the game by constructing the main game view.
      * @returns {void}
@@ -239,16 +242,12 @@ Mastermind.Solution_view = Backbone.View.extend({
         // Color X is not a color.
         // Color X means "remove color" or "no color".
         // Subtract 1 because color X cannot be part of the code.
-        var playable_colors = Mastermind.colors.filter(function (c) {
-            return c !== 'X';
-        });
-        var num_colors = playable_colors.length;
-        var cur_color = 'A';
+        var randomColor;
         var solution = [];
-        for (var i = 0; i < 4; i += 1) {
-            var random_index = Math.floor(Math.random() * num_colors);
-            cur_color = playable_colors[random_index];
-            solution.push(cur_color);
+        for (var i = 0; i < Mastermind.nCode; i += 1) {
+            var randomIndex = Math.floor(Math.random() * Mastermind.nColors);
+            randomColor = Mastermind.codeColors[randomIndex];
+            solution.push(randomColor);
         }
         solutionModel.set('code', solution);
         log('newSolution:', solution);
