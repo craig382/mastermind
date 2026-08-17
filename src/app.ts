@@ -75,6 +75,7 @@ type AllPiecesModel = {
 type TurnViewInstance = {
     render: () => Element;
     activateRow: () => void;
+    freezeRow: () => void;
 };
 
 type AllPiecesViewInstance = {
@@ -741,6 +742,7 @@ Mastermind.Game_view = Backbone.View.extend({
         } else {
             $(gameView.gameOver_el).text('you lost.');
             $(gameView.gameOver_el).addClass('lose');
+            gameView.turn_views.at(game.get('num_turns') - game.get('turns_remaining')).freezeRow();
         }
     },
 
