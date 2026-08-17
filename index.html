@@ -34,7 +34,8 @@
     <script type="text/template" id="turnView">
         <div class="turn <%= alt_class %> <%= locked_class %>" id="<%= id %>">
             <div class="pieces">
-                <% _.each(code, function(p,i) { %><div class="piece <%= p %>" id="<%= i %>" value="<%= p %>"><%= p %></div><% }); %>
+                <% code.split('').forEach( function(char,i) { %>
+                    <div class="piece <%= p %>" id="<%= i %>" value="<%= char %>"><%= char %></div><% }); %>
             </div>
             <span class="hint"><%= hint_string %></span> 
             <input class="go <%= disabled_class %>" type="submit" value="guess"/>
@@ -44,11 +45,14 @@
     <script type="text/template" id="solutionView">
         <div class="turn" id="solution">
             <div class="pieces <%= locked_class %>">
-                <% _.each(code, function(p,i) { %><div class="piece <%= p %>" id="<%= i %>" value="<%= p %>"><%= p %></div><% }); %>
+                <% code.split('').forEach( function(char, i) { %>
+                    <div class="piece <%= char %>" id="<%= i %>" value="<%= char %>"><%= char %></div>
+                <% }); %>
             </div>
             <span class="hint"><%= hint_string %></span> 
             <input id="reveal" type="submit" value="<%= button_text %>"/>
         </div>
     </script>
+
 </body>
 </html>

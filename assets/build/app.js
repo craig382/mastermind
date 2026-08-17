@@ -6,6 +6,7 @@ var mm = {
     palletColors: 'ABCDEFX',
     nColors: 6,
     nCode: 4,
+    nTurns: 10,
     /**
      * Initialize the game by constructing the main game view.
      * @returns {void}
@@ -21,12 +22,6 @@ function required(value, name) {
         throw new Error(name + ' is not initialized');
     }
     return value;
-}
-function isNubClass(value) {
-    return value === 'A' || value === 'B' || value === 'C' || value === 'D' || value === 'E' || value === 'F' || value === 'X';
-}
-function toNubClass(value) {
-    return isNubClass(value) ? value : 'X';
 }
 function getGameView() {
     return required(mm.GameView, 'Mastermind.GameView');
@@ -86,7 +81,7 @@ function createGameView(model) {
 mm.Turn = Backbone.Model.extend({
     defaults: {
         id: -1,
-        code: ['X', 'X', 'X', 'X'],
+        code: 'XXXX',
         hint_string: '',
         alt_class: '', // presentation
         disabled_class: 'disabled', // for the guess button
@@ -140,15 +135,15 @@ mm.Turn_view = Backbone.View.extend({
         // The player can use locked (future) turns 
         // as a scratch pad to plan their next guess.
         // log('place piece', color, place);
-        var code_array = turnModel.get('code').slice(0);
+        var code = turnModel.get('code');
         if (turnModel.get('locked_class') === 'frozen') {
             // set the nub color to the color clicked in the frozen turn
-            gameView.allPiecesView.setNub(code_array[place]);
+            gameView.allPiecesView.setNub(code[place]);
         }
         else {
-            code_array[place] = color;
-            turnModel.set({ code: code_array });
-            log('code_array', code_array);
+            code = code.substring(0, place) + color + code.substring(place + 1);
+            turnModel.set({ code: code });
+            log('code:', code);
         }
     },
     /**
@@ -159,11 +154,10 @@ mm.Turn_view = Backbone.View.extend({
         // log('holeClicked');
         var gameView = getGameView();
         var target = e.currentTarget;
-        var hole_id = target ? ($(target).attr('id') || '0') : '0';
-        var hole_index = parseInt(hole_id, 10);
-        var color_class = gameView.allPiecesView.getNub();
-        // log('holeClicked: hole_index = ', hole_index, ' color_class = ' 	, color_class);
-        this.placePiece(color_class, hole_index);
+        var holeId = target ? ($(target).attr('id') || '0') : '0';
+        var color = gameView.allPiecesView.getNub();
+        log('holeClicked: holeId = ', holeId, ' color = ', color);
+        this.placePiece(color, holeId);
     },
     /** Check whether the turn's code has no holes. @returns {boolean} */
     codeIsValid: function () {
@@ -243,11 +237,11 @@ mm.Solution_view = Backbone.View.extend({
         // Color X means "remove color" or "no color".
         // Subtract 1 because color X cannot be part of the code.
         var randomColor;
-        var solution = [];
+        var solution = '';
         for (var i = 0; i < mm.nCode; i += 1) {
             var randomIndex = Math.floor(Math.random() * mm.nColors);
             randomColor = mm.codeColors[randomIndex];
-            solution.push(randomColor);
+            solution += randomColor;
         }
         solutionModel.set('code', solution);
         log('newSolution:', solution);
@@ -317,11 +311,9 @@ mm.AllPieces_view = Backbone.View.extend({
         // log('nubClick');
         var target = e.currentTarget;
         var classes = target ? ($(target).attr('class') || '') : '';
-        var nub_token = classes.split(' ')[1] || 'X';
-        var nub_class = toNubClass(nub_token);
+        var nub_class = classes.split(' ')[1] || 'X';
         this.setNub(nub_class);
     },
-    /** @param {string} nub_class */
     setNub: function (nub_class) {
         var allPiecesModel = getAllPiecesModel(this);
         log('setNub, nub_class = ', nub_class);
@@ -374,7 +366,7 @@ mm.Game_view = Backbone.View.extend({
         var game = getGameModel(this);
         var turns = gameView.turns;
         var turns_array = [];
-        for (var i = 0; i < game.get('num_turns'); i += 1) {
+        for (var i = 0; i < mm.nTurns; i += 1) {
             // initialize the model
             var class_name = (i % 2) ? 'alt' : '';
             var locked_class;
@@ -408,30 +400,29 @@ mm.Game_view = Backbone.View.extend({
         }
         $(this.board_el).html(html_els_array);
     },
-    checkGuess: function (guess_array) {
+    checkGuess: function (guess) {
         var gameView = asGameView(this);
-        var solution_copy = gameView.solutionView.getCode().slice(0);
-        var guess_copy = guess_array.slice(0);
-        var num_black = 0;
-        var num_white = 0;
-        var code_length = 4;
-        for (var i = 0; i < code_length; i += 1) {
-            if (guess_copy[i] === solution_copy[i]) {
-                num_black += 1;
-                guess_copy[i] = 'x';
+        var solution_copy = gameView.solutionView.getCode().split('');
+        var guessArray = guess.split('');
+        var nBlack = 0;
+        var nWhite = 0;
+        for (var i = 0; i < mm.nCode; i += 1) {
+            if (guessArray[i] === solution_copy[i]) {
+                nBlack += 1;
+                guessArray[i] = 'x';
                 solution_copy[i] = 'z';
             }
         }
-        for (var j = 0; j < code_length; j += 1) {
-            for (var k = 0; k < code_length; k += 1) {
-                if (guess_copy[j] === solution_copy[k]) {
-                    num_white += 1;
-                    guess_copy[j] = 'x';
+        for (var j = 0; j < mm.nCode; j += 1) {
+            for (var k = 0; k < mm.nCode; k += 1) {
+                if (guessArray[j] === solution_copy[k]) {
+                    nWhite += 1;
+                    guessArray[j] = 'x';
                     solution_copy[k] = 'z';
                 }
             }
         }
-        gameView.handleResults(num_black, num_white);
+        gameView.handleResults(nBlack, nWhite);
     },
     handleResults: function (num_black, num_white) {
         var gameView = asGameView(this);

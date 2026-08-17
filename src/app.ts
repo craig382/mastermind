@@ -7,7 +7,7 @@ declare var _: any;
 declare var $: any;
 
 type TurnModel = {
-    get(key: 'code'): Array<NubClass>;
+    get(key: 'code'): string;
     get(key: 'id'): number;
     get(key: 'locked_class'): LockedClass;
     get(key: 'disabled_class'): DisabledClass;
@@ -17,11 +17,11 @@ type TurnModel = {
     set(key: 'disabled_class', value: DisabledClass): any;
     set(key: 'locked_class', value: LockedClass): any;
     set(key: 'hint_string', value: string): any;
-    set(key: 'code', value: Array<NubClass>): any;
+    set(key: 'code', value: string): any;
     set(key: 'button_text', value: ButtonText): any;
     set(attrs: Partial<{
         id: number;
-        code: Array<NubClass>;
+        code: string;
         hint_string: string;
         alt_class: string;
         disabled_class: DisabledClass;
@@ -47,15 +47,15 @@ type GameModel = {
 };
 
 type SolutionModel = {
-    get(key: 'code'): Array<NubClass>;
+    get(key: 'code'): string;
     get(key: 'button_text'): ButtonText;
     get(key: 'locked_class'): LockedClass;
     get(key: string): any;
-    set(key: 'code', value: Array<NubClass>): any;
+    set(key: 'code', value: string): any;
     set(key: 'button_text', value: ButtonText): any;
     set(key: 'locked_class', value: LockedClass): any;
     set(attrs: Partial<{
-        code: Array<NubClass>;
+        code: string;
         button_text: ButtonText;
         locked_class: LockedClass;
     }>): any;
@@ -63,11 +63,11 @@ type SolutionModel = {
 };
 
 type AllPiecesModel = {
-    get(key: 'nub_class'): NubClass;
+    get(key: 'nub_class'): string;
     get(key: string): any;
-    set(key: 'nub_class', value: NubClass): any;
+    set(key: 'nub_class', value: string): any;
     set(attrs: Partial<{
-        nub_class: NubClass;
+        nub_class: string;
     }>): any;
     set(key: string, value: any): any;
 };
@@ -79,14 +79,14 @@ type TurnViewInstance = {
 };
 
 type AllPiecesViewInstance = {
-    setNub(nub_class: NubClass): void;
-    getNub(): NubClass;
+    setNub(nub_class: string): void;
+    getNub(): string;
     resetNub(): void;
 };
 
 type SolutionViewInstance = {
     render(): Element;
-    getCode(): Array<NubClass>;
+    getCode(): string;
     setSolved(): void;
 };
 
@@ -96,7 +96,7 @@ type GameViewInstance = {
     solution: TurnModel;
     allPiecesView: AllPiecesViewInstance;
     solutionView: SolutionViewInstance;
-    checkGuess(guess_array: Array<NubClass>): void;
+    checkGuess(guess: string): void;
     getCurrentTurn(): TurnModel;
     getPreviousTurn(): TurnModel;
     quit(): void;
@@ -115,8 +115,6 @@ type TurnCollectionModel = {
 type ViewEvent = Event;
 type LockedClass = '' | 'active' | 'locked' | 'frozen' | 'correct' | 'hidden';
 type DisabledClass = '' | 'hidden' | 'disabled';
-type NubClass = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'X';
-type PlayableColor = Exclude<NubClass, 'X'>;
 type GuessMark = 'x' | 'z';
 type ButtonText = 'quit' | 'New Game';
 type GameStatus = 'notStarted' | 'inPlay' | 'won' | 'lost';
@@ -146,6 +144,7 @@ type MastermindRoot = {
     palletColors: string;
     nColors: number;
     nCode: number;
+    nTurns: number;
     GameView?: GameViewInstance;
     Turn?: TurnConstructor;
     Turn_collection?: TurnCollectionConstructor;
@@ -165,6 +164,7 @@ var mm: MastermindRoot = {
     palletColors: 'ABCDEFX',
     nColors: 6,
     nCode: 4,
+    nTurns: 10,
 
     /**
      * Initialize the game by constructing the main game view.
@@ -183,14 +183,6 @@ function required<T>(value: T | undefined, name: string): T {
         throw new Error(name + ' is not initialized');
     }
     return value;
-}
-
-function isNubClass(value: string): value is NubClass {
-    return value === 'A' || value === 'B' || value === 'C' || value === 'D' || value === 'E' || value === 'F' || value === 'X';
-}
-
-function toNubClass(value: string): NubClass {
-    return isNubClass(value) ? value : 'X';
 }
 
 function getGameView(): GameViewInstance {
@@ -271,7 +263,7 @@ function createGameView(model: GameModel): GameViewInstance {
 mm.Turn = Backbone.Model.extend({
     defaults: {
         id: -1,
-        code: ['X', 'X', 'X', 'X'],
+        code: 'XXXX',
         hint_string: '',
         alt_class: '', // presentation
         disabled_class: 'disabled', // for the guess button
@@ -329,7 +321,7 @@ mm.Turn_view = Backbone.View.extend({
      * @param {string} color
      * @param {number} place
      */
-    placePiece: function (color: NubClass, place: number): void {
+    placePiece: function (color: string, place: number): void {
         var turnModel = getTurnModel(this);
         var gameView = getGameView();
         // For a frozen (past) turn, set the nub 
@@ -339,14 +331,14 @@ mm.Turn_view = Backbone.View.extend({
         // The player can use locked (future) turns 
         // as a scratch pad to plan their next guess.
         // log('place piece', color, place);
-        var code_array = turnModel.get('code').slice(0);
+        var code = turnModel.get('code');
         if (turnModel.get('locked_class') === 'frozen') {
             // set the nub color to the color clicked in the frozen turn
-            gameView.allPiecesView.setNub(code_array[place]);
+            gameView.allPiecesView.setNub(code[place]);
         } else {
-            code_array[place] = color;
-            turnModel.set({code: code_array});
-            log('code_array', code_array);
+            code = code.substring(0, place) + color + code.substring(place + 1);
+            turnModel.set({code: code});
+            log('code:', code);
         }
     },
     
@@ -358,11 +350,10 @@ mm.Turn_view = Backbone.View.extend({
         // log('holeClicked');
         var gameView = getGameView();
         var target = e.currentTarget as Element | null;
-        var hole_id = target ? ($(target).attr('id') || '0') : '0';
-        var hole_index = parseInt(hole_id, 10);
-        var color_class: NubClass = gameView.allPiecesView.getNub();
-        // log('holeClicked: hole_index = ', hole_index, ' color_class = ' 	, color_class);
-        this.placePiece(color_class, hole_index);
+        var holeId : number = target ? ($(target).attr('id') || '0') : '0';
+        var color = gameView.allPiecesView.getNub();
+        log('holeClicked: holeId = ', holeId, ' color = ' 	, color);
+        this.placePiece(color, holeId);
     },
 
     /** Check whether the turn's code has no holes. @returns {boolean} */
@@ -451,12 +442,12 @@ mm.Solution_view = Backbone.View.extend({
         // Color X means "remove color" or "no color".
         // Subtract 1 because color X cannot be part of the code.
         var randomColor: string;
-        var solution: Array<NubClass> = [];
+        var solution = '';
 
         for (var i = 0; i < mm.nCode; i += 1) {
             var randomIndex = Math.floor(Math.random() * mm.nColors);
             randomColor = mm.codeColors[randomIndex];
-            solution.push(randomColor);
+            solution += randomColor;
         }
         solutionModel.set('code', solution);
         log('newSolution:', solution);
@@ -476,7 +467,7 @@ mm.Solution_view = Backbone.View.extend({
         solutionModel.set('locked_class', '');
     },
 
-    getCode: function (): Array<NubClass> {
+    getCode: function (): string {
         var solutionModel = getSolutionModel(this);
         return solutionModel.get('code');
     },
@@ -539,13 +530,11 @@ mm.AllPieces_view = Backbone.View.extend({
         // log('nubClick');
         var target = e.currentTarget as Element | null;
         var classes = target ? ($(target).attr('class') || '') : '';
-        var nub_token = classes.split(' ')[1] || 'X';
-        var nub_class = toNubClass(nub_token);
+        var nub_class = classes.split(' ')[1] || 'X';
         this.setNub(nub_class);    
     },
 
-    /** @param {string} nub_class */
-    setNub: function (nub_class: NubClass): void {
+    setNub: function (nub_class: string): void {
         var allPiecesModel = getAllPiecesModel(this);
         log('setNub, nub_class = ', nub_class);
         allPiecesModel.set('nub_class', nub_class);    
@@ -555,7 +544,7 @@ mm.AllPieces_view = Backbone.View.extend({
      * Get current nub class.
      * @returns {string}
      */
-    getNub: function (): NubClass {
+    getNub: function (): string {
         var allPiecesModel = getAllPiecesModel(this);
         return allPiecesModel.get('nub_class');    
     },
@@ -610,7 +599,7 @@ mm.Game_view = Backbone.View.extend({
         var turns = gameView.turns;
         var turns_array: Array<TurnModel> = [];
 
-        for (var i = 0; i < game.get('num_turns'); i += 1) {
+        for (var i = 0; i < mm.nTurns; i += 1) {
             // initialize the model
             var class_name: string = (i % 2) ? 'alt' : '';
             var locked_class: LockedClass;
@@ -649,31 +638,30 @@ mm.Game_view = Backbone.View.extend({
         $(this.board_el).html(html_els_array);
     },
 
-    checkGuess: function (guess_array: Array<NubClass>): void {
+    checkGuess: function (guess: string): void {
         var gameView = asGameView(this);
-        var solution_copy: Array<NubClass | GuessMark> = gameView.solutionView.getCode().slice(0);
-        var guess_copy: Array<NubClass | GuessMark> = guess_array.slice(0);
-        var num_black: number = 0;
-        var num_white: number = 0;
-        var code_length: number = 4;
+        var solution_copy = gameView.solutionView.getCode().split('');
+        var guessArray = guess.split('');
+        var nBlack: number = 0;
+        var nWhite: number = 0;
 
-        for (var i = 0; i < code_length; i += 1) {
-            if (guess_copy[i] === solution_copy[i]) {
-                num_black += 1;
-                guess_copy[i] = 'x';
+        for (var i = 0; i < mm.nCode; i += 1) {
+            if (guessArray[i] === solution_copy[i]) {
+                nBlack += 1;
+                guessArray[i] = 'x';
                 solution_copy[i] = 'z';
             }
         }
-        for (var j = 0; j < code_length; j += 1) {
-            for (var k = 0; k < code_length; k += 1) {
-                if (guess_copy[j] === solution_copy[k]) {
-                    num_white += 1;
-                    guess_copy[j] = 'x';
+        for (var j = 0; j < mm.nCode; j += 1) {
+            for (var k = 0; k < mm.nCode; k += 1) {
+                if (guessArray[j] === solution_copy[k]) {
+                    nWhite += 1;
+                    guessArray[j] = 'x';
                     solution_copy[k] = 'z';
                 }
             }
         }
-        gameView.handleResults(num_black, num_white);
+        gameView.handleResults(nBlack, nWhite);
     },
 
     handleResults: function (num_black: number, num_white: number): void {
