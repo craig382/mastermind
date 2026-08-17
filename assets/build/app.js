@@ -1,7 +1,7 @@
 "use strict";
 /* Minimal TypeScript scaffold: use `declare var` for external globals. */
 /** @type {any} */
-var Mastermind = {
+var mm = {
     codeColors: 'ABCDEF',
     palletColors: 'ABCDEFX',
     nColors: 6,
@@ -29,7 +29,7 @@ function toNubClass(value) {
     return isNubClass(value) ? value : 'X';
 }
 function getGameView() {
-    return required(Mastermind.GameView, 'Mastermind.GameView');
+    return required(mm.GameView, 'Mastermind.GameView');
 }
 function getTurnModel(view) {
     return view.model;
@@ -47,35 +47,35 @@ function asGameView(view) {
     return view;
 }
 function createTurn(attrs = {}) {
-    var TurnClass = required(Mastermind.Turn, 'Mastermind.Turn');
+    var TurnClass = required(mm.Turn, 'Mastermind.Turn');
     return new TurnClass(attrs);
 }
 function createTurnCollection() {
-    var TurnCollectionClass = required(Mastermind.Turn_collection, 'Mastermind.Turn_collection');
+    var TurnCollectionClass = required(mm.Turn_collection, 'Mastermind.Turn_collection');
     return new TurnCollectionClass();
 }
 function createTurnView(model) {
-    var TurnViewClass = required(Mastermind.Turn_view, 'Mastermind.Turn_view');
+    var TurnViewClass = required(mm.Turn_view, 'Mastermind.Turn_view');
     return new TurnViewClass({ model: model });
 }
 function createSolutionView(model) {
-    var SolutionViewClass = required(Mastermind.Solution_view, 'Mastermind.Solution_view');
+    var SolutionViewClass = required(mm.Solution_view, 'Mastermind.Solution_view');
     return new SolutionViewClass({ model: model });
 }
 function createAllPiecesView() {
-    var AllPiecesViewClass = required(Mastermind.AllPieces_view, 'Mastermind.AllPieces_view');
+    var AllPiecesViewClass = required(mm.AllPieces_view, 'Mastermind.AllPieces_view');
     return new AllPiecesViewClass();
 }
 function createAllPiecesModel() {
-    var AllPiecesModelClass = required(Mastermind.AllPieces, 'Mastermind.AllPieces');
+    var AllPiecesModelClass = required(mm.AllPieces, 'Mastermind.AllPieces');
     return new AllPiecesModelClass();
 }
 function createGameModel() {
-    var GameModelClass = required(Mastermind.Game, 'Mastermind.Game');
+    var GameModelClass = required(mm.Game, 'Mastermind.Game');
     return new GameModelClass();
 }
 function createGameView(model) {
-    var GameViewClass = required(Mastermind.Game_view, 'Mastermind.Game_view');
+    var GameViewClass = required(mm.Game_view, 'Mastermind.Game_view');
     return new GameViewClass({ model: model });
 }
 /**
@@ -83,7 +83,7 @@ function createGameView(model) {
  * It stores the current code state, hint text, display classes,
  * and whether the row is active, locked, or frozen.
  */
-Mastermind.Turn = Backbone.Model.extend({
+mm.Turn = Backbone.Model.extend({
     defaults: {
         id: -1,
         code: ['X', 'X', 'X', 'X'],
@@ -94,8 +94,8 @@ Mastermind.Turn = Backbone.Model.extend({
         button_text: 'quit' // for the solution view
     }
 });
-Mastermind.Turn_collection = Backbone.Collection.extend({
-    model: Mastermind.Turn,
+mm.Turn_collection = Backbone.Collection.extend({
+    model: mm.Turn,
     initialize: function () {
         /* */
     }
@@ -103,7 +103,7 @@ Mastermind.Turn_collection = Backbone.Collection.extend({
 /*************************************************************************************************
 * Turn View
 *************************************************************************************************/
-Mastermind.Turn_view = Backbone.View.extend({
+mm.Turn_view = Backbone.View.extend({
     tagName: 'li',
     className: 'turn',
     template: 'script#turnView',
@@ -226,7 +226,7 @@ Mastermind.Turn_view = Backbone.View.extend({
 /*************************************************************************************************
 * Solution View
 *************************************************************************************************/
-Mastermind.Solution_view = Backbone.View.extend({
+mm.Solution_view = Backbone.View.extend({
     tagName: 'li',
     template: 'script#solutionView',
     code_el: 'span#code',
@@ -244,9 +244,9 @@ Mastermind.Solution_view = Backbone.View.extend({
         // Subtract 1 because color X cannot be part of the code.
         var randomColor;
         var solution = [];
-        for (var i = 0; i < Mastermind.nCode; i += 1) {
-            var randomIndex = Math.floor(Math.random() * Mastermind.nColors);
-            randomColor = Mastermind.codeColors[randomIndex];
+        for (var i = 0; i < mm.nCode; i += 1) {
+            var randomIndex = Math.floor(Math.random() * mm.nColors);
+            randomColor = mm.codeColors[randomIndex];
             solution.push(randomColor);
         }
         solutionModel.set('code', solution);
@@ -286,12 +286,12 @@ Mastermind.Solution_view = Backbone.View.extend({
 /*************************************************************************************************
 * All Pieces View
 *************************************************************************************************/
-Mastermind.AllPieces = Backbone.Model.extend({
+mm.AllPieces = Backbone.Model.extend({
     defaults: {
         nub_class: 'X'
     }
 });
-Mastermind.AllPieces_view = Backbone.View.extend({
+mm.AllPieces_view = Backbone.View.extend({
     el: 'div#allPieces',
     cur_piece_el: 'div#current_piece',
     piece_template: '<div class="piece <%= nub_class %>"><%= nub_class %></div>',
@@ -342,14 +342,14 @@ Mastermind.AllPieces_view = Backbone.View.extend({
 /*************************************************************************************************
 * Game View
 *************************************************************************************************/
-Mastermind.Game = Backbone.Model.extend({
+mm.Game = Backbone.Model.extend({
     defaults: {
         num_turns: 10,
         turns_remaining: 10,
         status: 'notStarted'
     }
 });
-Mastermind.Game_view = Backbone.View.extend({
+mm.Game_view = Backbone.View.extend({
     el: 'div#game',
     board_el: 'ul#board',
     header_template: '<div id="header">Mastermind</div>',
@@ -499,10 +499,10 @@ Mastermind.Game_view = Backbone.View.extend({
         }
     },
     restart: function () {
-        Mastermind.init();
+        mm.init();
     }
 });
 $(function () {
-    Mastermind.init();
+    mm.init();
 });
 //# sourceMappingURL=app.js.map
