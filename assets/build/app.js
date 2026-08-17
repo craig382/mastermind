@@ -506,3 +506,4 @@ Mastermind.Game_view = Backbone.View.extend({
 $(function () {
     Mastermind.init();
 });
+//# sourceMappingURL=app.js.map
