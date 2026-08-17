@@ -13,8 +13,20 @@ var Mastermind = {
     }
 };
 var log = console.log.bind(console);
+function required(value, name) {
+    if (value === undefined) {
+        throw new Error(name + ' is not initialized');
+    }
+    return value;
+}
+function isNubClass(value) {
+    return value === 'A' || value === 'B' || value === 'C' || value === 'D' || value === 'E' || value === 'F' || value === 'X';
+}
+function toNubClass(value) {
+    return isNubClass(value) ? value : 'X';
+}
 function getGameView() {
-    return Mastermind.GameView;
+    return required(Mastermind.GameView, 'Mastermind.GameView');
 }
 function getTurnModel(view) {
     return view.model;
@@ -32,31 +44,35 @@ function asGameView(view) {
     return view;
 }
 function createTurn(attrs = {}) {
-    var TurnClass = Mastermind.Turn;
+    var TurnClass = required(Mastermind.Turn, 'Mastermind.Turn');
     return new TurnClass(attrs);
 }
 function createTurnCollection() {
-    var TurnCollectionClass = Mastermind.Turn_collection;
+    var TurnCollectionClass = required(Mastermind.Turn_collection, 'Mastermind.Turn_collection');
     return new TurnCollectionClass();
 }
 function createTurnView(model) {
-    var TurnViewClass = Mastermind.Turn_view;
+    var TurnViewClass = required(Mastermind.Turn_view, 'Mastermind.Turn_view');
     return new TurnViewClass({ model: model });
 }
 function createSolutionView(model) {
-    var SolutionViewClass = Mastermind.Solution_view;
+    var SolutionViewClass = required(Mastermind.Solution_view, 'Mastermind.Solution_view');
     return new SolutionViewClass({ model: model });
 }
 function createAllPiecesView() {
-    var AllPiecesViewClass = Mastermind.AllPieces_view;
+    var AllPiecesViewClass = required(Mastermind.AllPieces_view, 'Mastermind.AllPieces_view');
     return new AllPiecesViewClass();
 }
+function createAllPiecesModel() {
+    var AllPiecesModelClass = required(Mastermind.AllPieces, 'Mastermind.AllPieces');
+    return new AllPiecesModelClass();
+}
 function createGameModel() {
-    var GameModelClass = Mastermind.Game;
+    var GameModelClass = required(Mastermind.Game, 'Mastermind.Game');
     return new GameModelClass();
 }
 function createGameView(model) {
-    var GameViewClass = Mastermind.Game_view;
+    var GameViewClass = required(Mastermind.Game_view, 'Mastermind.Game_view');
     return new GameViewClass({ model: model });
 }
 /**
@@ -120,7 +136,7 @@ Mastermind.Turn_view = Backbone.View.extend({
         // set the piece to the nub (the color picker).
         // The player can use locked (future) turns 
         // as a scratch pad to plan their next guess.
-        // log('place piece',color,place);
+        // log('place piece', color, place);
         var code_array = turnModel.get('code').slice(0);
         if (turnModel.get('locked_class') === 'frozen') {
             // set the nub color to the color clicked in the frozen turn
@@ -243,8 +259,7 @@ Mastermind.Solution_view = Backbone.View.extend({
         this.$el.html(solution_html);
         return this.el;
     },
-    /** @param {boolean} _game_won */
-    setSolved: function (_game_won) {
+    setSolved: function () {
         var solutionModel = getSolutionModel(this);
         solutionModel.set('button_text', 'New Game');
         solutionModel.set('locked_class', '');
@@ -286,7 +301,7 @@ Mastermind.AllPieces_view = Backbone.View.extend({
         'click div.piece': 'nubClicked'
     },
     initialize: function () {
-        this.model = new Mastermind.AllPieces();
+        this.model = createAllPiecesModel();
         this.model.on('change:nub_class', this.render, this);
         this.render(); // reset the piece div
         // this.resetNub(); // reset the nub to X
@@ -303,7 +318,8 @@ Mastermind.AllPieces_view = Backbone.View.extend({
         // log('nubClick');
         var target = e.currentTarget;
         var classes = target ? ($(target).attr('class') || '') : '';
-        var nub_class = (classes.split(' ')[1] || 'X');
+        var nub_token = classes.split(' ')[1] || 'X';
+        var nub_class = toNubClass(nub_token);
         this.setNub(nub_class);
     },
     /** @param {string} nub_class */
@@ -471,8 +487,7 @@ Mastermind.Game_view = Backbone.View.extend({
         if (status === 'notStarted' || status === 'inPlay') {
             return;
         }
-        var you_won = (status === 'won');
-        gameView.solutionView.setSolved(you_won);
+        gameView.solutionView.setSolved();
         if (status === 'won') {
             gameView.getPreviousTurn().set('locked_class', 'correct');
             $(gameView.gameOver_el).text('you won!');
