@@ -120,11 +120,35 @@ type GuessMark = 'x' | 'z';
 type ButtonText = 'quit' | 'New Game';
 type GameStatus = 'notStarted' | 'inPlay' | 'won' | 'lost';
 
+type TurnAttrs = Partial<{
+    id: number;
+    alt_class: string;
+    locked_class: LockedClass;
+    disabled_class: DisabledClass;
+}>;
+
+
+type TurnConstructor = new (attrs?: TurnAttrs) => TurnModel;
+type TurnCollectionConstructor = new () => TurnCollectionModel;
+type TurnViewConstructor = new (options: { model: TurnModel }) => TurnViewInstance;
+type SolutionViewConstructor = new (options: { model: TurnModel }) => SolutionViewInstance;
+type AllPiecesModelConstructor = new () => AllPiecesModel;
+type AllPiecesViewConstructor = new () => AllPiecesViewInstance;
+type GameModelConstructor = new () => GameModel;
+type GameViewConstructor = new (options: { model: GameModel }) => GameViewInstance;
+
 type MastermindRoot = {
     colors: Array<NubClass>;
     GameView?: GameViewInstance;
+    Turn?: TurnConstructor;
+    Turn_collection?: TurnCollectionConstructor;
+    Turn_view?: TurnViewConstructor;
+    Solution_view?: SolutionViewConstructor;
+    AllPieces?: AllPiecesModelConstructor;
+    AllPieces_view?: AllPiecesViewConstructor;
+    Game?: GameModelConstructor;
+    Game_view?: GameViewConstructor;
     init(): void;
-    [key: string]: any;
 };
 
 /** @type {any} */
@@ -138,8 +162,8 @@ var Mastermind: MastermindRoot = {
      */
     init: function (): void {
         // Create the primary game view and pass in a new game model.
-        this.GameView = new this.Game_view({model: new this.Game()});
-        }
+        this.GameView = createGameView(createGameModel());
+    }
 };
 
 var log = console.log.bind(console);
@@ -172,29 +196,39 @@ function asGameView(view: unknown): GameViewInstance {
     return view as GameViewInstance;
 }
 
-function createTurn(attrs: Partial<{
-    id: number;
-    alt_class: string;
-    locked_class: LockedClass;
-    disabled_class: DisabledClass;
-}> = {}): TurnModel {
-    return new Mastermind.Turn(attrs) as TurnModel;
+function createTurn(attrs: TurnAttrs = {}): TurnModel {
+    var TurnClass = Mastermind.Turn as TurnConstructor;
+    return new TurnClass(attrs);
 }
 
 function createTurnCollection(): TurnCollectionModel {
-    return new Mastermind.Turn_collection() as TurnCollectionModel;
+    var TurnCollectionClass = Mastermind.Turn_collection as TurnCollectionConstructor;
+    return new TurnCollectionClass();
 }
 
 function createTurnView(model: TurnModel): TurnViewInstance {
-    return new Mastermind.Turn_view({model:model}) as TurnViewInstance;
+    var TurnViewClass = Mastermind.Turn_view as TurnViewConstructor;
+    return new TurnViewClass({model: model});
 }
 
 function createSolutionView(model: TurnModel): SolutionViewInstance {
-    return new Mastermind.Solution_view({model:model}) as SolutionViewInstance;
+    var SolutionViewClass = Mastermind.Solution_view as SolutionViewConstructor;
+    return new SolutionViewClass({model: model});
 }
 
 function createAllPiecesView(): AllPiecesViewInstance {
-    return new Mastermind.AllPieces_view() as AllPiecesViewInstance;
+    var AllPiecesViewClass = Mastermind.AllPieces_view as AllPiecesViewConstructor;
+    return new AllPiecesViewClass();
+}
+
+function createGameModel(): GameModel {
+    var GameModelClass = Mastermind.Game as GameModelConstructor;
+    return new GameModelClass();
+}
+
+function createGameView(model: GameModel): GameViewInstance {
+    var GameViewClass = Mastermind.Game_view as GameViewConstructor;
+    return new GameViewClass({model: model});
 }
 
 /**
@@ -279,7 +313,7 @@ Mastermind.Turn_view = Backbone.View.extend({
             gameView.allPiecesView.setNub(code_array[place]);
         } else {
             code_array[place] = color;
-            turnModel.set({code:code_array});
+            turnModel.set({code: code_array});
             log('code_array', code_array);
         }
     },
@@ -528,7 +562,7 @@ Mastermind.Game_view = Backbone.View.extend({
     initialize: function (): void {
         var gameView = asGameView(this);
         gameView.turns = createTurnCollection();
-        gameView.solution = createTurn({locked_class:'hidden'});
+        gameView.solution = createTurn({locked_class: 'hidden'});
         gameView.solutionView = createSolutionView(gameView.solution);
         gameView.allPiecesView = createAllPiecesView();
         gameView.turn_views = [] as Array<TurnViewInstance>;
@@ -560,7 +594,7 @@ Mastermind.Game_view = Backbone.View.extend({
                 locked_class = 'locked';
                 disabled_class = 'hidden'; 
             }
-            var turn_model = createTurn({alt_class:class_name, locked_class:locked_class, disabled_class:disabled_class, id:i});
+            var turn_model = createTurn({alt_class: class_name, locked_class: locked_class, disabled_class: disabled_class, id: i});
             var cur_turn = createTurnView(turn_model);
             turns_array.push(turn_model);
             gameView.turn_views.push(cur_turn);

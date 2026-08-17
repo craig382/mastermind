@@ -9,7 +9,7 @@ var Mastermind = {
      */
     init: function () {
         // Create the primary game view and pass in a new game model.
-        this.GameView = new this.Game_view({ model: new this.Game() });
+        this.GameView = createGameView(createGameModel());
     }
 };
 var log = console.log.bind(console);
@@ -32,19 +32,32 @@ function asGameView(view) {
     return view;
 }
 function createTurn(attrs = {}) {
-    return new Mastermind.Turn(attrs);
+    var TurnClass = Mastermind.Turn;
+    return new TurnClass(attrs);
 }
 function createTurnCollection() {
-    return new Mastermind.Turn_collection();
+    var TurnCollectionClass = Mastermind.Turn_collection;
+    return new TurnCollectionClass();
 }
 function createTurnView(model) {
-    return new Mastermind.Turn_view({ model: model });
+    var TurnViewClass = Mastermind.Turn_view;
+    return new TurnViewClass({ model: model });
 }
 function createSolutionView(model) {
-    return new Mastermind.Solution_view({ model: model });
+    var SolutionViewClass = Mastermind.Solution_view;
+    return new SolutionViewClass({ model: model });
 }
 function createAllPiecesView() {
-    return new Mastermind.AllPieces_view();
+    var AllPiecesViewClass = Mastermind.AllPieces_view;
+    return new AllPiecesViewClass();
+}
+function createGameModel() {
+    var GameModelClass = Mastermind.Game;
+    return new GameModelClass();
+}
+function createGameView(model) {
+    var GameViewClass = Mastermind.Game_view;
+    return new GameViewClass({ model: model });
 }
 /**
  * Model shared by both the turn rows and the solution row.
