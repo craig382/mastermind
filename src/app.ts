@@ -330,15 +330,18 @@ mm.Turn_view = Backbone.View.extend({
         // set the piece to the nub (the color picker).
         // The player can use locked (future) turns 
         // as a scratch pad to plan their next guess.
-        // log('place piece', color, place);
         var code = turnModel.get('code');
+        // log('placePiece turnModel.get code color place:', code, color, place);
         if (turnModel.get('locked_class') === 'frozen') {
             // set the nub color to the color clicked in the frozen turn
             gameView.allPiecesView.setNub(code[place]);
         } else {
-            code = code.substring(0, place) + color + code.substring(place + 1);
-            turnModel.set({code: code});
-            log('code:', code);
+            var codeArray = code.split('');
+            var newCode: string;
+            codeArray[place] = color;
+            newCode = codeArray.join('');
+            log('placePiece oldCode color place newCode:', code, color, place, newCode);
+            turnModel.set({code: newCode});
         }
     },
     
@@ -542,7 +545,6 @@ mm.AllPieces_view = Backbone.View.extend({
 
     /**
      * Get current nub class.
-     * @returns {string}
      */
     getNub: function (): string {
         var allPiecesModel = getAllPiecesModel(this);
