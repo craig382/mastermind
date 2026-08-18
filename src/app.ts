@@ -5,6 +5,7 @@ declare var $: any;
 type MastermindRoot = {
     codeColors: string;
     palletColors: string;
+    nubColor: string;
     nColors: number;
     nCode: number;
     nTurns: number;
@@ -24,6 +25,7 @@ var mm: MastermindRoot = {
 
     codeColors: 'ABCDEF',
     palletColors: 'ABCDEFX',
+    nubColor: 'X',
     nColors: 6,
     nCode: 4,
     nTurns: 10,
@@ -583,9 +585,8 @@ mm.AllPiecesView = Backbone.View.extend({
      * this = mm.AllPiecesView
      */
     setNub: function (color: string): void {
-        var allPiecesModel = getAllPiecesModel(this);
-        log('setNub, nub_class = ', color);
-        allPiecesModel.set('nub_class', color);
+        mm.nubColor = color;
+        this.model.set('nub_class', color);
     },
 
     /**
@@ -594,8 +595,7 @@ mm.AllPiecesView = Backbone.View.extend({
      * this = mm.AllPiecesView
      */
     getNub: function (): string {
-        var allPiecesModel = getAllPiecesModel(this);
-        return allPiecesModel.get('nub_class');    
+        return mm.nubColor;    
     },
 
     /**

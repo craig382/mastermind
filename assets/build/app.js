@@ -2,6 +2,7 @@
 var mm = {
     codeColors: 'ABCDEF',
     palletColors: 'ABCDEFX',
+    nubColor: 'X',
     nColors: 6,
     nCode: 4,
     nTurns: 10,
@@ -368,9 +369,8 @@ mm.AllPiecesView = Backbone.View.extend({
      * this = mm.AllPiecesView
      */
     setNub: function (color) {
-        var allPiecesModel = getAllPiecesModel(this);
-        log('setNub, nub_class = ', color);
-        allPiecesModel.set('nub_class', color);
+        mm.nubColor = color;
+        this.model.set('nub_class', color);
     },
     /**
      * Get current nub class.
@@ -378,8 +378,7 @@ mm.AllPiecesView = Backbone.View.extend({
      * this = mm.AllPiecesView
      */
     getNub: function () {
-        var allPiecesModel = getAllPiecesModel(this);
-        return allPiecesModel.get('nub_class');
+        return mm.nubColor;
     },
     /**
      * this = mm.AllPiecesView
