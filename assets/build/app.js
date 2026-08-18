@@ -6,6 +6,7 @@ var mm = {
     nColors: 6,
     nCode: 4,
     nTurns: 10,
+    solution: '',
     /**
      * Initialize the game by constructing the main game view.
      */
@@ -260,19 +261,15 @@ mm.SolutionView = Backbone.View.extend({
      * mm.SolutionView
      */
     newSolution: function () {
-        var solutionModel = getSolutionModel(this);
-        // Color X is not a color.
-        // Color X means "remove color" or "no color".
-        // Subtract 1 because color X cannot be part of the code.
         var randomColor;
-        var solution = '';
+        mm.solution = '';
         for (var i = 0; i < mm.nCode; i += 1) {
             var randomIndex = Math.floor(Math.random() * mm.nColors);
             randomColor = mm.codeColors[randomIndex];
-            solution += randomColor;
+            mm.solution += randomColor;
         }
-        solutionModel.set('code', solution);
-        log('newSolution:', solution);
+        this.model.set('code', mm.solution);
+        log('newSolution:', mm.solution);
     },
     /**
      * mm.SolutionView
@@ -290,13 +287,6 @@ mm.SolutionView = Backbone.View.extend({
         var solutionModel = getSolutionModel(this);
         solutionModel.set('button_text', 'New Game');
         solutionModel.set('locked_class', '');
-    },
-    /**
-     * mm.SolutionView
-     */
-    getCode: function () {
-        var solutionModel = getSolutionModel(this);
-        return solutionModel.get('code');
     },
     /**
      * Reveal or restart action from the solution view.
@@ -470,23 +460,23 @@ mm.GameView = Backbone.View.extend({
     */
     checkGuess: function (guess) {
         var gameView = asGameView(this);
-        var solution_copy = gameView.solutionView.getCode().split('');
+        var solutionArray = mm.solution.split('');
         var guessArray = guess.split('');
         var nBlack = 0;
         var nWhite = 0;
         for (var i = 0; i < mm.nCode; i += 1) {
-            if (guessArray[i] === solution_copy[i]) {
+            if (guessArray[i] === solutionArray[i]) {
                 nBlack += 1;
                 guessArray[i] = 'x';
-                solution_copy[i] = 'z';
+                solutionArray[i] = 'z';
             }
         }
         for (var j = 0; j < mm.nCode; j += 1) {
             for (var k = 0; k < mm.nCode; k += 1) {
-                if (guessArray[j] === solution_copy[k]) {
+                if (guessArray[j] === solutionArray[k]) {
                     nWhite += 1;
                     guessArray[j] = 'x';
-                    solution_copy[k] = 'z';
+                    solutionArray[k] = 'z';
                 }
             }
         }
