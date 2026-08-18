@@ -148,10 +148,10 @@ type MastermindRoot = {
     GameView?: GameViewInstance;
     Turn?: TurnConstructor;
     Turn_collection?: TurnCollectionConstructor;
-    Turn_view?: TurnViewConstructor;
-    Solution_view?: SolutionViewConstructor;
+    TurnView?: TurnViewConstructor;
+    SolutionView?: SolutionViewConstructor;
     AllPieces?: AllPiecesModelConstructor;
-    AllPieces_view?: AllPiecesViewConstructor;
+    AllPiecesView?: AllPiecesViewConstructor;
     Game?: GameModelConstructor;
     Game_view?: GameViewConstructor;
     init(): void;
@@ -178,15 +178,15 @@ var mm: MastermindRoot = {
 
 var log = console.log.bind(console);
 
-function required<T>(value: T | undefined, name: string): T {
+function required<T>(value: T | undefined): T {
     if (value === undefined) {
-        throw new Error(name + ' is not initialized');
+        throw new Error('Attempted to get an undefined Backbone.js model or view.');
     }
     return value;
 }
 
 function getGameView(): GameViewInstance {
-    return required(mm.GameView, 'Mastermind.GameView');
+    return required(mm.GameView);
 }
 
 type ViewWithModel<TModel = unknown> = {
@@ -216,42 +216,42 @@ function asGameView(view: GameViewContext): GameViewInstance {
 }
 
 function createTurn(attrs: TurnAttrs = {}): TurnModel {
-    var TurnClass = required(mm.Turn, 'Mastermind.Turn');
+    var TurnClass = required(mm.Turn);
     return new TurnClass(attrs);
 }
 
 function createTurnCollection(): TurnCollectionModel {
-    var TurnCollectionClass = required(mm.Turn_collection, 'Mastermind.Turn_collection');
+    var TurnCollectionClass = required(mm.Turn_collection);
     return new TurnCollectionClass();
 }
 
 function createTurnView(model: TurnModel): TurnViewInstance {
-    var TurnViewClass = required(mm.Turn_view, 'Mastermind.Turn_view');
+    var TurnViewClass = required(mm.TurnView);
     return new TurnViewClass({model: model});
 }
 
 function createSolutionView(model: TurnModel): SolutionViewInstance {
-    var SolutionViewClass = required(mm.Solution_view, 'Mastermind.Solution_view');
+    var SolutionViewClass = required(mm.SolutionView);
     return new SolutionViewClass({model: model});
 }
 
 function createAllPiecesView(): AllPiecesViewInstance {
-    var AllPiecesViewClass = required(mm.AllPieces_view, 'Mastermind.AllPieces_view');
+    var AllPiecesViewClass = required(mm.AllPiecesView);
     return new AllPiecesViewClass();
 }
 
 function createAllPiecesModel(): AllPiecesModel {
-    var AllPiecesModelClass = required(mm.AllPieces, 'Mastermind.AllPieces');
+    var AllPiecesModelClass = required(mm.AllPieces);
     return new AllPiecesModelClass();
 }
 
 function createGameModel(): GameModel {
-    var GameModelClass = required(mm.Game, 'Mastermind.Game');
+    var GameModelClass = required(mm.Game);
     return new GameModelClass();
 }
 
 function createGameView(model: GameModel): GameViewInstance {
-    var GameViewClass = required(mm.Game_view, 'Mastermind.Game_view');
+    var GameViewClass = required(mm.Game_view);
     return new GameViewClass({model: model});
 }
 
@@ -283,10 +283,10 @@ mm.Turn_collection = Backbone.Collection.extend({
 });
 
 
-/*************************************************************************************************
-* Turn View
-*************************************************************************************************/
-mm.Turn_view = Backbone.View.extend({
+/**
+ * mm.TurnView.
+ */
+mm.TurnView = Backbone.View.extend({
 
     tagName: 'li',
     className: 'turn',
@@ -298,6 +298,9 @@ mm.Turn_view = Backbone.View.extend({
         'click div.piece': 'holeClicked'
     },
 
+    /**
+     * mm.TurnView.
+     */
     initialize: function (): void {
         _.bindAll(this, 'render', 'placePiece');
 
@@ -306,6 +309,9 @@ mm.Turn_view = Backbone.View.extend({
         this.model.on('change:locked_class', this.render);
     },
 
+    /**
+     * mm.TurnView.
+     */
     render: function (): Element {
         var turn_template = $(this.template).html();
         var turn_html = '';
@@ -318,8 +324,8 @@ mm.Turn_view = Backbone.View.extend({
 
     /**
      * Place a piece (or, when frozen, set the shared nub color).
-     * @param {string} color
-     * @param {number} place
+     * 
+     * mm.TurnView.
      */
     placePiece: function (color: string, place: number): void {
         var turnModel = getTurnModel(this);
@@ -347,7 +353,8 @@ mm.Turn_view = Backbone.View.extend({
     
     /**
      * Handle click on a hole in a turn row.
-     * @param {Event} e
+     * 
+     * mm.TurnView.
      */
     holeClicked: function (e: ViewEvent): void {
         // log('holeClicked');
@@ -359,7 +366,11 @@ mm.Turn_view = Backbone.View.extend({
         this.placePiece(color, holeId);
     },
 
-    /** Check whether the turn's code has no holes. @returns {boolean} */
+    /** Check whether the turn's code has no holes.
+     * 
+     * mm.TurnView.
+     * 
+    */
     codeIsValid: function (): boolean {
         var turnModel = getTurnModel(this);
         var code_complete = false;
@@ -373,12 +384,18 @@ mm.Turn_view = Backbone.View.extend({
         return code_complete;
     },
 
+    /**
+     * mm.TurnView.
+     */
     hideTurnButton: function (): void { 
         var turnModel = getTurnModel(this);
         turnModel.set('disabled_class', 'hidden');
         this.render();
     },
 
+    /**
+     * mm.TurnView.
+     */
     showTurnButton: function (): void { 
         var turnModel = getTurnModel(this);
         turnModel.set('disabled_class', '');
@@ -387,7 +404,8 @@ mm.Turn_view = Backbone.View.extend({
 
     /**
      * User clicked the guess button for this turn.
-     * @param {Event} e
+     * 
+     * mm.TurnView.
      */
     guessClicked: function (_e: ViewEvent): void {
         var turnModel = getTurnModel(this);
@@ -398,6 +416,8 @@ mm.Turn_view = Backbone.View.extend({
 
     /**
      * Execute the guess flow for this turn.
+     * 
+     * mm.TurnView.
      */
     goGuess: function (): void {
         var turnModel = getTurnModel(this);
@@ -406,12 +426,17 @@ mm.Turn_view = Backbone.View.extend({
         gameView.checkGuess(turnModel.get('code'));
     },
 
+    /**
+     * mm.TurnView.
+     */
     freezeRow: function (): void {
         var turnModel = getTurnModel(this);
         turnModel.set('locked_class', 'frozen');
         this.hideTurnButton();
     },
-
+    /**
+     * mm.TurnView.
+     */
     activateRow: function (): void {
         var turnModel = getTurnModel(this);
         turnModel.set('locked_class', 'active');
@@ -421,10 +446,7 @@ mm.Turn_view = Backbone.View.extend({
 });
 
 
-/*************************************************************************************************
-* Solution View
-*************************************************************************************************/
-mm.Solution_view = Backbone.View.extend({
+mm.SolutionView = Backbone.View.extend({
 
     tagName: 'li',
     template: 'script#solutionView',
@@ -434,11 +456,17 @@ mm.Solution_view = Backbone.View.extend({
         'click input#reveal': 'revealClicked'
     },
     
+    /**
+     * mm.SolutionView
+     */
     initialize: function (): void {
         this.newSolution();
         this.model.on('change:locked_class', this.render, this);
     },
 
+    /**
+     * mm.SolutionView
+     */
     newSolution: function (): void {
         var solutionModel = getSolutionModel(this);
         // Color X is not a color.
@@ -456,6 +484,9 @@ mm.Solution_view = Backbone.View.extend({
         log('newSolution:', solution);
     },
 
+    /**
+     * mm.SolutionView
+     */
     render: function (): Element {
         var solution_template = $(this.template).html();
         var solution_html = _.template(solution_template, this.model.toJSON());
@@ -464,12 +495,18 @@ mm.Solution_view = Backbone.View.extend({
         return this.el;
     },
 
+    /**
+     * mm.SolutionView
+     */
     setSolved: function (): void {
         var solutionModel = getSolutionModel(this);
         solutionModel.set('button_text', 'New Game');
         solutionModel.set('locked_class', '');
     },
 
+    /**
+     * mm.SolutionView
+     */
     getCode: function (): string {
         var solutionModel = getSolutionModel(this);
         return solutionModel.get('code');
@@ -477,7 +514,8 @@ mm.Solution_view = Backbone.View.extend({
 
     /**
      * Reveal or restart action from the solution view.
-     * @param {Event} e
+     *
+     * mm.SolutionView
      */
     revealClicked: function (e: ViewEvent): void {
         var solutionModel = getSolutionModel(this);
@@ -491,17 +529,21 @@ mm.Solution_view = Backbone.View.extend({
     }
 });
 
-
-/*************************************************************************************************
-* All Pieces View
-*************************************************************************************************/
+/**
+ * mm.AllPieces model for mm.AllPiecesView.
+ */
 mm.AllPieces = Backbone.Model.extend({ 
     defaults: {
         nub_class: 'X'
     }
 });
 
-mm.AllPieces_view = Backbone.View.extend({
+
+/**
+ * mm.AllPiecesView handles the click and 
+ * sets the nub_class in the model.
+ */
+mm.AllPiecesView = Backbone.View.extend({
     el: 'div#allPieces',
     cur_piece_el: 'div#current_piece',
     piece_template: '<div class="piece <%= nub_class %>"><%= nub_class %></div>',
@@ -510,7 +552,9 @@ mm.AllPieces_view = Backbone.View.extend({
         'click div.piece': 'nubClicked'
     },
 
-
+    /**
+     * this = mm.AllPiecesView
+     */
     initialize: function (): void {
         this.model = createAllPiecesModel();
         this.model.on('change:nub_class', this.render, this);
@@ -520,6 +564,9 @@ mm.AllPieces_view = Backbone.View.extend({
     },
 
 
+    /**
+     * this = mm.AllPiecesView
+     */
     render: function (): void {
         var nub_copy = _.template(this.piece_template, this.model.attributes);
         $(this.cur_piece_el).html(nub_copy);
@@ -527,39 +574,48 @@ mm.AllPieces_view = Backbone.View.extend({
 
     /**
      * User clicked a color in the palette.
-     * @param {Event} e
+     * 
+     * this = mm.AllPiecesView
      */
     nubClicked: function (e: ViewEvent): void {
         // log('nubClick');
         var target = e.currentTarget as Element | null;
         var classes = target ? ($(target).attr('class') || '') : '';
-        var nub_class = classes.split(' ')[1] || 'X';
-        this.setNub(nub_class);    
+        var color = classes.split(' ')[1] || 'X';
+        this.setNub(color);    
     },
 
-    setNub: function (nub_class: string): void {
+    /**
+     * this = mm.AllPiecesView
+     */
+    setNub: function (color: string): void {
         var allPiecesModel = getAllPiecesModel(this);
-        log('setNub, nub_class = ', nub_class);
-        allPiecesModel.set('nub_class', nub_class);    
+        log('setNub, nub_class = ', color);
+        allPiecesModel.set('nub_class', color);
     },
 
     /**
      * Get current nub class.
+     * 
+     * this = mm.AllPiecesView
      */
     getNub: function (): string {
         var allPiecesModel = getAllPiecesModel(this);
         return allPiecesModel.get('nub_class');    
     },
 
+    /**
+     * this = mm.AllPiecesView
+     */
     resetNub: function (): void {
         this.setNub('X');    
     }
 });
 
 
-/*************************************************************************************************
-* Game View
-*************************************************************************************************/
+/**
+* mm.Game model for mm.GameView
+*/
 mm.Game = Backbone.Model.extend({
     defaults: {
         num_turns: 10,
@@ -568,8 +624,10 @@ mm.Game = Backbone.Model.extend({
     }
 });
 
+/**
+* this = mm.GameView
+*/
 mm.Game_view = Backbone.View.extend({
-
     el: 'div#game',
     board_el: 'ul#board',
     header_template: '<div id="header">Mastermind</div>',
@@ -578,6 +636,9 @@ mm.Game_view = Backbone.View.extend({
 
     events: { /* see initialize */ },
 
+    /**
+    * this = mm.GameView
+    */
     initialize: function (): void {
         var gameView = asGameView(this);
         gameView.turns = createTurnCollection();
@@ -595,6 +656,9 @@ mm.Game_view = Backbone.View.extend({
         this.model.set('status', 'inPlay');
     },
 
+    /**
+    * this = mm.GameView
+    */
     resetBoard: function (): void {
         var gameView = asGameView(this);
         var game = getGameModel(this);
@@ -627,6 +691,9 @@ mm.Game_view = Backbone.View.extend({
         log('resetBoard executed');
     },
 
+    /**
+    * this = mm.GameView
+    */
     render: function (): void { // only fired when game is initialized
         var gameView = asGameView(this);
         var turns = gameView.turns;
@@ -640,6 +707,9 @@ mm.Game_view = Backbone.View.extend({
         $(this.board_el).html(html_els_array);
     },
 
+    /**
+    * this = mm.GameView
+    */
     checkGuess: function (guess: string): void {
         var gameView = asGameView(this);
         var solution_copy = gameView.solutionView.getCode().split('');
@@ -666,6 +736,9 @@ mm.Game_view = Backbone.View.extend({
         gameView.handleResults(nBlack, nWhite);
     },
 
+    /**
+    * this = mm.GameView
+    */
     handleResults: function (num_black: number, num_white: number): void {
         var gameView = asGameView(this);
         var game = getGameModel(this);
@@ -685,6 +758,9 @@ mm.Game_view = Backbone.View.extend({
         }
     },
 
+    /**
+    * this = mm.GameView
+    */
     getPreviousTurn: function (): TurnModel {
         var gameView = asGameView(this);
         var turns = gameView.turns;
@@ -695,6 +771,9 @@ mm.Game_view = Backbone.View.extend({
         return prev_turn;
     },
 
+    /**
+    * this = mm.GameView
+    */
     getCurrentTurn: function (): TurnModel {
         var gameView = asGameView(this);
         var turns = gameView.turns;
@@ -704,7 +783,9 @@ mm.Game_view = Backbone.View.extend({
 
         return cur_turn;
     },
-
+    /**
+    * this = mm.GameView
+    */
     getNextTurn: function (): TurnModel {
         var gameView = asGameView(this);
         var turns = gameView.turns;
@@ -715,11 +796,17 @@ mm.Game_view = Backbone.View.extend({
         return next_turn;
     },
 
+    /**
+    * this = mm.GameView
+    */
     quit: function (): void {
         var game = getGameModel(this);
         game.set('status', 'lost');
     },
 
+    /**
+    * this = mm.GameView
+    */
     gameOver: function (): void {
         var gameView = asGameView(this);
         var game = getGameModel(this);
@@ -738,6 +825,9 @@ mm.Game_view = Backbone.View.extend({
         }
     },
 
+    /**
+    * this = mm.GameView
+    */
     restart: function (): void {
         mm.init();
     }
