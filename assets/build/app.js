@@ -149,7 +149,7 @@ mm.TurnView = Backbone.View.extend({
             var newCode;
             codeArray[place] = color;
             newCode = codeArray.join('');
-            log('placePiece oldCode color place newCode:', code, color, place, newCode);
+            // log('placePiece oldCode color place newCode:', code, color, place, newCode);
             turnModel.set({ code: newCode });
         }
     },
@@ -160,14 +160,9 @@ mm.TurnView = Backbone.View.extend({
      */
     holeClicked: function (e) {
         // log('holeClicked');
-        var target = e.currentTarget;
-        var holeId = target ? ($(target).attr('id') || '0') : '0';
+        var holeId = $(e.currentTarget).attr('id');
         var color = mm.nubColor;
         // log('holeClicked: holeId = ', holeId, ' color = ' 	, color);
-        log('holeClicked target: ', target);
-        log('holeClicked (target).attr(class): ', $(target).attr('class'));
-        log('holeClicked (target).attr(color): ', $(target).attr('color'));
-        log('holeClicked (target).text(): ', $(target).text());
         this.placePiece(color, holeId);
     },
     /** Check whether the turn's code has no holes.
@@ -363,13 +358,8 @@ mm.AllPiecesView = Backbone.View.extend({
      */
     nubClicked: function (e) {
         // log('nubClicked');
-        var target = e.currentTarget;
-        var color = $(target).text();
-        log('nubClicked target: ', target);
-        log('nubClicked (target).attr(class): ', $(target).attr('class'));
-        log('nubClicked (target).attr(color): ', $(target).attr('color'));
-        log('nubClicked (target).text(): ', $(target).text());
-        log('nubClicked (e.currentTarget).text(): ', $(e.currentTarget).text());
+        var color = $(e.currentTarget).text();
+        // log('nubClicked read color: ', color);
         this.setNub(color);
     },
     /**
