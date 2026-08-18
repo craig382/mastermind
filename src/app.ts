@@ -1,10 +1,42 @@
-/* Minimal TypeScript scaffold: use `declare var` for external globals. */
-
 declare var Backbone: any;
-
 declare var _: any;
-
 declare var $: any;
+
+type MastermindRoot = {
+    codeColors: string;
+    palletColors: string;
+    nColors: number;
+    nCode: number;
+    nTurns: number;
+    gameView?: GameViewInstance;
+    Turn?: TurnConstructor;
+    TurnCollection?: TurnCollectionConstructor;
+    TurnView?: TurnViewConstructor;
+    SolutionView?: SolutionViewConstructor;
+    AllPieces?: AllPiecesModelConstructor;
+    AllPiecesView?: AllPiecesViewConstructor;
+    Game?: GameModelConstructor;
+    GameView?: GameViewConstructor;
+    init(): void;
+};
+
+/** @type {any} */
+var mm: MastermindRoot = {
+
+    codeColors: 'ABCDEF',
+    palletColors: 'ABCDEFX',
+    nColors: 6,
+    nCode: 4,
+    nTurns: 10,
+
+    /**
+     * Initialize the game by constructing the main game view.
+     */
+    init: function (): void {
+        // Create the primary game view and pass in a new game model.
+        this.gameView = createGameView(createGameModel());
+    }
+};
 
 type TurnModel = {
     get(key: 'code'): string;
@@ -139,43 +171,6 @@ type AllPiecesViewConstructor = new () => AllPiecesViewInstance;
 type GameModelConstructor = new () => GameModel;
 type GameViewConstructor = new (options: ViewModelOption<GameModel>) => GameViewInstance;
 
-type MastermindRoot = {
-    codeColors: string;
-    palletColors: string;
-    nColors: number;
-    nCode: number;
-    nTurns: number;
-    gameView?: GameViewInstance;
-    Turn?: TurnConstructor;
-    Turn_collection?: TurnCollectionConstructor;
-    TurnView?: TurnViewConstructor;
-    SolutionView?: SolutionViewConstructor;
-    AllPieces?: AllPiecesModelConstructor;
-    AllPiecesView?: AllPiecesViewConstructor;
-    Game?: GameModelConstructor;
-    GameView?: GameViewConstructor;
-    init(): void;
-};
-
-/** @type {any} */
-var mm: MastermindRoot = {
-
-    codeColors: 'ABCDEF',
-    palletColors: 'ABCDEFX',
-    nColors: 6,
-    nCode: 4,
-    nTurns: 10,
-
-    /**
-     * Initialize the game by constructing the main game view.
-     * @returns {void}
-     */
-    init: function (): void {
-        // Create the primary game view and pass in a new game model.
-        this.gameView = createGameView(createGameModel());
-    }
-};
-
 var log = console.log.bind(console);
 
 function required<T>(value: T | undefined): T {
@@ -221,7 +216,7 @@ function createTurn(attrs: TurnAttrs = {}): TurnModel {
 }
 
 function createTurnCollection(): TurnCollectionModel {
-    var TurnCollectionClass = required(mm.Turn_collection);
+    var TurnCollectionClass = required(mm.TurnCollection);
     return new TurnCollectionClass();
 }
 
@@ -272,7 +267,7 @@ mm.Turn = Backbone.Model.extend({
     }
 });
 
-mm.Turn_collection = Backbone.Collection.extend({
+mm.TurnCollection = Backbone.Collection.extend({
     model: mm.Turn,
 
     initialize: function (): void {

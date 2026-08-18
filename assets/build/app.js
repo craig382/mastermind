@@ -1,5 +1,4 @@
 "use strict";
-/* Minimal TypeScript scaffold: use `declare var` for external globals. */
 /** @type {any} */
 var mm = {
     codeColors: 'ABCDEF',
@@ -9,7 +8,6 @@ var mm = {
     nTurns: 10,
     /**
      * Initialize the game by constructing the main game view.
-     * @returns {void}
      */
     init: function () {
         // Create the primary game view and pass in a new game model.
@@ -46,7 +44,7 @@ function createTurn(attrs = {}) {
     return new TurnClass(attrs);
 }
 function createTurnCollection() {
-    var TurnCollectionClass = required(mm.Turn_collection);
+    var TurnCollectionClass = required(mm.TurnCollection);
     return new TurnCollectionClass();
 }
 function createTurnView(model) {
@@ -89,7 +87,7 @@ mm.Turn = Backbone.Model.extend({
         button_text: 'quit' // for the solution view
     }
 });
-mm.Turn_collection = Backbone.Collection.extend({
+mm.TurnCollection = Backbone.Collection.extend({
     model: mm.Turn,
     initialize: function () {
         /* */
