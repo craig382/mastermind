@@ -354,11 +354,14 @@ mm.TurnView = Backbone.View.extend({
      */
     holeClicked: function (e: ViewEvent): void {
         // log('holeClicked');
-        var gameView = getGameView();
         var target = e.currentTarget as Element | null;
         var holeId : number = target ? ($(target).attr('id') || '0') : '0';
-        var color = gameView.allPiecesView.getNub();
-        log('holeClicked: holeId = ', holeId, ' color = ' 	, color);
+        var color = mm.nubColor;
+        // log('holeClicked: holeId = ', holeId, ' color = ' 	, color);
+        log('holeClicked target: ', target);
+        log('holeClicked (target).attr(class): ', $(target).attr('class'));
+        log('holeClicked (target).attr(color): ', $(target).attr('color'));
+        log('holeClicked (target).text(): ', $(target).text());
         this.placePiece(color, holeId);
     },
 
@@ -574,11 +577,15 @@ mm.AllPiecesView = Backbone.View.extend({
      * this = mm.AllPiecesView
      */
     nubClicked: function (e: ViewEvent): void {
-        // log('nubClick');
-        var target = e.currentTarget as Element | null;
-        var classes = target ? ($(target).attr('class') || '') : '';
-        var color = classes.split(' ')[1] || 'X';
-        this.setNub(color);    
+        // log('nubClicked');
+        var target = e.currentTarget as Element;
+        var color = $(target).text();
+        log('nubClicked target: ', target);
+        log('nubClicked (target).attr(class): ', $(target).attr('class'));
+        log('nubClicked (target).attr(color): ', $(target).attr('color'));
+        log('nubClicked (target).text(): ', $(target).text());
+        log('nubClicked (e.currentTarget).text(): ', $(e.currentTarget).text());
+        this.setNub(color);
     },
 
     /**
