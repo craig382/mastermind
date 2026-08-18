@@ -322,18 +322,18 @@ mm.SolutionView = Backbone.View.extend({
  */
 mm.AllPieces = Backbone.Model.extend({
     defaults: {
-        nub_class: 'X'
+        color_class: 'X'
     }
 });
 /**
  * mm.AllPiecesView handles the click and
- * sets the nub_class in the model.
+ * sets the color_class in the model.
  */
 mm.AllPiecesView = Backbone.View.extend({
     el: 'div#allPieces',
     cur_piece_el: 'div#current_piece',
-    piece_template: '<div class="piece <%= nub_class %>"><%= nub_class %></div>',
-    nub_template: '<div id="current_piece" class="piece <%= nub_class %>"><%= nub_class %></div>',
+    piece_template: '<div class="piece <%= color_class %>"><%= color_class %></div>',
+    nub_template: '<div id="current_piece" class="piece <%= color_class %>"><%= color_class %></div>',
     events: {
         'click div.piece': 'nubClicked'
     },
@@ -342,7 +342,7 @@ mm.AllPiecesView = Backbone.View.extend({
      */
     initialize: function () {
         this.model = createAllPiecesModel();
-        this.model.on('change:nub_class', this.render, this);
+        this.model.on('change:color_class', this.render, this);
         this.render(); // reset the piece div
         // this.resetNub(); // reset the nub to X
     },
@@ -370,7 +370,7 @@ mm.AllPiecesView = Backbone.View.extend({
      */
     setNub: function (color) {
         mm.nubColor = color;
-        this.model.set('nub_class', color);
+        this.model.set('color_class', color);
     },
     /**
      * Get current nub class.

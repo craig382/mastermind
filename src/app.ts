@@ -96,11 +96,11 @@ type SolutionModel = {
 };
 
 type AllPiecesModel = {
-    get(key: 'nub_class'): string;
+    get(key: 'color_class'): string;
     get(key: string): any;
-    set(key: 'nub_class', value: string): any;
+    set(key: 'color_class', value: string): any;
     set(attrs: Partial<{
-        nub_class: string;
+        color_class: string;
     }>): any;
     set(key: string, value: any): any;
 };
@@ -112,7 +112,7 @@ type TurnViewInstance = {
 };
 
 type AllPiecesViewInstance = {
-    setNub(nub_class: string): void;
+    setNub(color_class: string): void;
     getNub(): string;
     resetNub(): void;
 };
@@ -530,20 +530,20 @@ mm.SolutionView = Backbone.View.extend({
  */
 mm.AllPieces = Backbone.Model.extend({ 
     defaults: {
-        nub_class: 'X'
+        color_class: 'X'
     }
 });
 
 
 /**
  * mm.AllPiecesView handles the click and 
- * sets the nub_class in the model.
+ * sets the color_class in the model.
  */
 mm.AllPiecesView = Backbone.View.extend({
     el: 'div#allPieces',
     cur_piece_el: 'div#current_piece',
-    piece_template: '<div class="piece <%= nub_class %>"><%= nub_class %></div>',
-    nub_template: '<div id="current_piece" class="piece <%= nub_class %>"><%= nub_class %></div>',
+    piece_template: '<div class="piece <%= color_class %>"><%= color_class %></div>',
+    nub_template: '<div id="current_piece" class="piece <%= color_class %>"><%= color_class %></div>',
     events: {
         'click div.piece': 'nubClicked'
     },
@@ -553,7 +553,7 @@ mm.AllPiecesView = Backbone.View.extend({
      */
     initialize: function (): void {
         this.model = createAllPiecesModel();
-        this.model.on('change:nub_class', this.render, this);
+        this.model.on('change:color_class', this.render, this);
 
         this.render(); // reset the piece div
         // this.resetNub(); // reset the nub to X
@@ -586,7 +586,7 @@ mm.AllPiecesView = Backbone.View.extend({
      */
     setNub: function (color: string): void {
         mm.nubColor = color;
-        this.model.set('nub_class', color);
+        this.model.set('color_class', color);
     },
 
     /**
