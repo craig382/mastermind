@@ -1,5 +1,4 @@
 "use strict";
-/** @type {any} */
 var mm = {
     codeColors: 'ABCDEF',
     palletColors: 'ABCDEFX',

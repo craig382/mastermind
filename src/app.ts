@@ -20,7 +20,6 @@ type MastermindRoot = {
     init(): void;
 };
 
-/** @type {any} */
 var mm: MastermindRoot = {
 
     codeColors: 'ABCDEF',
