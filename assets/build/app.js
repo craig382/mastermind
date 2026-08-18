@@ -13,7 +13,7 @@ var mm = {
      */
     init: function () {
         // Create the primary game view and pass in a new game model.
-        this.GameView = createGameView(createGameModel());
+        this.gameView = createGameView(createGameModel());
     }
 };
 var log = console.log.bind(console);
@@ -24,7 +24,7 @@ function required(value) {
     return value;
 }
 function getGameView() {
-    return required(mm.GameView);
+    return required(mm.gameView);
 }
 function getTurnModel(view) {
     return view.model;
@@ -70,7 +70,7 @@ function createGameModel() {
     return new GameModelClass();
 }
 function createGameView(model) {
-    var GameViewClass = required(mm.Game_view);
+    var GameViewClass = required(mm.GameView);
     return new GameViewClass({ model: model });
 }
 /**
@@ -404,7 +404,7 @@ mm.Game = Backbone.Model.extend({
 /**
 * this = mm.GameView
 */
-mm.Game_view = Backbone.View.extend({
+mm.GameView = Backbone.View.extend({
     el: 'div#game',
     board_el: 'ul#board',
     header_template: '<div id="header">Mastermind</div>',

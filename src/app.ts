@@ -145,7 +145,7 @@ type MastermindRoot = {
     nColors: number;
     nCode: number;
     nTurns: number;
-    GameView?: GameViewInstance;
+    gameView?: GameViewInstance;
     Turn?: TurnConstructor;
     Turn_collection?: TurnCollectionConstructor;
     TurnView?: TurnViewConstructor;
@@ -153,7 +153,7 @@ type MastermindRoot = {
     AllPieces?: AllPiecesModelConstructor;
     AllPiecesView?: AllPiecesViewConstructor;
     Game?: GameModelConstructor;
-    Game_view?: GameViewConstructor;
+    GameView?: GameViewConstructor;
     init(): void;
 };
 
@@ -172,7 +172,7 @@ var mm: MastermindRoot = {
      */
     init: function (): void {
         // Create the primary game view and pass in a new game model.
-        this.GameView = createGameView(createGameModel());
+        this.gameView = createGameView(createGameModel());
     }
 };
 
@@ -186,7 +186,7 @@ function required<T>(value: T | undefined): T {
 }
 
 function getGameView(): GameViewInstance {
-    return required(mm.GameView);
+    return required(mm.gameView);
 }
 
 type ViewWithModel<TModel = unknown> = {
@@ -251,7 +251,7 @@ function createGameModel(): GameModel {
 }
 
 function createGameView(model: GameModel): GameViewInstance {
-    var GameViewClass = required(mm.Game_view);
+    var GameViewClass = required(mm.GameView);
     return new GameViewClass({model: model});
 }
 
@@ -627,7 +627,7 @@ mm.Game = Backbone.Model.extend({
 /**
 * this = mm.GameView
 */
-mm.Game_view = Backbone.View.extend({
+mm.GameView = Backbone.View.extend({
     el: 'div#game',
     board_el: 'ul#board',
     header_template: '<div id="header">Mastermind</div>',
