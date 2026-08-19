@@ -9,12 +9,64 @@ var mm = {
     solution: '',
     /**
      * Initialize the game by constructing the main game view.
+     *
+     * Runs at the beginning of each new game.
      */
     init: function () {
         // Create the primary game view and pass in a new game model.
         this.gameView = createGameView(createGameModel());
+        mm.appLog = new AppLog();
+        mm.appLog.setTitle('Mastermind Log. Solution: ' + mm.solution);
+        mm.appLog.prepend('Solution: ' + mm.solution);
     }
 };
+class AppLog {
+    appLog_el;
+    title_el;
+    top_el;
+    bottom_el;
+    constructor() {
+        const aDocument = document;
+        this.appLog_el = document.getElementById('appLog');
+        this.title_el = this.appLog_el.querySelector('#title');
+        this.top_el = this.appLog_el.querySelector('#top');
+        this.bottom_el = this.appLog_el.querySelector('#bottom');
+    }
+    setTitle(text) {
+        this.title_el.textContent = text;
+    }
+    setTop(text) {
+        this.top_el.textContent = text;
+    }
+    setBottom(text) {
+        this.bottom_el.textContent = text;
+    }
+    /**
+     * Merges the top text into the bottom text,
+     * then sets the top text to the newText.
+     */
+    prepend(newText) {
+        const oldTop = this.top_el.textContent;
+        if (oldTop !== '') {
+            this.bottom_el.textContent = `${oldTop}\n${this.bottom_el.textContent}`;
+        }
+        this.top_el.textContent = newText;
+    }
+    /**
+     * Appends the newText to the end of the top text.
+     */
+    insert(newText) {
+        const oldTop = this.top_el.textContent;
+        this.top_el.textContent = oldTop ? `${oldTop}\n${newText}` : newText;
+    }
+    /**
+     * Appends the newText to the end of the bottom text.
+     */
+    append(newText) {
+        const oldBot = this.bottom_el.textContent;
+        this.bottom_el.textContent = oldBot ? `${oldBot}\n${newText}` : newText;
+    }
+}
 var log = console.log.bind(console);
 function required(value) {
     if (value === undefined) {
@@ -269,7 +321,7 @@ mm.SolutionView = Backbone.View.extend({
             mm.solution += randomColor;
         }
         this.model.set('code', mm.solution);
-        log('newSolution:', mm.solution);
+        // log('newSolution:', mm.solution);
     },
     /**
      * mm.SolutionView
@@ -395,6 +447,8 @@ mm.GameView = Backbone.View.extend({
     gameOver_template: '<div id="gameOver"></div>',
     events: { /* see initialize */},
     /**
+     * Executes at the beginning of each new game.
+     *
     * this = mm.GameView
     */
     initialize: function () {
@@ -411,6 +465,8 @@ mm.GameView = Backbone.View.extend({
         this.model.set('status', 'inPlay');
     },
     /**
+     * Executes at the beginning of each new game.
+     *
     * this = mm.GameView
     */
     resetBoard: function () {
@@ -440,9 +496,11 @@ mm.GameView = Backbone.View.extend({
         $(this.gameOver_el).attr('class', '');
         turns.reset(turns_array);
         this.render();
-        log('resetBoard executed');
+        // mm.appLog.prepend('Solution: ' + mm.solution);
     },
     /**
+     * Executes at the beginning of each new game.
+     *
     * this = mm.GameView
     */
     render: function () {

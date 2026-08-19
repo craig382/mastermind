@@ -156,6 +156,30 @@ div#presentation {
 	padding:10px 10px;
 	border:1px solid;
 }
+div#appLog {
+	width:300px;
+	text-align:left;
+	margin:10px auto;
+	padding:10px 10px;
+	border:1px solid;
+	background-color: #000;
+}
+div#appLog #title {
+	font-weight:bold;
+	font-size:1.0em;
+	margin-bottom:5px;
+	white-space: pre-wrap;
+}
+div#appLog #top {
+	font-size:1.0em;
+	margin-bottom:5px;
+	white-space: pre-wrap;
+}
+div#appLog #bottom {
+	font-size:1.0em;
+	color: #888;
+	white-space: pre-wrap;
+}
 /* guess button */
 input {
 	width:fit-content;

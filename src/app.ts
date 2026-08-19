@@ -11,6 +11,7 @@ type MastermindRoot = {
     nTurns: number;
     solution: string;
 
+    appLog?: AppLog;
     gameView?: GameViewInstance;
     Turn?: TurnConstructor;
     TurnCollection?: TurnCollectionConstructor;
@@ -35,12 +36,73 @@ var mm: MastermindRoot = {
 
     /**
      * Initialize the game by constructing the main game view.
+     * 
+     * Runs at the beginning of each new game.
      */
     init: function (): void {
         // Create the primary game view and pass in a new game model.
         this.gameView = createGameView(createGameModel());
+
+        mm.appLog = new AppLog();
+        mm.appLog.setTitle('Mastermind Log. Solution: ' + mm.solution);
+        mm.appLog.prepend('Solution: ' + mm.solution);
     }
 };
+
+class AppLog {
+    private appLog_el: HTMLElement;
+    private title_el: HTMLElement;
+    private top_el: HTMLElement;
+    private bottom_el: HTMLElement;
+
+    constructor() {
+        const aDocument = document;
+        this.appLog_el = document.getElementById('appLog')!;
+        this.title_el = this.appLog_el.querySelector('#title')!;
+        this.top_el = this.appLog_el.querySelector('#top')!;
+        this.bottom_el = this.appLog_el.querySelector('#bottom')!;
+    }
+    
+    setTitle(text: string): void {
+        this.title_el.textContent = text;
+    }
+
+    setTop(text: string): void {
+        this.top_el.textContent = text;
+    }
+
+    setBottom(text: string): void {
+        this.bottom_el.textContent = text;
+    }
+
+    /**
+     * Merges the top text into the bottom text,
+     * then sets the top text to the newText.
+     */
+    prepend(newText: string): void {
+        const oldTop = this.top_el.textContent;
+        if (oldTop !== '') {
+            this.bottom_el.textContent = `${oldTop}\n${this.bottom_el.textContent}`;
+        }
+        this.top_el.textContent = newText;
+    }
+
+    /**
+     * Appends the newText to the end of the top text.
+     */
+    insert(newText: string): void {
+        const oldTop = this.top_el.textContent;
+        this.top_el.textContent = oldTop ? `${oldTop}\n${newText}` : newText;
+    }
+
+    /**
+     * Appends the newText to the end of the bottom text.
+     */
+    append(newText: string): void {
+        const oldBot = this.bottom_el.textContent;
+        this.bottom_el.textContent = oldBot ? `${oldBot}\n${newText}` : newText;
+    }
+}
 
 type TurnModel = {
     get(key: 'code'): string;
@@ -472,7 +534,7 @@ mm.SolutionView = Backbone.View.extend({
             mm.solution += randomColor;
         }
         this.model.set('code', mm.solution);
-        log('newSolution:', mm.solution);
+        // log('newSolution:', mm.solution);
     },
 
     /**
@@ -617,6 +679,8 @@ mm.GameView = Backbone.View.extend({
     events: { /* see initialize */ },
 
     /**
+     * Executes at the beginning of each new game.
+     * 
     * this = mm.GameView
     */
     initialize: function (): void {
@@ -637,6 +701,8 @@ mm.GameView = Backbone.View.extend({
     },
 
     /**
+     * Executes at the beginning of each new game.
+     * 
     * this = mm.GameView
     */
     resetBoard: function (): void {
@@ -668,13 +734,16 @@ mm.GameView = Backbone.View.extend({
         turns.reset(turns_array);
 
         this.render();
-        log('resetBoard executed');
+
+        // mm.appLog.prepend('Solution: ' + mm.solution);
     },
 
     /**
+     * Executes at the beginning of each new game.
+     * 
     * this = mm.GameView
     */
-    render: function (): void { // only fired when game is initialized
+    render: function (): void {
         var gameView = asGameView(this);
         var turns = gameView.turns;
 
