@@ -17,6 +17,7 @@ A web app to play mastermind. Written in Backbone.js.
 - allCodes[0..1295] array with all possible 1296 combos.
 - validCodeCount[turn 0 .. turn 9].
 - let iMax = (iTurn === 0 ? allCodes.length : validCodeCount[iTurn - 1]) - 1;
+- Add a mode that automatically fills in a turn suggestion for the active turn (suggestion of ABBC for turn 0 or allCodes[0] for any other turn). The user then gets to accept or modify the suggestion before hitting the GUESS button.
 - Add a mm.TextBoxView log at the bottom with the following functions: Set(title:string, textTop:string, textBottom:string), Prepend(), Insert(), and Append().
 - Add a timer and show game play time in the "you won" message.
 - Add "Stats" to the bottom of the screen showing: reset stats button, number of games played, how many games lost, win percentage, average number of guesses to win a game (excludes lost games), guess distribution, current winning streak, max winning streak, time distribution, average time to win a game (excludes lost games), etc.
