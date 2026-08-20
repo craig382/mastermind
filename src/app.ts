@@ -190,7 +190,7 @@ type SolutionViewInstance = {
 type GameViewInstance = {
     turns: TurnCollectionModel;
     turn_views: Array<TurnViewInstance>;
-    solution: TurnModel;
+    solution: SolutionModel;
     allPiecesView: AllPiecesViewInstance;
     solutionView: SolutionViewInstance;
     checkGuess(guess: string): void;
@@ -198,7 +198,7 @@ type GameViewInstance = {
     getPreviousTurn(): TurnModel;
     quit(): void;
     restart(): void;
-    handleResults(num_black: number, num_white: number): void;
+    handleResults([nBlack, nWhite]: [number, number]): void;
     gameOver_el: string;
 };
 
@@ -237,6 +237,13 @@ type GameModelConstructor = new () => GameModel;
 type GameViewConstructor = new (options: ViewModelOption<GameModel>) => GameViewInstance;
 
 var log = console.log.bind(console);
+
+// These variables were made global to avoid new
+// creation of them each time calculatePegs() is called.
+var code0: string;
+var unpairedCode0: {[key: string]: number} = {};
+var unpairedCode1: {[key: string]: number} = {};
+var pegs0: [nBlack: number, nWhite: number] = [0, 0];
 
 function required<T>(value: T | undefined): T {
     if (value === undefined) {
@@ -707,7 +714,6 @@ mm.GameView = Backbone.View.extend({
     */
     resetBoard: function (): void {
         var gameView = asGameView(this);
-        var game = getGameModel(this);
         var turns = gameView.turns;
         var turns_array: Array<TurnModel> = [];
 
@@ -734,8 +740,6 @@ mm.GameView = Backbone.View.extend({
         turns.reset(turns_array);
 
         this.render();
-
-        // mm.appLog.prepend('Solution: ' + mm.solution);
     },
 
     /**
@@ -760,43 +764,65 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     checkGuess: function (guess: string): void {
-        var gameView = asGameView(this);
-        var solutionArray = mm.solution.split('');
-        var guessArray = guess.split('');
-        var nBlack: number = 0;
-        var nWhite: number = 0;
+        pegs0 = this.setCode0AndCalculatePegs(mm.solution, guess);
+        this.handleResults(pegs0);
+    },
 
-        for (var i = 0; i < mm.nCode; i += 1) {
-            if (guessArray[i] === solutionArray[i]) {
+    /**
+     * Sets code0 to newCode0 and 
+     * calculates the number of black and white pegs.
+     * @param code1 The code to compare to code0.
+     * @returns [nBlack, nWhite] The number of black and white pegs.
+     */
+    setCode0AndCalculatePegs: function (newCode0: string, code1: string): [nBlack: number, nWhite: number] {
+        code0 = newCode0;
+        return this.calculatePegs(code1);
+    },
+
+    /**
+     * Calculates the number of black and white pegs.
+     * @param code1 The code to compare to previously set code0.
+     * @returns [nBlack, nWhite] The number of black and white pegs.
+     */
+    calculatePegs: function (code1: string): [nBlack: number, nWhite: number] {
+        let nBlack = 0;
+        let nWhite = 0;
+        for (let i = 0; i < mm.codeColors.length; i += 1) {
+            unpairedCode0[mm.codeColors[i]] = 0;
+            unpairedCode1[mm.codeColors[i]] = 0;
+        }
+        for (let i = 0; i < code0.length; i += 1) {
+            if (code0[i] === code1[i]) { // tally black pegs
                 nBlack += 1;
-                guessArray[i] = 'x';
-                solutionArray[i] = 'z';
-            }
-        }
-        for (var j = 0; j < mm.nCode; j += 1) {
-            for (var k = 0; k < mm.nCode; k += 1) {
-                if (guessArray[j] === solutionArray[k]) {
+            } else { // tally white pegs
+                // Test if code0[i] has a pair.
+                if (unpairedCode1[code0[i]] > 0) { // found pair
                     nWhite += 1;
-                    guessArray[j] = 'x';
-                    solutionArray[k] = 'z';
-                }
+                    unpairedCode1[code0[i]] -= 1;
+                } else unpairedCode0[code0[i]] += 1; // inc unpaired
+                // Test if code1[i] has a pair.
+                if (unpairedCode0[code1[i]] > 0) { // found pair
+                    nWhite += 1;
+                    unpairedCode0[code1[i]] -= 1;
+                } else unpairedCode1[code1[i]] += 1; // inc unpaired
             }
         }
-        gameView.handleResults(nBlack, nWhite);
+        // log(nBlack, nWhite, unpairedCode0, unpairedCode1);
+        return [nBlack, nWhite];
     },
 
     /**
     * this = mm.GameView
     */
-    handleResults: function (num_black: number, num_white: number): void {
+    handleResults: function ([nBlack, nWhite]: [number, number]): void {
         var gameView = asGameView(this);
         var game = getGameModel(this);
-        var hint_string: string = '<p class="hint b">' + num_black + '</p><p class="hint w">' + num_white + '</p>';
+        var hint_string: string = '<p class="hint b">' + nBlack + '</p><p class="hint w">' + nWhite + '</p>';
         gameView.getCurrentTurn().set('hint_string', hint_string);
 
         game.set('turns_remaining', game.get('turns_remaining') - 1);
 
-        if (num_black === 4) {
+        if (nBlack === 4) {
             game.set('status', 'won');
         } else if (game.get('turns_remaining') === 0) {
             game.set('status', 'lost');

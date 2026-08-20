@@ -68,6 +68,12 @@ class AppLog {
     }
 }
 var log = console.log.bind(console);
+// These variables were made global to avoid new
+// creation of them each time calculatePegs() is called.
+var code0;
+var unpairedCode0 = {};
+var unpairedCode1 = {};
+var pegs0 = [0, 0];
 function required(value) {
     if (value === undefined) {
         throw new Error('Attempted to get an undefined Backbone.js model or view.');
@@ -471,7 +477,6 @@ mm.GameView = Backbone.View.extend({
     */
     resetBoard: function () {
         var gameView = asGameView(this);
-        var game = getGameModel(this);
         var turns = gameView.turns;
         var turns_array = [];
         for (var i = 0; i < mm.nTurns; i += 1) {
@@ -496,7 +501,6 @@ mm.GameView = Backbone.View.extend({
         $(this.gameOver_el).attr('class', '');
         turns.reset(turns_array);
         this.render();
-        // mm.appLog.prepend('Solution: ' + mm.solution);
     },
     /**
      * Executes at the beginning of each new game.
@@ -517,39 +521,65 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     checkGuess: function (guess) {
-        var gameView = asGameView(this);
-        var solutionArray = mm.solution.split('');
-        var guessArray = guess.split('');
-        var nBlack = 0;
-        var nWhite = 0;
-        for (var i = 0; i < mm.nCode; i += 1) {
-            if (guessArray[i] === solutionArray[i]) {
+        pegs0 = this.setCode0AndCalculatePegs(mm.solution, guess);
+        this.handleResults(pegs0);
+    },
+    /**
+     * Sets code0 to newCode0 and
+     * calculates the number of black and white pegs.
+     * @param code1 The code to compare to code0.
+     * @returns [nBlack, nWhite] The number of black and white pegs.
+     */
+    setCode0AndCalculatePegs: function (newCode0, code1) {
+        code0 = newCode0;
+        return this.calculatePegs(code1);
+    },
+    /**
+     * Calculates the number of black and white pegs.
+     * @param code1 The code to compare to previously set code0.
+     * @returns [nBlack, nWhite] The number of black and white pegs.
+     */
+    calculatePegs: function (code1) {
+        let nBlack = 0;
+        let nWhite = 0;
+        for (let i = 0; i < mm.codeColors.length; i += 1) {
+            unpairedCode0[mm.codeColors[i]] = 0;
+            unpairedCode1[mm.codeColors[i]] = 0;
+        }
+        for (let i = 0; i < code0.length; i += 1) {
+            if (code0[i] === code1[i]) { // tally black pegs
                 nBlack += 1;
-                guessArray[i] = 'x';
-                solutionArray[i] = 'z';
             }
-        }
-        for (var j = 0; j < mm.nCode; j += 1) {
-            for (var k = 0; k < mm.nCode; k += 1) {
-                if (guessArray[j] === solutionArray[k]) {
+            else { // tally white pegs
+                // Test if code0[i] has a pair.
+                if (unpairedCode1[code0[i]] > 0) { // found pair
                     nWhite += 1;
-                    guessArray[j] = 'x';
-                    solutionArray[k] = 'z';
+                    unpairedCode1[code0[i]] -= 1;
                 }
+                else
+                    unpairedCode0[code0[i]] += 1; // inc unpaired
+                // Test if code1[i] has a pair.
+                if (unpairedCode0[code1[i]] > 0) { // found pair
+                    nWhite += 1;
+                    unpairedCode0[code1[i]] -= 1;
+                }
+                else
+                    unpairedCode1[code1[i]] += 1; // inc unpaired
             }
         }
-        gameView.handleResults(nBlack, nWhite);
+        // log(nBlack, nWhite, unpairedCode0, unpairedCode1);
+        return [nBlack, nWhite];
     },
     /**
     * this = mm.GameView
     */
-    handleResults: function (num_black, num_white) {
+    handleResults: function ([nBlack, nWhite]) {
         var gameView = asGameView(this);
         var game = getGameModel(this);
-        var hint_string = '<p class="hint b">' + num_black + '</p><p class="hint w">' + num_white + '</p>';
+        var hint_string = '<p class="hint b">' + nBlack + '</p><p class="hint w">' + nWhite + '</p>';
         gameView.getCurrentTurn().set('hint_string', hint_string);
         game.set('turns_remaining', game.get('turns_remaining') - 1);
-        if (num_black === 4) {
+        if (nBlack === 4) {
             game.set('status', 'won');
         }
         else if (game.get('turns_remaining') === 0) {

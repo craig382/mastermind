@@ -228,6 +228,8 @@ div.turn#solution {
 }
 div.turn#solution div.pieces.hidden { /* solution */
 	display: none;
+	/* display: flex; */
+
 }
 
 
