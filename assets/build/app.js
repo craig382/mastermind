@@ -17,6 +17,7 @@ var nColors = 6;
 var nCode = 4;
 var nTurns = 10;
 var solution = '';
+var u;
 var mm = {
     /**
      * Initialize the game by constructing the main game view.
@@ -27,10 +28,59 @@ var mm = {
         // Create the primary game view and pass in a new game model.
         createGameView(createGameModel());
         appLog = new AppLog();
+        u = new MastermindUtilities();
         appLog.setTitle('Mastermind Log. Solution: ' + solution);
         log('mm.init() executed');
     }
 };
+class MastermindUtilities {
+    /**
+     * Sets code0 to newCode0 and
+     * calculates the number of black and white pegs.
+     * @param code1 The code to compare to code0.
+     * @returns [nBlack, nWhite] The number of black and white pegs.
+     */
+    setCode0AndCalculatePegs(newCode0, code1) {
+        code0 = newCode0;
+        return this.calculatePegs(code1);
+    }
+    /**
+     * Calculates the number of black and white pegs.
+     * @param code1 The code to compare to previously set code0.
+     * @returns [nBlack, nWhite] The number of black and white pegs.
+     */
+    calculatePegs(code1) {
+        let nBlack = 0;
+        let nWhite = 0;
+        for (let i = 0; i < codeColors.length; i += 1) {
+            unpairedCode0[codeColors[i]] = 0;
+            unpairedCode1[codeColors[i]] = 0;
+        }
+        for (let i = 0; i < code0.length; i += 1) {
+            if (code0[i] === code1[i]) { // tally black pegs
+                nBlack += 1;
+            }
+            else { // tally white pegs
+                // Test if code0[i] has a pair.
+                if (unpairedCode1[code0[i]] > 0) { // found pair
+                    nWhite += 1;
+                    unpairedCode1[code0[i]] -= 1;
+                }
+                else
+                    unpairedCode0[code0[i]] += 1; // inc unpaired
+                // Test if code1[i] has a pair.
+                if (unpairedCode0[code1[i]] > 0) { // found pair
+                    nWhite += 1;
+                    unpairedCode0[code1[i]] -= 1;
+                }
+                else
+                    unpairedCode1[code1[i]] += 1; // inc unpaired
+            }
+        }
+        // log(nBlack, nWhite, unpairedCode0, unpairedCode1);
+        return [nBlack, nWhite];
+    }
+}
 class AppLog {
     appLog_el;
     title_el;
@@ -525,54 +575,8 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     checkGuess: function (guess) {
-        pegs0 = this.setCode0AndCalculatePegs(solution, guess);
+        pegs0 = u.setCode0AndCalculatePegs(solution, guess);
         this.handleResults(pegs0);
-    },
-    /**
-     * Sets code0 to newCode0 and
-     * calculates the number of black and white pegs.
-     * @param code1 The code to compare to code0.
-     * @returns [nBlack, nWhite] The number of black and white pegs.
-     */
-    setCode0AndCalculatePegs: function (newCode0, code1) {
-        code0 = newCode0;
-        return this.calculatePegs(code1);
-    },
-    /**
-     * Calculates the number of black and white pegs.
-     * @param code1 The code to compare to previously set code0.
-     * @returns [nBlack, nWhite] The number of black and white pegs.
-     */
-    calculatePegs: function (code1) {
-        let nBlack = 0;
-        let nWhite = 0;
-        for (let i = 0; i < codeColors.length; i += 1) {
-            unpairedCode0[codeColors[i]] = 0;
-            unpairedCode1[codeColors[i]] = 0;
-        }
-        for (let i = 0; i < code0.length; i += 1) {
-            if (code0[i] === code1[i]) { // tally black pegs
-                nBlack += 1;
-            }
-            else { // tally white pegs
-                // Test if code0[i] has a pair.
-                if (unpairedCode1[code0[i]] > 0) { // found pair
-                    nWhite += 1;
-                    unpairedCode1[code0[i]] -= 1;
-                }
-                else
-                    unpairedCode0[code0[i]] += 1; // inc unpaired
-                // Test if code1[i] has a pair.
-                if (unpairedCode0[code1[i]] > 0) { // found pair
-                    nWhite += 1;
-                    unpairedCode0[code1[i]] -= 1;
-                }
-                else
-                    unpairedCode1[code1[i]] += 1; // inc unpaired
-            }
-        }
-        // log(nBlack, nWhite, unpairedCode0, unpairedCode1);
-        return [nBlack, nWhite];
     },
     /**
     * this = mm.GameView
