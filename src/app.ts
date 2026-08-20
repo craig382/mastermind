@@ -12,13 +12,13 @@ var unpairedCode0: {[key: string]: number} = {};
 var unpairedCode1: {[key: string]: number} = {};
 var pegs0: [nBlack: number, nWhite: number] = [0, 0];
 var allCodes: string[];
-var validCodeCount: number[];
+var validCodeCount: number[] = [];
 var appLog: AppLog;
 var codeColors= 'ABCDEF';
 var palletColors= 'ABCDEFX';
 var nubColor= 'X';
 var nColors= 6;
-var nCode= 4;
+var nHoles= 4; // number of holes in the code, i.e. code length
 var nTurns= 10;
 var solution= '';
 var u: MastermindUtilities;
@@ -48,12 +48,30 @@ var mm: MastermindRoot = {
         createGameView(createGameModel());
         appLog = new AppLog();
         u = new MastermindUtilities();
+        u.generateAllCodes();
         appLog.setTitle('Mastermind Log. Solution: ' + solution);
         log('mm.init() executed');
     }
 };
 
 class MastermindUtilities {
+
+    generateAllCodes(): void {
+        allCodes = [];
+        const c = codeColors;
+        // nest nHoles loops to generate all possible codes
+        for (let i0 = 0; i0 < nColors; i0 += 1) {
+            for (let i1 = 0; i1 < nColors; i1 += 1) {
+                for (let i2 = 0; i2 < nColors; i2 += 1) {
+                    for (let i3 = 0; i3 < nColors; i3 += 1) {
+                        allCodes.push(c[i0] + c[i1] + c[i2] + c[i3]);
+                    }
+                }
+            }
+        }
+        log('generateAllCodes() executed. allCodes.length = ', allCodes.length);
+        // log(allCodes.join(' '));
+    }
 
     /**
      * Sets code0 to newCode0 and 
@@ -577,7 +595,7 @@ mm.SolutionView = Backbone.View.extend({
     newSolution: function (): void {
         var randomColor: string;
         solution = '';
-        for (var i = 0; i < nCode; i += 1) {
+        for (var i = 0; i < nHoles; i += 1) {
             var randomIndex = Math.floor(Math.random() * nColors);
             randomColor = codeColors[randomIndex];
             solution += randomColor;
