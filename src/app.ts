@@ -2,16 +2,28 @@ declare var Backbone: any;
 declare var _: any;
 declare var $: any;
 
-type MastermindRoot = {
-    codeColors: string;
-    palletColors: string;
-    nubColor: string;
-    nColors: number;
-    nCode: number;
-    nTurns: number;
-    solution: string;
+// Global Variables
+var log = console.log.bind(console);
 
-    appLog?: AppLog;
+// These variables were made global to avoid new
+// creation of them each time calculatePegs() is called.
+var code0: string;
+var unpairedCode0: {[key: string]: number} = {};
+var unpairedCode1: {[key: string]: number} = {};
+var pegs0: [nBlack: number, nWhite: number] = [0, 0];
+var allCodes: string[];
+var validCodeCount: number[];
+var appLog: AppLog;
+var codeColors= 'ABCDEF';
+var palletColors= 'ABCDEFX';
+var nubColor= 'X';
+var nColors= 6;
+var nCode= 4;
+var nTurns= 10;
+var solution= '';
+
+
+type MastermindRoot = {
     gameView?: GameViewInstance;
     Turn?: TurnConstructor;
     TurnCollection?: TurnCollectionConstructor;
@@ -25,15 +37,6 @@ type MastermindRoot = {
 };
 
 var mm: MastermindRoot = {
-
-    codeColors: 'ABCDEF',
-    palletColors: 'ABCDEFX',
-    nubColor: 'X',
-    nColors: 6,
-    nCode: 4,
-    nTurns: 10,
-    solution: '',
-
     /**
      * Initialize the game by constructing the main game view.
      * 
@@ -42,8 +45,8 @@ var mm: MastermindRoot = {
     init: function (): void {
         // Create the primary game view and pass in a new game model.
         createGameView(createGameModel());
-        mm.appLog = new AppLog();
-        mm.appLog.setTitle('Mastermind Log. Solution: ' + mm.solution);
+        appLog = new AppLog();
+        appLog.setTitle('Mastermind Log. Solution: ' + solution);
         log('mm.init() executed');
     }
 };
@@ -235,15 +238,6 @@ type AllPiecesViewConstructor = new () => AllPiecesViewInstance;
 type GameModelConstructor = new () => GameModel;
 type GameViewConstructor = new (options: ViewModelOption<GameModel>) => GameViewInstance;
 
-var log = console.log.bind(console);
-
-// These variables were made global to avoid new
-// creation of them each time calculatePegs() is called.
-var code0: string;
-var unpairedCode0: {[key: string]: number} = {};
-var unpairedCode1: {[key: string]: number} = {};
-var pegs0: [nBlack: number, nWhite: number] = [0, 0];
-
 function required<T>(value: T | undefined): T {
     if (value === undefined) {
         throw new Error('Attempted to get an undefined Backbone.js model or view.');
@@ -425,7 +419,7 @@ mm.TurnView = Backbone.View.extend({
     holeClicked: function (e: ViewEvent): void {
         // log('holeClicked');
         var holeId : number = $(e.currentTarget).attr('id');
-        var color = mm.nubColor;
+        var color = nubColor;
         // log('holeClicked: holeId = ', holeId, ' color = ' 	, color);
         this.placePiece(color, holeId);
     },
@@ -533,14 +527,14 @@ mm.SolutionView = Backbone.View.extend({
      */
     newSolution: function (): void {
         var randomColor: string;
-        mm.solution = '';
-        for (var i = 0; i < mm.nCode; i += 1) {
-            var randomIndex = Math.floor(Math.random() * mm.nColors);
-            randomColor = mm.codeColors[randomIndex];
-            mm.solution += randomColor;
+        solution = '';
+        for (var i = 0; i < nCode; i += 1) {
+            var randomIndex = Math.floor(Math.random() * nColors);
+            randomColor = codeColors[randomIndex];
+            solution += randomColor;
         }
-        this.model.set('code', mm.solution);
-        // log('newSolution:', mm.solution);
+        this.model.set('code', solution);
+        // log('newSolution:', solution);
     },
 
     /**
@@ -639,7 +633,7 @@ mm.AllPiecesView = Backbone.View.extend({
      * this = mm.AllPiecesView
      */
     setNub: function (color: string): void {
-        mm.nubColor = color;
+        nubColor = color;
         this.model.set('color_class', color);
     },
 
@@ -649,7 +643,7 @@ mm.AllPiecesView = Backbone.View.extend({
      * this = mm.AllPiecesView
      */
     getNub: function (): string {
-        return mm.nubColor;    
+        return nubColor;    
     },
 
     /**
@@ -716,7 +710,7 @@ mm.GameView = Backbone.View.extend({
         var turns = gameView.turns;
         var turns_array: Array<TurnModel> = [];
 
-        for (var i = 0; i < mm.nTurns; i += 1) {
+        for (var i = 0; i < nTurns; i += 1) {
             // initialize the model
             var class_name: string = (i % 2) ? 'alt' : '';
             var locked_class: LockedClass;
@@ -763,7 +757,7 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     checkGuess: function (guess: string): void {
-        pegs0 = this.setCode0AndCalculatePegs(mm.solution, guess);
+        pegs0 = this.setCode0AndCalculatePegs(solution, guess);
         this.handleResults(pegs0);
     },
 
@@ -786,9 +780,9 @@ mm.GameView = Backbone.View.extend({
     calculatePegs: function (code1: string): [nBlack: number, nWhite: number] {
         let nBlack = 0;
         let nWhite = 0;
-        for (let i = 0; i < mm.codeColors.length; i += 1) {
-            unpairedCode0[mm.codeColors[i]] = 0;
-            unpairedCode1[mm.codeColors[i]] = 0;
+        for (let i = 0; i < codeColors.length; i += 1) {
+            unpairedCode0[codeColors[i]] = 0;
+            unpairedCode1[codeColors[i]] = 0;
         }
         for (let i = 0; i < code0.length; i += 1) {
             if (code0[i] === code1[i]) { // tally black pegs
@@ -907,8 +901,8 @@ mm.GameView = Backbone.View.extend({
     newGame: function (): void {
         // Create the primary game view and pass in a new game model.
         mm.gameView = createGameView(createGameModel());
-        mm.appLog.setTitle('Mastermind Log. Solution: ' + mm.solution);
-        mm.appLog.prepend('Solution: ' + mm.solution);
+        appLog.setTitle('Mastermind Log. Solution: ' + solution);
+        appLog.prepend('Solution: ' + solution);
     }
 });
 
