@@ -10,14 +10,14 @@ var mm = {
     /**
      * Initialize the game by constructing the main game view.
      *
-     * Runs at the beginning of each new game.
+     * Runs only once as the app starts.
      */
     init: function () {
         // Create the primary game view and pass in a new game model.
-        this.gameView = createGameView(createGameModel());
+        createGameView(createGameModel());
         mm.appLog = new AppLog();
         mm.appLog.setTitle('Mastermind Log. Solution: ' + mm.solution);
-        mm.appLog.prepend('Solution: ' + mm.solution);
+        log('mm.init() executed');
     }
 };
 class AppLog {
@@ -26,11 +26,11 @@ class AppLog {
     top_el;
     bottom_el;
     constructor() {
-        const aDocument = document;
         this.appLog_el = document.getElementById('appLog');
         this.title_el = this.appLog_el.querySelector('#title');
         this.top_el = this.appLog_el.querySelector('#top');
         this.bottom_el = this.appLog_el.querySelector('#bottom');
+        log('AppLog constructor() executed');
     }
     setTitle(text) {
         this.title_el.textContent = text;
@@ -347,7 +347,7 @@ mm.SolutionView = Backbone.View.extend({
         solutionModel.set('locked_class', '');
     },
     /**
-     * Reveal or restart action from the solution view.
+     * Reveal or start a new game action from the solution view.
      *
      * mm.SolutionView
      */
@@ -359,7 +359,7 @@ mm.SolutionView = Backbone.View.extend({
             gameView.quit();
         }
         else {
-            gameView.restart();
+            gameView.newGame();
         }
     }
 });
@@ -458,12 +458,12 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     initialize: function () {
-        var gameView = asGameView(this);
-        gameView.turns = createTurnCollection();
-        gameView.solution = createTurn({ locked_class: 'hidden' });
-        gameView.solutionView = createSolutionView(gameView.solution);
-        gameView.allPiecesView = createAllPiecesView();
-        gameView.turn_views = [];
+        mm.gameView = this;
+        this.turns = createTurnCollection();
+        this.solution = createTurn({ locked_class: 'hidden' });
+        this.solutionView = createSolutionView(this.solution);
+        this.allPiecesView = createAllPiecesView();
+        this.turn_views = [];
         this.model.on('change:status', this.gameOver, this);
         this.resetBoard(); // START
         // Keep current behavior: game begins immediately for now.
@@ -654,10 +654,15 @@ mm.GameView = Backbone.View.extend({
         }
     },
     /**
+     * Runs at the beginning of each new game.
+     *
     * this = mm.GameView
     */
-    restart: function () {
-        mm.init();
+    newGame: function () {
+        // Create the primary game view and pass in a new game model.
+        mm.gameView = createGameView(createGameModel());
+        mm.appLog.setTitle('Mastermind Log. Solution: ' + mm.solution);
+        mm.appLog.prepend('Solution: ' + mm.solution);
     }
 });
 $(function () {
