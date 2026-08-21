@@ -41,7 +41,6 @@ var palletBbv: AllPiecesViewInstance;
 type MastermindRoot = {
     gameView?: GameViewInstance;
     Turn?: TurnConstructor;
-    TurnCollection?: TurnCollectionConstructor;
     TurnView?: TurnViewConstructor;
     SolutionView?: SolutionViewConstructor;
     AllPieces?: AllPiecesModelConstructor;
@@ -265,8 +264,6 @@ type SolutionViewInstance = {
 };
 
 type GameViewInstance = {
-    turns: TurnCollectionModel;
-    turn_views: Array<TurnViewInstance>;
     solution: SolutionModel;
     allPiecesView: AllPiecesViewInstance;
     solutionView: SolutionViewInstance;
@@ -280,12 +277,6 @@ type GameViewInstance = {
     gameOver_el: string;
 };
 
-type TurnCollectionModel = {
-    length: number;
-    reset(models: Array<TurnModel>): any;
-    get(id: number): TurnModel;
-    at(index: number): TurnModel;
-};
 
 type ViewEvent = Event;
 type LockedClass = '' | 'active' | 'locked' | 'frozen' | 'correct' | 'hidden';
@@ -306,7 +297,6 @@ type TurnAttrs = Partial<{
 }>;
 
 type TurnConstructor = new (attrs?: TurnAttrs) => TurnModel;
-type TurnCollectionConstructor = new () => TurnCollectionModel;
 type TurnViewConstructor = new (options: ViewModelOption<TurnModel>) => TurnViewInstance;
 type SolutionViewConstructor = new (options: ViewModelOption<TurnModel>) => SolutionViewInstance;
 type AllPiecesModelConstructor = new () => AllPiecesModel;
@@ -334,11 +324,6 @@ function asGameView(view: GameViewContext): GameViewInstance {
 function createTurnModel(attrs: TurnAttrs = {}): TurnModel {
     var TurnClass = required(mm.Turn);
     return new TurnClass(attrs);
-}
-
-function createTurnCollectionModel(): TurnCollectionModel {
-    var TurnCollectionClass = required(mm.TurnCollection);
-    return new TurnCollectionClass();
 }
 
 function createTurnView(model: TurnModel): TurnViewInstance {
@@ -387,17 +372,6 @@ mm.Turn = Backbone.Model.extend({
         button_text: 'quit' // for the solution view
     }
 });
-
-mm.TurnCollection = Backbone.Collection.extend({
-    model: mm.Turn,
-
-    initialize: function (): void {
-        turnsBbv = this;
-    }
-
-
-});
-
 
 /**
  * mm.TurnView.
@@ -729,7 +703,6 @@ mm.GameView = Backbone.View.extend({
     */
     initialize: function (): void {
         gameBbv = this;
-        // turnsBbm = createTurnCollectionModel();
         solutionBbm = createTurnModel({locked_class: 'hidden'});
         createSolutionView(solutionBbm);
         createAllPiecesView();

@@ -171,10 +171,6 @@ function createTurnModel(attrs = {}) {
     var TurnClass = required(mm.Turn);
     return new TurnClass(attrs);
 }
-function createTurnCollectionModel() {
-    var TurnCollectionClass = required(mm.TurnCollection);
-    return new TurnCollectionClass();
-}
 function createTurnView(model) {
     var TurnViewClass = required(mm.TurnView);
     return new TurnViewClass({ model: model });
@@ -213,12 +209,6 @@ mm.Turn = Backbone.Model.extend({
         disabled_class: 'disabled', // for the guess button
         locked_class: 'locked',
         button_text: 'quit' // for the solution view
-    }
-});
-mm.TurnCollection = Backbone.Collection.extend({
-    model: mm.Turn,
-    initialize: function () {
-        turnsBbv = this;
     }
 });
 /**
@@ -516,7 +506,6 @@ mm.GameView = Backbone.View.extend({
     */
     initialize: function () {
         gameBbv = this;
-        // turnsBbm = createTurnCollectionModel();
         solutionBbm = createTurnModel({ locked_class: 'hidden' });
         createSolutionView(solutionBbm);
         createAllPiecesView();
