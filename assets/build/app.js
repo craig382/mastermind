@@ -14,10 +14,22 @@ var codeColors = 'ABCDEF';
 var palletColors = 'ABCDEFX';
 var nubColor = 'X';
 var nColors = 6;
-var nHoles = 4; // number of holes in the code, i.e. code length
+/** number of holes in the code, i.e. code length */
+var nHoles = 4;
 var nTurns = 10;
+/** index of the current turn, 0 based */
+var turnIndex = 0;
 var solution = '';
 var u;
+var gameBbm;
+var gameBbv;
+var turnsBbm;
+var turnsBbv;
+var currentTurnBbm;
+var solutionBbm;
+var solutionBbv;
+var palletBbm;
+var palletBbv;
 var mm = {
     /**
      * Initialize the game by constructing the main game view.
@@ -507,10 +519,11 @@ mm.AllPiecesView = Backbone.View.extend({
 * mm.Game model for mm.GameView
 */
 mm.Game = Backbone.Model.extend({
-    defaults: {
-        num_turns: 10,
-        turns_remaining: 10,
-        status: 'notStarted'
+    status: 'notStarted',
+    initialize: function () {
+        turnIndex = 0;
+        this.status = 'notStarted';
+        game = this;
     }
 });
 /**
@@ -529,7 +542,7 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     initialize: function () {
-        mm.gameView = this;
+        gameView = this;
         this.turns = createTurnCollection();
         this.solution = createTurn({ locked_class: 'hidden' });
         this.solutionView = createSolutionView(this.solution);
@@ -603,11 +616,11 @@ mm.GameView = Backbone.View.extend({
         var game = getGameModel(this);
         var hint_string = '<p class="hint b">' + nBlack + '</p><p class="hint w">' + nWhite + '</p>';
         gameView.getCurrentTurn().set('hint_string', hint_string);
-        game.set('turns_remaining', game.get('turns_remaining') - 1);
+        turnIndex += 1; // increment the turn index
         if (nBlack === 4) {
             game.set('status', 'won');
         }
-        else if (game.get('turns_remaining') === 0) {
+        else if (turnIndex === nTurns) {
             game.set('status', 'lost');
         }
         else {

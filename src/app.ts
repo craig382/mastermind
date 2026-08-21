@@ -14,14 +14,27 @@ var pegs0: [nBlack: number, nWhite: number] = [0, 0];
 var allCodes: string[];
 var validCodeCount: number[] = [];
 var appLog: AppLog;
-var codeColors= 'ABCDEF';
-var palletColors= 'ABCDEFX';
-var nubColor= 'X';
-var nColors= 6;
-var nHoles= 4; // number of holes in the code, i.e. code length
-var nTurns= 10;
+var codeColors = 'ABCDEF';
+var palletColors = 'ABCDEFX';
+var nubColor = 'X';
+var nColors = 6;
+/** number of holes in the code, i.e. code length */
+var nHoles = 4; 
+var nTurns = 10;
+/** index of the current turn, 0 based */
+var turnIndex = 0;
 var solution= '';
 var u: MastermindUtilities;
+
+var gameBbm: GameModel;
+var gameBbv: GameViewInstance;
+var turnsBbm: TurnCollectionModel;
+var turnsBbv: Array<TurnViewInstance>;
+var currentTurnBbm: TurnModel;
+var solutionBbm: SolutionModel;
+var solutionBbv: SolutionViewInstance;
+var palletBbm: AllPiecesModel;
+var palletBbv: AllPiecesViewInstance;
 
 
 type MastermindRoot = {
@@ -199,17 +212,10 @@ type TurnModel = {
 };
 
 type GameModel = {
-    get(key: 'num_turns'): number;
-    get(key: 'turns_remaining'): number;
     get(key: 'status'): GameStatus;
     get(key: string): any;
     set(key: 'turns_remaining', value: number): any;
     set(key: 'status', value: GameStatus): any;
-    set(attrs: Partial<{
-        num_turns: number;
-        turns_remaining: number;
-        status: GameStatus;
-    }>): any;
     set(key: string, value: any): any;
 };
 
@@ -726,11 +732,14 @@ mm.AllPiecesView = Backbone.View.extend({
 * mm.Game model for mm.GameView
 */
 mm.Game = Backbone.Model.extend({
-    defaults: {
-        num_turns: 10,
-        turns_remaining: 10,
-        status: 'notStarted'
+    status: 'notStarted',
+
+    initialize:function (): void {
+        turnIndex = 0;
+        this.status = 'notStarted';
+        game = this;
     }
+
 });
 
 /**
@@ -751,7 +760,7 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     initialize: function (): void {
-        mm.gameView = this;
+        gameView = this;
         this.turns = createTurnCollection();
         this.solution = createTurn({locked_class: 'hidden'});
         this.solutionView = createSolutionView(this.solution);
@@ -837,12 +846,11 @@ mm.GameView = Backbone.View.extend({
         var game = getGameModel(this);
         var hint_string: string = '<p class="hint b">' + nBlack + '</p><p class="hint w">' + nWhite + '</p>';
         gameView.getCurrentTurn().set('hint_string', hint_string);
-
-        game.set('turns_remaining', game.get('turns_remaining') - 1);
+        turnIndex += 1; // increment the turn index
 
         if (nBlack === 4) {
             game.set('status', 'won');
-        } else if (game.get('turns_remaining') === 0) {
+        } else if (turnIndex === nTurns) {
             game.set('status', 'lost');
         } else {
             var t: TurnModel = gameView.getCurrentTurn();
