@@ -369,9 +369,7 @@ mm.SolutionView = Backbone.View.extend({
             randomColor = codeColors[randomIndex];
             solution += randomColor;
         }
-        log('newSolution:', solution);
-        log('solutionBbm:', solutionBbm);
-        log('solutionBbv:', solutionBbv);
+        // log('newSolution:', solution);
         solutionBbm.set({ code: solution });
     },
     /**

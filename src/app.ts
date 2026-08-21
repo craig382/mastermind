@@ -39,7 +39,6 @@ var palletBbv: AllPiecesViewInstance;
 
 
 type MastermindRoot = {
-    gameView?: GameViewInstance;
     Turn?: TurnConstructor;
     TurnView?: TurnViewConstructor;
     SolutionView?: SolutionViewConstructor;
@@ -264,9 +263,6 @@ type SolutionViewInstance = {
 };
 
 type GameViewInstance = {
-    solution: SolutionModel;
-    allPiecesView: AllPiecesViewInstance;
-    solutionView: SolutionViewInstance;
     checkGuess(guess: string): void;
     getCurrentTurnBbm(): TurnModel;
     getPreviousTurnBbm(): TurnModel;
@@ -276,7 +272,6 @@ type GameViewInstance = {
     handleResults([nBlack, nWhite]: [number, number]): void;
     gameOver_el: string;
 };
-
 
 type ViewEvent = Event;
 type LockedClass = '' | 'active' | 'locked' | 'frozen' | 'correct' | 'hidden';
@@ -545,9 +540,7 @@ mm.SolutionView = Backbone.View.extend({
             randomColor = codeColors[randomIndex];
             solution += randomColor;
         }
-        log('newSolution:', solution);
-        log('solutionBbm:', solutionBbm);
-        log('solutionBbv:', solutionBbv);
+        // log('newSolution:', solution);
         solutionBbm.set({code: solution});
     },
 
@@ -557,7 +550,6 @@ mm.SolutionView = Backbone.View.extend({
     render: function (): Element {
         var solutionTemplate = $(this.template).html();
         var solutionHtml = _.template(solutionTemplate, this.model.toJSON());
-
         this.$el.html(solutionHtml);
         return this.el;
     },
