@@ -232,7 +232,7 @@ mm.Turn = Backbone.Model.extend({
 mm.TurnCollection = Backbone.Collection.extend({
     model: mm.Turn,
     initialize: function () {
-        /* */
+        turnsBbm = this;
     }
 });
 /**
@@ -542,7 +542,7 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     initialize: function () {
-        gameView = this;
+        gameBbv = this;
         this.turns = createTurnCollection();
         this.solution = createTurn({ locked_class: 'hidden' });
         this.solutionView = createSolutionView(this.solution);
