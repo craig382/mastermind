@@ -10,7 +10,6 @@ var log = console.log.bind(console);
 var code0: string;
 var unpairedCode0: {[key: string]: number} = {};
 var unpairedCode1: {[key: string]: number} = {};
-var pegs0: [nBlack: number, nWhite: number] = [0, 0];
 var allCodes: string[];
 var validCodeCount: number[] = [];
 var appLog: AppLog;
@@ -126,6 +125,55 @@ class MastermindUtilities {
         }
         // log(nBlack, nWhite, unpairedCode0, unpairedCode1);
         return [nBlack, nWhite];
+    }
+
+    /**
+     * Calculates the number of valid codes remaining after a guess.
+     * 
+     * Assumes calculateValidCodeCount() has been called 
+     * for all previous turns.
+     * @param guess The guess code to compare to allCodes.
+     * @param gBpegs The number of black pegs for the guess.
+     * @param gWpegs The number of white pegs for the guess.
+     * @param gIndex The index of the turn for the guess.
+     */
+    calculateValidCodeCount(guess: string, 
+        gBpegs: number, 
+        gWpegs: number, 
+        gIndex: number): void {
+
+        var iMin = 0;
+        var iMax: number;
+        var tempCode: string;
+        var acBpegs: number;
+        var acWpegs: number;
+
+        if (gIndex !== turnIndex)
+            throw new Error(`calculateValidCodeCount() called with guessTurnIndex(${gIndex}) !== turnIndex(${turnIndex}).`);
+
+        if (gIndex === 0) {
+            validCodeCount = [];
+            iMax = allCodes.length - 1;
+        } else iMax = validCodeCount[gIndex - 1] - 1;
+
+        code0 = guess;
+        while (iMin < iMax) {
+            [acBpegs, acWpegs] = this.calculatePegs(allCodes[iMin]);
+            if (acBpegs === gBpegs && acWpegs === gWpegs) {
+                // valid code, keep it and move to the next code
+                iMin += 1;
+            } else {
+                // invalid code, swap it with the last valid code
+                tempCode = allCodes[iMax];
+                allCodes[iMax] = allCodes[iMin];
+                allCodes[iMin] = tempCode;
+                iMax -= 1;
+            }
+        }
+        validCodeCount[gIndex] = iMax + 1;
+
+        log(`calculateValidCodeCount() on turn ${gIndex} found ${validCodeCount[gIndex]} valid codes.`);
+        log(`first valid code ${allCodes[0]}, last valid code ${allCodes[validCodeCount[gIndex] - 1]}, and first invalid code ${allCodes[validCodeCount[gIndex]]}`);
     }
 
 }
@@ -757,8 +805,9 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     checkGuess: function (guess: string): void {
-        pegs0 = u.setCode0AndCalculatePegs(solution, guess);
+        var pegs0 = u.setCode0AndCalculatePegs(solution, guess);
         this.handleResults(pegs0);
+        u.calculateValidCodeCount(guess, pegs0[0], pegs0[1], turnIndex);
     },
 
 
