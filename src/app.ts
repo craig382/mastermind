@@ -830,7 +830,7 @@ mm.GameView = Backbone.View.extend({
         this.getCurrentTurnBbm().set('hint_string', hint_string);
 
         if (nBlack === 4) gameBbm.set('status', 'won');
-        else if (turnIndex === nTurns) gameBbm.set('status', 'lost');
+        else if (turnIndex === (nTurns - 1)) gameBbm.set('status', 'lost');
         else { // activate the next turn
             turnIndex += 1; // increment the turn index
             // set the next turn's code to the first valid code
