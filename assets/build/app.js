@@ -11,6 +11,10 @@ var validCodeCount = [];
 var appLog;
 var codeColors = 'ABCDEF';
 var palletColors = 'ABCDEFX';
+/** For auto opener mode, the code that
+ * is automatically filled in for the first guess.
+ * The player can override this guess. */
+var autoOpener = 'ABBC';
 var nubColor = 'X';
 var nColors = 6;
 /** number of holes in the code, i.e. code length */
@@ -38,11 +42,10 @@ var mm = {
      */
     init: function () {
         // Create the primary game view and pass in a new game model.
-        createGameView(createGameModel());
         appLog = new AppLog();
         u = new MastermindUtilities();
         u.generateAllCodes();
-        appLog.setTitle('Mastermind Log. Solution: ' + solution);
+        createGameView(createGameModel());
         log('mm.init() executed');
     }
 };
@@ -128,13 +131,13 @@ class MastermindUtilities {
         if (gIndex !== turnIndex)
             throw new Error(`calculateValidCodeCount() called with guessTurnIndex(${gIndex}) !== turnIndex(${turnIndex}).`);
         if (gIndex === 0) {
-            validCodeCount = [];
+            validCodeCount = new Array(nTurns);
             iMax = allCodes.length - 1;
         }
         else
             iMax = validCodeCount[gIndex - 1] - 1;
         code0 = guess;
-        while (iMin < iMax) {
+        while (iMin <= iMax) {
             [acBpegs, acWpegs] = this.calculatePegs(allCodes[iMin]);
             if (acBpegs === gBpegs && acWpegs === gWpegs) {
                 // valid code, keep it and move to the next code
@@ -149,7 +152,7 @@ class MastermindUtilities {
             }
         }
         validCodeCount[gIndex] = iMax + 1;
-        log(`calculateValidCodeCount() on turn ${gIndex} found ${validCodeCount[gIndex]} valid codes.`);
+        log(`calculateValidCodeCount() on turn index ${gIndex} found ${validCodeCount[gIndex]} valid codes.`);
         log(`first valid code ${allCodes[0]}, last valid code ${allCodes[validCodeCount[gIndex] - 1]}, and first invalid code ${allCodes[validCodeCount[gIndex]]}`);
     }
 }
@@ -346,7 +349,7 @@ mm.TurnView = Backbone.View.extend({
      * mm.TurnView.
      */
     showTurnButton: function () {
-        this.set('disabled_class', '');
+        this.model.set('disabled_class', '');
         this.render();
     },
     /**
@@ -554,6 +557,12 @@ mm.GameView = Backbone.View.extend({
         // Keep current behavior: game begins immediately for now.
         // A future change can keep this as notStarted until user clicks New Game.
         this.model.set('status', 'inPlay');
+        // newGame stuff belongs here, not in newGame.
+        // set the opener for auto opener mode
+        turnsBbm[turnIndex].set('code', autoOpener);
+        appLog.setTitle('Mastermind Log. Solution: ' + solution);
+        appLog.prepend('Solution: ' + solution);
+        this.render(); // must be last line of initialize()
     },
     /**
      * Executes at the beginning of each new game.
@@ -583,9 +592,6 @@ mm.GameView = Backbone.View.extend({
         }
         // reset the game over message
         $(this.gameOver_el).attr('class', '');
-        // turnsBbv.reset(turnsBbm); threw exception ERROR
-        // turnsBbm.reset(turnsBbm);
-        this.render();
     },
     /**
      * Executes at the beginning of each new game.
@@ -605,8 +611,8 @@ mm.GameView = Backbone.View.extend({
     */
     checkGuess: function (guess) {
         var pegs0 = u.setCode0AndCalculatePegs(solution, guess);
-        this.handleResults(pegs0);
         u.calculateValidCodeCount(guess, pegs0[0], pegs0[1], turnIndex);
+        this.handleResults(pegs0);
     },
     /**
     * this = mm.GameView
@@ -614,17 +620,16 @@ mm.GameView = Backbone.View.extend({
     handleResults: function ([nBlack, nWhite]) {
         var hint_string = '<p class="hint b">' + nBlack + '</p><p class="hint w">' + nWhite + '</p>';
         this.getCurrentTurnBbm().set('hint_string', hint_string);
-        turnIndex += 1; // increment the turn index
-        if (nBlack === 4) {
+        if (nBlack === 4)
             gameBbm.set('status', 'won');
-        }
-        else if (turnIndex === nTurns) {
+        else if (turnIndex === nTurns)
             gameBbm.set('status', 'lost');
-        }
-        else {
-            var t = this.getCurrentTurnBbm();
-            t.set('disabled_class', '');
-            t.set('locked_class', 'active');
+        else { // activate the next turn
+            turnIndex += 1; // increment the turn index
+            // set the next turn's code to the first valid code
+            // for help mode or hint mode
+            turnsBbm[turnIndex].set('code', allCodes[0]);
+            turnsBbv[turnIndex].activateRow();
         }
     },
     /**
@@ -661,7 +666,7 @@ mm.GameView = Backbone.View.extend({
         }
         solutionBbv.setSolved();
         if (status === 'won') {
-            gameBbv.getPreviousTurnBbm().set('locked_class', 'correct');
+            turnsBbm.at(turnIndex).set('locked_class', 'correct');
             $(gameBbv.gameOver_el).text('you won!');
             $(gameBbv.gameOver_el).addClass('win');
         }
@@ -678,9 +683,8 @@ mm.GameView = Backbone.View.extend({
     */
     newGame: function () {
         // Create the primary game view and pass in a new game model.
+        // Put nothing else but the following line in newGame().
         createGameView(createGameModel());
-        appLog.setTitle('Mastermind Log. Solution: ' + solution);
-        appLog.prepend('Solution: ' + solution);
     }
 });
 $(function () {
