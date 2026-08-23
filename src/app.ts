@@ -263,11 +263,11 @@ type TurnModel = {
 };
 
 type GameModel = {
-    status: GameStatus;
-    get(key: 'status'): GameStatus;
+    gameStatus: GameStatus;
+    get(key: 'gameStatus'): GameStatus;
     get(key: string): any;
     set(key: 'turns_remaining', value: number): any;
-    set(key: 'status', value: GameStatus): any;
+    set(key: 'gameStatus', value: GameStatus): any;
     set(key: string, value: any): any;
 };
 
@@ -301,6 +301,8 @@ type TurnViewInstance = {
     render: () => Element;
     activateRow: () => void;
     freezeRow: () => void;
+    hideTurnButton: () => void;
+    showTurnButton: () => void;
 };
 
 type AllPiecesViewInstance = {
@@ -322,6 +324,7 @@ type GameViewInstance = {
     quit(): void;
     newGame(): void;
     handleResults([nBlack, nWhite]: [number, number]): void;
+    game_el: string;
     gameOver_el: string;
 };
 
@@ -468,18 +471,20 @@ mm.TurnView = Backbone.View.extend({
         // set the piece to the nub (the color picker).
         // The player can use locked (future) turns 
         // as a scratch pad to plan their next guess.
+        var turnState = this.model.get('locked_class');
         var code = this.model.get('code');
         // log('placePiece turnModel.get code color place:', code, color, place);
-        if (this.model.get('locked_class') === 'frozen') {
-            // set the nub color to the color clicked in the frozen turn
-            palletBbv.setNub(code[place]);
-        } else {
+        if (turnState === 'active' || turnState === 'locked') {
+            // set the piece in the turn to the nub color
             var codeArray = code.split('');
             var newCode: string;
             codeArray[place] = color;
             newCode = codeArray.join('');
-            // log('placePiece oldCode color place newCode:', code, color, place, newCode);
             this.model.set({code: newCode});
+            // log('placePiece oldCode color place newCode:', code, color, place, newCode);
+        } else {
+            // set the nub color to the color clicked in the frozen turn
+            palletBbv.setNub(code[place]);
         }
     },
     
@@ -718,12 +723,12 @@ mm.AllPiecesView = Backbone.View.extend({
 * mm.Game model for mm.GameView
 */
 mm.Game = Backbone.Model.extend({
-    status: 'notStarted',
+    gameStatus: 'notStarted',
 
     initialize:function (): void {
         gameBbm = this;
         turnIndex = 0;
-        gameBbm.status = 'notStarted';
+        gameBbm.set('gameStatus', 'notStarted');
     }
 
 });
@@ -732,7 +737,7 @@ mm.Game = Backbone.Model.extend({
 * this = mm.GameView
 */
 mm.GameView = Backbone.View.extend({
-    el: 'div#game',
+    game_el: 'div#game',
     board_el: 'ul#board',
     header_template: '<div id="header">Mastermind</div>',
     gameOver_el: 'div#gameOver',
@@ -750,12 +755,12 @@ mm.GameView = Backbone.View.extend({
         solutionBbm = createTurnModel({locked_class: 'hidden'});
         createSolutionView(solutionBbm);
         createAllPiecesView();
-        this.model.on('change:status', this.gameOver, this);
+        this.model.on('change:gameStatus', this.gameOver, this);
         this.resetBoard(); // START
 
         // Keep current behavior: game begins immediately for now.
         // A future change can keep this as notStarted until user clicks New Game.
-        this.model.set('status', 'inPlay');
+        this.model.set('gameStatus', 'inPlay');
 
         // newGame stuff belongs here, not in newGame.
 
@@ -829,8 +834,8 @@ mm.GameView = Backbone.View.extend({
         var hint_string: string = '<p class="hint b">' + nBlack + '</p><p class="hint w">' + nWhite + '</p>';
         this.getCurrentTurnBbm().set('hint_string', hint_string);
 
-        if (nBlack === 4) gameBbm.set('status', 'won');
-        else if (turnIndex === (nTurns - 1)) gameBbm.set('status', 'lost');
+        if (nBlack === 4) gameBbm.set('gameStatus', 'won');
+        else if (turnIndex === (nTurns - 1)) gameBbm.set('gameStatus', 'lost');
         else { // activate the next turn
             turnIndex += 1; // increment the turn index
             // set the next turn's code to the first valid code
@@ -864,14 +869,15 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     quit: function (): void {
-        gameBbm.set('status', 'lost');
+        gameBbm.set('gameStatus', 'lost');
     },
 
     /**
     * this = mm.GameView
     */
     gameOver: function (): void {
-        var status: GameStatus = gameBbm.get('status');
+        var status: GameStatus = gameBbm.get('gameStatus');
+        $(gameBbv.game_el).attr('class', status);
         if (status === 'notStarted' || status === 'inPlay') { return; }
 
         solutionBbv.setSolved();
@@ -883,7 +889,7 @@ mm.GameView = Backbone.View.extend({
             turnsBbm.at(turnIndex).set('locked_class', 'wrong');
             $(gameBbv.gameOver_el).text('you lost.');
             $(gameBbv.gameOver_el).addClass('lose');
-            turnsBbv.at(turnIndex).freezeRow();
+            turnsBbv.at(turnIndex).hideTurnButton();
         }
     },
 
