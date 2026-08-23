@@ -592,8 +592,6 @@ mm.GameView = Backbone.View.extend({
             turnsBbm.push(turnM);
             turnsBbv.push(turnV);
         }
-        // reset the game over message
-        $(this.gameOver_el).attr('class', '');
     },
     /**
      * Executes at the beginning of each new game.
@@ -671,12 +669,10 @@ mm.GameView = Backbone.View.extend({
         if (status === 'won') {
             turnsBbm.at(turnIndex).set('locked_class', 'correct');
             $(gameBbv.gameOver_el).text('you won!');
-            $(gameBbv.gameOver_el).addClass('win');
         }
         else {
             turnsBbm.at(turnIndex).set('locked_class', 'wrong');
             $(gameBbv.gameOver_el).text('you lost.');
-            $(gameBbv.gameOver_el).addClass('lose');
             turnsBbv.at(turnIndex).hideTurnButton();
         }
     },

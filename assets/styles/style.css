@@ -138,12 +138,12 @@ div#gameOver {
 	font-size:2em;
 	display:none;
 }
-div#gameOver.lose {
+div#game.lost div#gameOver {
 	display: flex;
 	color:#F00;
 	background-color: rgba(64,0,0,0.9);
 }
-div#gameOver.win {
+div#game.won div#gameOver {
 	display:flex;
 	color:#0F0;
 	background-color: rgba(0,64,0,0.9);
