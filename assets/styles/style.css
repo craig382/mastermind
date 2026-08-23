@@ -100,7 +100,7 @@ div.piece {
 	cursor: pointer;
 }
 div.piece.X {
-	background-color: #000;
+	background-color: black;
 	color:#000;
 }
 div.piece.A {
@@ -138,7 +138,8 @@ div#gameOver {
 	font-size:2em;
 	display:none;
 }
-div#game.lost div#gameOver {
+div#game.lost div#gameOver, 
+div#game.quit div#gameOver {
 	display: flex;
 	color:#F00;
 	background-color: rgba(64,0,0,0.9);
@@ -213,10 +214,13 @@ p.hint {
 	display:inline;
 }
 p.b {
-	color:#000;
+	color:black;
 }
 p.w {
-	color:#FFF;
+	color:white;
+}
+p.c {
+	color: cyan;
 }
 span.hint.done { /* unused */
 	color:#FFF;

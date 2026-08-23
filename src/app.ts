@@ -16,15 +16,16 @@ var validCodeCount: number[] = [];
 var appLog: AppLog;
 var codeColors = 'ABCDEF';
 var palletColors = 'ABCDEFX';
-/** The code that 
- * is automatically filled in for the first guess.
- * The player can override this guess. */
+/** The automatically filled in code for the 
+ * first guess. which he player can override. */
 var autoOpener = 'ABCD';
 var nubColor = 'X';
 var nColors = 6;
 /** number of holes in the code, i.e. code length */
-var nHoles = 4; 
+var nHoles = 4;
 var nTurns = 10;
+//* number of games played, 1 for the first game */
+var nGames = 1;
 /** index of the current turn, 0 based */
 var turnIndex = 0;
 var solution= '';
@@ -333,7 +334,7 @@ type LockedClass = '' | 'active' | 'locked' | 'frozen' | 'correct' | 'wrong' | '
 type DisabledClass = '' | 'hidden' | 'disabled';
 type GuessMark = 'x' | 'z';
 type ButtonText = 'quit' | 'New Game';
-type GameStatus = 'notStarted' | 'inPlay' | 'won' | 'lost';
+type GameStatus = 'notStarted' | 'inPlay' | 'won' | 'quit' | 'lost';
 
 type ViewModelOption<TModel> = {
     model: TModel;
@@ -767,8 +768,7 @@ mm.GameView = Backbone.View.extend({
         // set the opener for auto opener mode
         turnsBbm[turnIndex].set('code', autoOpener);
 
-        appLog.setTitle('Mastermind Log. Solution: ' + solution);
-        appLog.prepend('Solution: ' + solution);
+        appLog.setTitle('Mastermind Log.');
 
         this.render(); // must be last line of initialize()
     },
@@ -829,7 +829,7 @@ mm.GameView = Backbone.View.extend({
     */
     handleResults: function ([nBlack, nWhite]: [number, number]): void {
         var hint_string: string = '<p class="hint b">' + nBlack 
-            + '</p><p class="hint w">' + nWhite + '</p><p class="hint b">' 
+            + '</p><p class="hint w">' + nWhite + '</p><p class="hint c">' 
             + validCodeCount[turnIndex] + '</p>';
         this.getCurrentTurnBbm().set('hint_string', hint_string);
 
@@ -868,7 +868,7 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     quit: function (): void {
-        gameBbm.set('gameStatus', 'lost');
+        gameBbm.set('gameStatus', 'quit');
     },
 
     /**
@@ -879,17 +879,31 @@ mm.GameView = Backbone.View.extend({
         $(gameBbv.game_el).attr('class', status);
         if (status === 'notStarted' || status === 'inPlay') { return; }
 
+        var turnProgress: string = allCodes.length.toString();
+        var completedTurns: number = turnIndex + 1;
         // Set next game's opener equal to this game's opener.
         autoOpener = turnsBbm[0].get('code'); 
         solutionBbv.setSolved();
         if (status === 'won') {
             turnsBbm.at(turnIndex).set('locked_class', 'correct');
             $(gameBbv.gameOver_el).text('you won!');
+            completedTurns = turnIndex + 1;
         } else {
             turnsBbm.at(turnIndex).set('locked_class', 'wrong');
-            $(gameBbv.gameOver_el).text('you lost.');
-            turnsBbv.at(turnIndex).hideTurnButton();
+            if (status === 'quit') { 
+                turnsBbv.at(turnIndex).hideTurnButton();
+                $(gameBbv.gameOver_el).text('you quit.');
+                completedTurns = turnIndex;
+            } else {
+                $(gameBbv.gameOver_el).text('you lost.');
+                completedTurns = nTurns;
+            }
         }
+        if (completedTurns > 0) turnProgress += ' ' 
+            + validCodeCount.slice(0, completedTurns).join(' ');
+        appLog.prepend(`\nYou ${status} game ${nGames} on turn ${turnIndex + 1}. Secret code ${solution}, opener ${autoOpener}, turn by turn progress: ${turnProgress}.`);
+
+        nGames += 1; // increment the number of games played
     },
 
     /**
