@@ -828,7 +828,9 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     handleResults: function ([nBlack, nWhite]: [number, number]): void {
-        var hint_string: string = '<p class="hint b">' + nBlack + '</p><p class="hint w">' + nWhite + '</p>';
+        var hint_string: string = '<p class="hint b">' + nBlack 
+            + '</p><p class="hint w">' + nWhite + '</p><p class="hint b">' 
+            + validCodeCount[turnIndex] + '</p>';
         this.getCurrentTurnBbm().set('hint_string', hint_string);
 
         if (nBlack === 4) gameBbm.set('gameStatus', 'won');
