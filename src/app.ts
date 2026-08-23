@@ -16,10 +16,10 @@ var validCodeCount: number[] = [];
 var appLog: AppLog;
 var codeColors = 'ABCDEF';
 var palletColors = 'ABCDEFX';
-/** For auto opener mode, the code that 
+/** The code that 
  * is automatically filled in for the first guess.
  * The player can override this guess. */
-var autoOpener = 'ABBC';
+var autoOpener = 'ABCD';
 var nubColor = 'X';
 var nColors = 6;
 /** number of holes in the code, i.e. code length */
@@ -879,6 +879,8 @@ mm.GameView = Backbone.View.extend({
         $(gameBbv.game_el).attr('class', status);
         if (status === 'notStarted' || status === 'inPlay') { return; }
 
+        // Set next game's opener equal to this game's opener.
+        autoOpener = turnsBbm[0].get('code'); 
         solutionBbv.setSolved();
         if (status === 'won') {
             turnsBbm.at(turnIndex).set('locked_class', 'correct');
