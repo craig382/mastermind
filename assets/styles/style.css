@@ -36,19 +36,15 @@ div#game {
 ul {
 	list-style: none;
 }
-li {
-	margin: 10px 0px 0px 0px;
-}
 div.turn {
 	width:100%;
-	padding:0px 10px;
+	padding:0px 10px 0px 0px;
 	height:auto;
 	min-height: 54px;
 	background-color: #555;
 	align-items: center;
 	justify-content: left;
 	display: flex;
-	margin: 0px 5px 0px 0px;
 }
 div.turn.alt {
 	background-color: #666;
@@ -57,14 +53,17 @@ div.locked {
 	border: 1px dotted #000;
 }
 div.active {
-	/* border: 2px solid #000; */
-	border: 1px solid green;
+	border: 1px solid yellow;
+	/* background-color: #000; */
 }
 div.active div.pieces {
 	background-color: #000;
 }
-div.correct {
-	border:1px solid #0F0;
+div.turn.correct {
+	border:2px solid green;
+}
+div.turn.wrong {
+	border:2px solid red;
 }
 div.frozen {
 	border: 1px solid #000;
@@ -72,12 +71,11 @@ div.frozen {
 span.guess {
 	margin-right:10px;
 }
-
 div.pieces {
 	display: inline-flex;
 	padding: 5px 5px 5px 10px;
 	margin: 0px 10px 0px 0px;
-	border:1px solid #FF0;
+	/* border:1px solid green; */
 }
 div#current_piece {
 	width:auto;

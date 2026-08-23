@@ -176,8 +176,8 @@ class MastermindUtilities {
         }
         validCodeCount[gIndex] = iMax + 1;
 
-        log(`calculateValidCodeCount() on turn index ${gIndex} found ${validCodeCount[gIndex]} valid codes.`);
-        log(`first valid code ${allCodes[0]}, last valid code ${allCodes[validCodeCount[gIndex] - 1]}, and first invalid code ${allCodes[validCodeCount[gIndex]]}`);
+        // log(`calculateValidCodeCount() on turn index ${gIndex} found ${validCodeCount[gIndex]} valid codes.`);
+        // log(`first valid code ${allCodes[0]}, last valid code ${allCodes[validCodeCount[gIndex] - 1]}, and first invalid code ${allCodes[validCodeCount[gIndex]]}`);
     }
 
 }
@@ -326,7 +326,7 @@ type GameViewInstance = {
 };
 
 type ViewEvent = Event;
-type LockedClass = '' | 'active' | 'locked' | 'frozen' | 'correct' | 'hidden';
+type LockedClass = '' | 'active' | 'locked' | 'frozen' | 'correct' | 'wrong' | 'hidden';
 type DisabledClass = '' | 'hidden' | 'disabled';
 type GuessMark = 'x' | 'z';
 type ButtonText = 'quit' | 'New Game';
@@ -880,6 +880,7 @@ mm.GameView = Backbone.View.extend({
             $(gameBbv.gameOver_el).text('you won!');
             $(gameBbv.gameOver_el).addClass('win');
         } else {
+            turnsBbm.at(turnIndex).set('locked_class', 'wrong');
             $(gameBbv.gameOver_el).text('you lost.');
             $(gameBbv.gameOver_el).addClass('lose');
             turnsBbv.at(turnIndex).freezeRow();
