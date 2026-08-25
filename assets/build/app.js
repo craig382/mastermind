@@ -13,7 +13,7 @@ var codeColors = 'ABCDEF';
 var palletColors = 'ABCDEFX';
 /** The automatically filled in code for the
  * first guess. which he player can override. */
-var autoOpener = 'ABCD';
+var autoOpener = 'AABB';
 var nubColor = 'X';
 var nColors = 6;
 /** number of holes in the code, i.e. code length */
