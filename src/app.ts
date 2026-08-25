@@ -14,6 +14,10 @@ var allCodes: string[];
 var validCodeCount: number[] = [];
 
 var appLog: AppLog;
+/** guesses contains all the guesses
+ * separated by spaces. For outputting to the appLog.
+ */
+var guesses: string;
 var codeColors = 'ABCDEF';
 var palletColors = 'ABCDEFX';
 /** The automatically filled in code for the 
@@ -159,7 +163,11 @@ class MastermindUtilities {
         if (gIndex === 0) {
             validCodeCount = new Array(nTurns);
             iMax = allCodes.length - 1;
-        } else iMax = validCodeCount[gIndex - 1] - 1;
+            guesses = guess;
+        } else {
+            iMax = validCodeCount[gIndex - 1] - 1;
+            guesses += ' ' + guess;
+        }
 
         code0 = guess;
         while (iMin <= iMax) {
@@ -175,8 +183,10 @@ class MastermindUtilities {
                 iMax -= 1;
             }
         }
-        validCodeCount[gIndex] = iMax + 1;
+        iMax += 1; // iMax is now the valid code count
+        validCodeCount[gIndex] = iMax;
 
+        appLog.setTitle(allCodes.slice(0, iMax).join(' '));
         // log(`calculateValidCodeCount() on turn index ${gIndex} found ${validCodeCount[gIndex]} valid codes.`);
         // log(`first valid code ${allCodes[0]}, last valid code ${allCodes[validCodeCount[gIndex] - 1]}, and first invalid code ${allCodes[validCodeCount[gIndex]]}`);
     }
@@ -901,7 +911,7 @@ mm.GameView = Backbone.View.extend({
         }
         if (completedTurns > 0) turnProgress += ' ' 
             + validCodeCount.slice(0, completedTurns).join(' ');
-        appLog.prepend(`\nYou ${status} game ${nGames} on turn ${turnIndex + 1}. Secret code ${solution}, opener ${autoOpener}, turn by turn progress: ${turnProgress}.`);
+        appLog.prepend(`\nYou ${status} game ${nGames} on turn ${turnIndex + 1}. Secret code ${solution}, guesses ${guesses}, turn by turn progress: ${turnProgress}.`);
 
         nGames += 1; // increment the number of games played
     },
