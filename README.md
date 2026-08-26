@@ -73,7 +73,7 @@ The repository intentionally ignores `node_modules/`; this folder is only needed
 - Note that 3b 1w is impossible.
 - pegs[key:code0, key:code1]:[nBlack: number, nWhite: number]. Peg lookup array. code0, code1 are 0..1295 code combos.
 - pegs is a symmetric array (pegs[code0, code1] = pegs[code1, code0]).
-- codes[turnIndex: number, guess: string, pegs[nBlack:number, nWhite:number]]: string[].
+- codeTree[turnIndex: number, guess: string, pegs[nBlack:number, nWhite:number]]: string[].
 
 
 ## Forked from bobbyroe/Mastermind_demo
