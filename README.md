@@ -27,17 +27,6 @@ A web app to play mastermind. Written in Backbone.js.
 - Add a bot that gives analysis of the top 5 remaining guesses for each turn given the player's turn history up to that point. The bot should also give its solution from the start (if the bot were to play the game by itself, how many moves it required in total and what each of those moves were, and how many possible solutions were left after each of its moves). Of course, the bot is not allowed to know the secret code. It is only allowed to make guesses based on the black and white peg feedback it receives.
 - Add row hints on frozen rows that every time you change the code on the active row, it shows the black and white peg results vs the active code (only when each differs from the true black and white peg (vs the secret code) row hint).
 
-## Craig's Mastermind Strategy
-(For 6 colors, duplicates allowed, code length 4, blanks not allowed.)
-Move 1. AABB.
-Depending on the number of pegs found in move 1:
-Move 2. DCCE for 0 or 3 pegs.
-Move 2. ACCD for 1 black peg, DCCA for 1 white peg.
-Move 2. ACCB for 2 black pegs, BCCA for 2 white pegs, ABCC for 1 black 1 white peg.
-Move 2. For 4 move 1 pegs, a new permutation of AABB that satisfies the 4 move 1 pegs.
-For the following moves, if possible, satisfy the previous moves using only 2 pegs, and then fill in the other 2 pegs with a doublet of an unused color (most preferred).
-Alternately, satisfy the previous moves using 3 pegs and fill in the last peg with by duplicating the color of one of those 3 pegs to create a doublet of a color that in previous guesses has only ben used as a singlet. And after the fourth peg is thus placed, the guess still should satisfy all previous guesses (else try a different guess).
-
 ## Development Setup After Conversion to TypeScript
 
 `npm run serve`
@@ -69,6 +58,23 @@ The repository intentionally ignores `node_modules/`; this folder is only needed
 - ABCD = 3 leaves 0 (2 singles and 1 duplicate) or 1 (3 singles) color. Thus guess 2 should not have duplicate of E or F. Make guess 2 a valid combination of ABEF. ABEF = b = 1 (e.g. ACCD) | 2 (e.g. ABCD) | 3 (e.g. ABED). b = 0 | 4 is impossilbe.
 - ABCD = 4 eliminates the remaining 2 colors. Try another combination of ABCD for guess 2.
 - ABCD = 0 eliminates 4 colors. Follow with EEFF = b, then E | F is: quadruple for b = 2; or triplicate for b = 3; for b = 4, E and F are both duplicate. 
+
+## Craig's Mastermind Strategy
+- (For 6 colors, duplicates allowed, code length 4, blanks not allowed.)
+- Move 1. AABB.
+- Depending on the number of pegs found in move 1:
+    - Move 2. DCCE for 0 or 3 pegs.
+    - Move 2. ACCD for 1 black peg, DCCA for 1 white peg.
+    - Move 2. ACCB for 2 black pegs, BCCA for 2 white pegs, ABCC for 1 black 1 white peg.
+    - Move 2. For 4 move 1 pegs, a new permutation of AABB that satisfies the 4 move 1 pegs.
+- For the following moves, if possible, satisfy the previous moves using only 2 pegs, and then fill in the other 2 pegs with a doublet of an unused color (most preferred).
+- Alternately, satisfy the previous moves using 3 pegs and fill in the last peg with by duplicating the color of one of those 3 pegs to create a doublet of a color that in previous guesses has only ben used as a singlet. And after the fourth peg is thus placed, the guess still should satisfy all previous guesses (else try a different guess).
+- 14 possible peg results: 0b 0w, 1b 0w, 0b 1w, 2b 0w, 1b 1w, 0b 2w, 3b 0w, 2b 1w, 1b 2w, 0b 3w, 4b 0w, 2b 2w, 1b 3w, 0b 4w.
+- Note that 3b 1w is impossible.
+- pegs[key:code0, key:code1]:[nBlack: number, nWhite: number]. Peg lookup array. code0, code1 are 0..1295 code combos.
+- pegs is a symmetric array (pegs[code0, code1] = pegs[code1, code0]).
+- codes[turnIndex: number, guess: string, pegs[nBlack:number, nWhite:number]]: string[].
+
 
 ## Forked from bobbyroe/Mastermind_demo
 
