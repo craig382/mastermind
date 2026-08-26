@@ -8,8 +8,8 @@ var log = console.log.bind(console);
 // These variables were made global to avoid new
 // creation of them each time calculatePegs() is called.
 var code0: string;
-var unpairedCode0: {[key: string]: number} = {};
-var unpairedCode1: {[key: string]: number} = {};
+var unpairedCode0: {[color: string]: number} = {};
+var unpairedCode1: {[color: string]: number} = {};
 var allCodes: string[];
 var validCodeCount: number[] = [];
 
