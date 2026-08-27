@@ -122,18 +122,18 @@ class MastermindUtilities {
         var maxPegCombos = 0;
         var maxPegComboGuess = '';
         var nValid = validCodesIn.length;
+        if (!codeTree[turn])
+            codeTree[turn] = {};
         for (var g = 0; g < guessArray.length; g += 1) {
             var guess = guessArray[g];
+            if (!codeTree[turn][guess])
+                codeTree[turn][guess] = {};
             code0 = guess;
             for (var v = 0; v < validCodesIn.length; v += 1) {
                 pc = AsPegCombo(this.calculatePegs(validCodesIn[v]));
-                // Push validCodesIn[v] onto the codeTree.
-                if (!codeTree[turn])
-                    codeTree[turn] = {};
-                if (!codeTree[turn][guess])
-                    codeTree[turn][guess] = {};
                 if (!codeTree[turn][guess][pc])
                     codeTree[turn][guess][pc] = [];
+                // Push validCodesIn[v] onto the codeTree.
                 codeTree[turn][guess][pc].push(validCodesIn[v]);
             }
             nPegCombos = Object.keys(codeTree[turn][guess]).length;
