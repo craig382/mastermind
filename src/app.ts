@@ -15,7 +15,8 @@ var validCodeCount: number[] = [];
 
 var appLog: AppLog;
 /** guesses contains all the guesses
- * separated by spaces. For outputting to the appLog.
+ * separated by spaces.
+ * For outputting to the appLog at the end of the game.
  */
 var guesses: string;
 var codeColors = 'ABCDEF';
@@ -34,6 +35,22 @@ var nGames = 1;
 var turnIndex = 0;
 var solution= '';
 var u: MastermindUtilities;
+
+/** validCodesArray = codeTree[turn][guess][nBlack][nWhite];
+ * 
+ * A tree structure that stores an array of valid 
+ * remaining codes for the next turn (0 based) for 
+ * each possible guess of the next turn and each 
+ * possible peg combo of that guess.
+ * 
+ * codeTree is the data structure acted upon by the
+ * calculateCodeTree function.*/
+var codeTree: {[turn: number]: {[guess: string]: {[nBlack: number]: {[nWhite: number]: string[]}}}} = {};
+/** botGuess[thisTurn] is the bot's guess for this turn
+ *  given the human's guesses prior to this turn. */
+var botGuesses: string[] = [];
+var boardGuesses: string[] = [];
+var boardPegs: [nBlack: number, nWhite: number][] = [];
 
 // Backbone.js models Bbm and views Bbv
 var gameBbm: GameModel;
@@ -92,6 +109,49 @@ class MastermindUtilities {
         log('generateAllCodes() executed. allCodes.length = ', allCodes.length);
         // log(allCodes.join(' '));
     }
+
+    /** Empty codeTree and calculate codeTree
+     * for the first time in a new game.
+     */
+    initializeCodeTree(): void {
+        codeTree = {};
+        u.calculateCodeTree(0, ['ABCD', 'ABBC', 'AABB', 'AAAA']);
+    }
+
+    calculateCodeTree(turn:number, guessArray?: string[]): void {
+        log(`execute calculateCodeTree(turn: ${turn}, guessArray: ${guessArray ? guessArray.join(' ') : 'undefined'}).`);
+        if (turn < 0 || turn > (nTurns - 1)) return;
+        var validCodesIn: string[] = [];
+        var [nBlack, nWhite] = [0, 0];
+        if (turn === 0) {
+            validCodesIn = allCodes;
+            botGuesses = [];
+        } else {
+            if (!codeTree[turn-1][boardGuesses[turn-1]]) {
+                this.calculateCodeTree(turn-1, [boardGuesses[turn-1]]);
+            }
+            validCodesIn = codeTree[turn-1][boardGuesses[turn-1]][boardPegs[turn-1][0]][boardPegs[turn-1][1]];
+            if (!guessArray) guessArray = validCodesIn;
+        }
+
+        for (var g = 0; g < guessArray.length; g += 1) {
+            var guess = guessArray[g];
+            code0 = guess;
+            for (var v = 0; v < validCodesIn.length; v += 1) {
+                [nBlack, nWhite] = this.calculatePegs(validCodesIn[v]);
+                // Push validCodesIn[v] onto the codeTree.
+                if (!codeTree[turn]) codeTree[turn] = {};
+                if (!codeTree[turn][guess]) codeTree[turn][guess] = {};
+                if (!codeTree[turn][guess][nBlack]) codeTree[turn][guess][nBlack] = {};
+                if (!codeTree[turn][guess][nBlack][nWhite]) codeTree[turn][guess][nBlack][nWhite] = [];
+                codeTree[turn][guess][nBlack][nWhite].push(validCodesIn[v]);
+            }
+        }
+
+        log(`calculateCodeTree executed for turn ${turn}.`);
+        log(codeTree);
+    }
+        
 
     /**
      * Sets code0 to newCode0 and 
@@ -778,6 +838,8 @@ mm.GameView = Backbone.View.extend({
         // set the opener for auto opener mode
         turnsBbm[turnIndex].set('code', autoOpener);
 
+        u.initializeCodeTree();
+
         appLog.setTitle('Mastermind Log.');
 
         this.render(); // must be last line of initialize()
@@ -829,7 +891,10 @@ mm.GameView = Backbone.View.extend({
     */
     checkGuess: function (guess: string): void {
         var pegs0 = u.setCode0AndCalculatePegs(solution, guess);
+        boardGuesses[turnIndex] = guess;
+        boardPegs[turnIndex] = pegs0;
         u.calculateValidCodeCount(guess, pegs0[0], pegs0[1], turnIndex);
+        if (pegs0[0] < nHoles) u.calculateCodeTree(turnIndex + 1);
         this.handleResults(pegs0);
     },
 
