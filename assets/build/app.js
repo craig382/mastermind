@@ -55,6 +55,12 @@ var solutionBbm;
 var solutionBbv;
 var palletBbm;
 var palletBbv;
+function AsPegCombo(pegs) {
+    return `${pegs.b}${pegs.w}`;
+}
+function AsPegs(peg) {
+    return { b: parseInt(peg[0]), w: parseInt(peg[1]) };
+}
 var mm = {
     /**
      * Initialize the game by constructing the main game view.
@@ -99,7 +105,7 @@ class MastermindUtilities {
         if (turn < 0 || turn > (nTurns - 1))
             return;
         var validCodesIn = [];
-        var [nBlack, nWhite] = [0, 0];
+        var pc = '00';
         if (turn === 0) {
             validCodesIn = allCodes;
             botGuesses = [];
@@ -108,7 +114,7 @@ class MastermindUtilities {
             if (!codeTree[turn - 1][boardGuesses[turn - 1]]) {
                 this.calculateCodeTree(turn - 1, [boardGuesses[turn - 1]]);
             }
-            validCodesIn = codeTree[turn - 1][boardGuesses[turn - 1]][boardPegs[turn - 1][0]][boardPegs[turn - 1][1]];
+            validCodesIn = codeTree[turn - 1][boardGuesses[turn - 1]][boardPegs[turn - 1]];
             if (!guessArray)
                 guessArray = validCodesIn;
         }
@@ -116,17 +122,15 @@ class MastermindUtilities {
             var guess = guessArray[g];
             code0 = guess;
             for (var v = 0; v < validCodesIn.length; v += 1) {
-                [nBlack, nWhite] = this.calculatePegs(validCodesIn[v]);
+                pc = AsPegCombo(this.calculatePegs(validCodesIn[v]));
                 // Push validCodesIn[v] onto the codeTree.
                 if (!codeTree[turn])
                     codeTree[turn] = {};
                 if (!codeTree[turn][guess])
                     codeTree[turn][guess] = {};
-                if (!codeTree[turn][guess][nBlack])
-                    codeTree[turn][guess][nBlack] = {};
-                if (!codeTree[turn][guess][nBlack][nWhite])
-                    codeTree[turn][guess][nBlack][nWhite] = [];
-                codeTree[turn][guess][nBlack][nWhite].push(validCodesIn[v]);
+                if (!codeTree[turn][guess][pc])
+                    codeTree[turn][guess][pc] = [];
+                codeTree[turn][guess][pc].push(validCodesIn[v]);
             }
         }
         log(`calculateCodeTree executed for turn ${turn}.`);
@@ -148,35 +152,34 @@ class MastermindUtilities {
      * @returns [nBlack, nWhite] The number of black and white pegs.
      */
     calculatePegs(code1) {
-        let nBlack = 0;
-        let nWhite = 0;
+        let pegs = { b: 0, w: 0 };
         for (let i = 0; i < codeColors.length; i += 1) {
             unpairedCode0[codeColors[i]] = 0;
             unpairedCode1[codeColors[i]] = 0;
         }
         for (let i = 0; i < code0.length; i += 1) {
             if (code0[i] === code1[i]) { // tally black pegs
-                nBlack += 1;
+                pegs.b += 1;
             }
             else { // tally white pegs
                 // Test if code0[i] has a pair.
                 if (unpairedCode1[code0[i]] > 0) { // found pair
-                    nWhite += 1;
+                    pegs.w += 1;
                     unpairedCode1[code0[i]] -= 1;
                 }
                 else
                     unpairedCode0[code0[i]] += 1; // inc unpaired
                 // Test if code1[i] has a pair.
                 if (unpairedCode0[code1[i]] > 0) { // found pair
-                    nWhite += 1;
+                    pegs.w += 1;
                     unpairedCode0[code1[i]] -= 1;
                 }
                 else
                     unpairedCode1[code1[i]] += 1; // inc unpaired
             }
         }
-        // log(nBlack, nWhite, unpairedCode0, unpairedCode1);
-        return [nBlack, nWhite];
+        // log(pegs, unpairedCode0, unpairedCode1);
+        return pegs;
     }
     /**
      * Calculates the number of valid codes remaining after a guess.
@@ -184,16 +187,14 @@ class MastermindUtilities {
      * Assumes calculateValidCodeCount() has been called
      * for all previous turns.
      * @param guess The guess code to compare to allCodes.
-     * @param gBpegs The number of black pegs for the guess.
-     * @param gWpegs The number of white pegs for the guess.
+     * @param gPegs The number of black and white pegs for the guess.
      * @param gIndex The index of the turn for the guess.
      */
-    calculateValidCodeCount(guess, gBpegs, gWpegs, gIndex) {
+    calculateValidCodeCount(guess, gPegs, gIndex) {
         var iMin = 0;
         var iMax;
         var tempCode;
-        var acBpegs;
-        var acWpegs;
+        var acPegs;
         if (gIndex !== turnIndex)
             throw new Error(`calculateValidCodeCount() called with guessTurnIndex(${gIndex}) !== turnIndex(${turnIndex}).`);
         if (gIndex === 0) {
@@ -207,8 +208,8 @@ class MastermindUtilities {
         }
         code0 = guess;
         while (iMin <= iMax) {
-            [acBpegs, acWpegs] = this.calculatePegs(allCodes[iMin]);
-            if (acBpegs === gBpegs && acWpegs === gWpegs) {
+            acPegs = this.calculatePegs(allCodes[iMin]);
+            if (acPegs.b === gPegs.b && acPegs.w === gPegs.w) {
                 // valid code, keep it and move to the next code
                 iMin += 1;
             }
@@ -683,21 +684,21 @@ mm.GameView = Backbone.View.extend({
     checkGuess: function (guess) {
         var pegs0 = u.setCode0AndCalculatePegs(solution, guess);
         boardGuesses[turnIndex] = guess;
-        boardPegs[turnIndex] = pegs0;
-        u.calculateValidCodeCount(guess, pegs0[0], pegs0[1], turnIndex);
-        if (pegs0[0] < nHoles)
+        boardPegs[turnIndex] = AsPegCombo(pegs0);
+        u.calculateValidCodeCount(guess, pegs0, turnIndex);
+        if (pegs0.b < nHoles)
             u.calculateCodeTree(turnIndex + 1);
         this.handleResults(pegs0);
     },
     /**
     * this = mm.GameView
     */
-    handleResults: function ([nBlack, nWhite]) {
-        var hint_string = '<p class="hint b">' + nBlack
-            + '</p><p class="hint w">' + nWhite + '</p><p class="hint c">'
+    handleResults: function (pegs) {
+        var hint_string = '<p class="hint b">' + pegs.b
+            + '</p><p class="hint w">' + pegs.w + '</p><p class="hint c">'
             + validCodeCount[turnIndex] + '</p>';
         this.getCurrentTurnBbm().set('hint_string', hint_string);
-        if (nBlack === 4)
+        if (pegs.b === 4)
             gameBbm.set('gameStatus', 'won');
         else if (turnIndex === (nTurns - 1))
             gameBbm.set('gameStatus', 'lost');
