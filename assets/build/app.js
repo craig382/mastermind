@@ -98,7 +98,7 @@ class MastermindUtilities {
      */
     initializeCodeTree() {
         codeTree = {};
-        u.calculateCodeTree(0, ['ABCD', 'ABBC', 'AABB', 'AAAA']);
+        u.calculateCodeTree(0, ['AABB', 'ABBC', 'ABCD']);
     }
     calculateCodeTree(turn, guessArray) {
         log(`execute calculateCodeTree(turn: ${turn}, guessArray: ${guessArray ? guessArray.join(' ') : 'undefined'}).`);
@@ -118,6 +118,10 @@ class MastermindUtilities {
             if (!guessArray)
                 guessArray = validCodesIn;
         }
+        var nPegCombos = 0;
+        var maxPegCombos = 0;
+        var maxPegComboGuess = '';
+        var nValid = validCodesIn.length;
         for (var g = 0; g < guessArray.length; g += 1) {
             var guess = guessArray[g];
             code0 = guess;
@@ -132,8 +136,17 @@ class MastermindUtilities {
                     codeTree[turn][guess][pc] = [];
                 codeTree[turn][guess][pc].push(validCodesIn[v]);
             }
+            nPegCombos = Object.keys(codeTree[turn][guess]).length;
+            if (nPegCombos > maxPegCombos) {
+                maxPegCombos = nPegCombos;
+                maxPegComboGuess = guess;
+            }
+            // log(`turn ${turn} guess ${guess} has ${nPegCombos} peg combos.`);
+            if (nPegCombos === nValid) {
+                log(`turn ${turn} guess ${guess} is PERFECT.`);
+            }
         }
-        log(`calculateCodeTree executed for turn ${turn}.`);
+        log(`calculateCodeTree executed for turn ${turn}, maxPegComboGuess: ${maxPegComboGuess}, maxPegCombos: ${maxPegCombos}.`);
         log(codeTree);
     }
     /**
