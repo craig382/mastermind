@@ -144,8 +144,8 @@ class MastermindUtilities {
     }
 
     calculateCodeTree(turn:number, guessArray?: string[]): void {
-        log(`execute calculateCodeTree(turn: ${turn}, guessArray: ${guessArray ? guessArray.join(' ') : 'undefined'}).`);
         if (turn < 0 || turn > (nTurns - 1)) return;
+        var guessArrayIn = guessArray ? guessArray.join(' ') : 'undefined'
         var validCodesIn: string[] = [];
         var pc: PegCombo = '00';
         if (turn === 0) {
@@ -191,8 +191,8 @@ class MastermindUtilities {
             botGuesses[turn] = maxPegComboGuess;
         }
 
-        log(`calculateCodeTree executed for turn ${turn}, botGuesses[${turn}]: ${botGuesses[turn]}.`);
-        log(codeTree);
+        log(`executed calculateCodeTree(turn: ${turn}, guessArray: ${guessArrayIn}), botGuesses[${turn}]: ${botGuesses[turn]}.`);
+        // log(codeTree);
     }
         
 
@@ -285,7 +285,6 @@ class MastermindUtilities {
         iMax += 1; // iMax is now the valid code count
         validCodeCount[gIndex] = iMax;
 
-        appLog.setTitle(allCodes.slice(0, iMax).join(' '));
         // log(`calculateValidCodeCount() on turn index ${gIndex} found ${validCodeCount[gIndex]} valid codes.`);
         // log(`first valid code ${allCodes[0]}, last valid code ${allCodes[validCodeCount[gIndex] - 1]}, and first invalid code ${allCodes[validCodeCount[gIndex]]}`);
     }
