@@ -37,6 +37,8 @@ var codeTree = {};
 /** botGuesses[thisTurn] is the bot's guess for this turn
  *  given the human's guesses prior to this turn. */
 var botGuesses = [];
+var botPegs = [];
+var botValidCounts = [];
 var boardGuesses = [];
 var boardPegs = [];
 var boardValidCounts = [];
@@ -94,10 +96,12 @@ class MastermindUtilities {
     initializeCodeTree() {
         codeTree = {};
         botGuesses = [];
+        botPegs = [];
+        botValidCounts = [];
         boardGuesses = [];
         boardPegs = [];
         boardValidCounts = [];
-        u.calculateCodeTree(0, ['AABB', 'ABBC', 'ABCD']);
+        this.calculateCodeTree(0, ['AABB', 'ABBC', 'ABCD']);
         // For hint mode, set the turn's
         // suggested guess to the bot's guess.
         turnsBbm[turnIndex].set('code', botGuesses[turnIndex]);
@@ -151,7 +155,7 @@ class MastermindUtilities {
                 if (nValid > 2) {
                     var perfectMsg = botGuesses[turn] ? `YOU` : `The bot`;
                     perfectMsg += ` found PERFECT guess ${guess} in game ${nGames} turn ${turn + 1} with ${nValid} valid codes remaining.`;
-                    appLog.prepend(perfectMsg);
+                    appLog.insert(perfectMsg);
                 }
                 if (!botGuesses[turn]) {
                     botGuesses[turn] = guess;
@@ -161,6 +165,10 @@ class MastermindUtilities {
         }
         if (!botGuesses[turn]) {
             botGuesses[turn] = maxPegComboGuess;
+        }
+        if (!botPegs[turn]) {
+            botPegs[turn] = AsPegCombo(this.setCode0AndCalculatePegs(solution, botGuesses[turn]));
+            botValidCounts[turn] = codeTree[turn][botGuesses[turn]][botPegs[turn]].length;
         }
         // log(`executed calculateCodeTree(turn: ${turn}, guessArray: ${guessArrayIn}), botGuesses[${turn}]: ${botGuesses[turn]}.`);
         // log(codeTree);
@@ -233,15 +241,11 @@ class AppLog {
         this.bottom_el.textContent = text;
     }
     /**
-     * Merges the top text into the bottom text,
-     * then sets the top text to the newText.
+     * Appends the newText to the beginning of the top text.
      */
     prepend(newText) {
         const oldTop = this.top_el.textContent;
-        if (oldTop !== '') {
-            this.bottom_el.textContent = `${oldTop}\n${this.bottom_el.textContent}`;
-        }
-        this.top_el.textContent = newText;
+        this.top_el.textContent = oldTop ? `${newText}\n${oldTop}` : newText;
     }
     /**
      * Appends the newText to the end of the top text.
@@ -249,6 +253,17 @@ class AppLog {
     insert(newText) {
         const oldTop = this.top_el.textContent;
         this.top_el.textContent = oldTop ? `${oldTop}\n${newText}` : newText;
+    }
+    /**
+     * Merges the top text into the bottom text,
+     * then sets the top text to the newText.
+     */
+    merge(newText = '') {
+        const oldTop = this.top_el.textContent;
+        if (oldTop !== '') {
+            this.bottom_el.textContent = `${oldTop}\n${this.bottom_el.textContent}`;
+        }
+        this.top_el.textContent = newText;
     }
     /**
      * Appends the newText to the end of the bottom text.
@@ -618,7 +633,9 @@ mm.GameView = Backbone.View.extend({
         // set the opener for auto opener mode
         turnsBbm[turnIndex].set('code', autoOpener);
         u.initializeCodeTree();
-        appLog.setTitle(`Mastermind Log.`);
+        appLog.setTitle(`Mastermind (${allCodes.length} possible codes)`);
+        // merge the previous game log into the bottom of the log
+        appLog.merge(`\nGame ${nGames}`);
         this.render(); // must be last line of initialize()
     },
     /**
@@ -727,8 +744,6 @@ mm.GameView = Backbone.View.extend({
         if (status === 'notStarted' || status === 'inPlay') {
             return;
         }
-        var turnProgress = allCodes.length.toString();
-        var guesses = 'no guesses';
         // Set next game's opener equal to this game's opener.
         autoOpener = turnsBbm[0].get('code');
         solutionBbv.setSolved();
@@ -742,24 +757,30 @@ mm.GameView = Backbone.View.extend({
                 turnsBbv.at(turnIndex).hideTurnButton();
             }
         }
+        appLog.insert(`You ${status} on turn ${turnIndex + 1}.`);
+        appLog.insert(`Secret code ${solution}.`);
         if (boardGuesses.length > 0) {
-            turnProgress += ' ' + boardValidCounts.join(' ');
-            guesses = `${boardGuesses[0]} (${botGuesses[0]})`;
-            for (var i = 1; i < boardGuesses.length - 1; i += 1) {
-                guesses += `, ${boardGuesses[i]} (${botGuesses[i]})`;
+            appLog.insert(`Turn by turn: board (bot):`);
+            for (var i = 0; i < boardGuesses.length; i += 1) {
+                appLog.insert(`${boardGuesses[i]} `
+                    + `${boardPegs[i][0]} ${boardPegs[i][1]} `
+                    + `${boardValidCounts[i]} `
+                    + `(${botGuesses[i]} `
+                    + `${botPegs[i][0]} ${botPegs[i][1]} `
+                    + `${botValidCounts[i]})`);
             }
-            guesses += `, ${boardGuesses[i]} (${botGuesses[i]}` +
-                ((status === 'won' && botGuesses[i] !== boardGuesses[i])
-                    ? ` you beat the bot!)` : `)`);
+            i -= 1;
+            if (status === 'won' && botGuesses[i] !== boardGuesses[i])
+                appLog.insert(`You beat the bot!`);
+            i += 1;
             if (botGuesses.length > boardGuesses.length) {
-                guesses += `, [you ${status}] (${botGuesses[i + 1]})`;
+                appLog.insert(`[ you ${status} ] `
+                    + `(${botGuesses[i]} `
+                    + `${botPegs[i][0]} ${botPegs[i][1]} `
+                    + `${botValidCounts[i]})`);
             }
         }
         ;
-        appLog.prepend(`\nYou ${status} game ${nGames} on turn `
-            + `${turnIndex + 1}. Secret code ${solution}, `
-            + `guesses (bot guesses): ${guesses}. `
-            + `Turn by turn progress: ${turnProgress}.`);
         nGames += 1; // increment the number of games played
     },
     /**
