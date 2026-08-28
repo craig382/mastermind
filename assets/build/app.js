@@ -701,6 +701,7 @@ mm.GameView = Backbone.View.extend({
         u.calculateValidCodeCount(guess, pegs0, turnIndex);
         if (pegs0.b < nHoles)
             u.calculateCodeTree(turnIndex + 1);
+        // log(`boardPegs[${turnIndex}]: ${boardPegs[turnIndex]}`);
         this.handleResults(pegs0);
     },
     /**
@@ -709,7 +710,8 @@ mm.GameView = Backbone.View.extend({
     handleResults: function (pegs) {
         var hint_string = '<p class="hint b">' + pegs.b
             + '</p><p class="hint w">' + pegs.w + '</p><p class="hint c">'
-            + validCodeCount[turnIndex] + '</p>';
+            + validCodeCount[turnIndex]
+            + ' ' + codeTree[turnIndex][boardGuesses[turnIndex]][boardPegs[turnIndex]].length + '</p>';
         this.getCurrentTurnBbm().set('hint_string', hint_string);
         if (pegs.b === 4)
             gameBbm.set('gameStatus', 'won');
