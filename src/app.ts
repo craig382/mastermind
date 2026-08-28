@@ -11,14 +11,8 @@ var code0: string;
 var unpairedCode0: {[color: string]: number} = {};
 var unpairedCode1: {[color: string]: number} = {};
 var allCodes: string[];
-var validCodeCount: number[] = [];
 
 var appLog: AppLog;
-/** guesses contains all the guesses
- * separated by spaces.
- * For outputting to the appLog at the end of the game.
- */
-var guesses: string;
 var codeColors = 'ABCDEF';
 var palletColors = 'ABCDEFX';
 /** The automatically filled in code for the 
@@ -140,7 +134,7 @@ class MastermindUtilities {
         // For hint mode, set the turn's
         // suggested guess to the bot's guess.
         turnsBbm[turnIndex].set('code', botGuesses[turnIndex]);
-
+        log(`initializeCodeTree() executed, solution: ${solution}.`);
     }
 
     calculateCodeTree(turn:number, guessArray?: string[]): void {
@@ -182,9 +176,15 @@ class MastermindUtilities {
             }
             // log(`turn ${turn} guess ${guess} has ${nPegCombos} peg combos.`);
             if (nPegCombos === nValid) {
-                log(`turn ${turn} guess ${guess} is PERFECT.`);
-                botGuesses[turn] = guess;
-                break; // abort building the codeTree for other guesses
+                if (nValid > 2) {
+                    var perfectMsg = botGuesses[turn] ? `YOU` : `The bot`;
+                    perfectMsg += ` found PERFECT guess ${guess} in game ${nGames} turn ${turn + 1} with ${nValid} valid codes remaining.`;
+                    appLog.prepend(perfectMsg);
+                }
+                if (!botGuesses[turn]) {
+                    botGuesses[turn] = guess;
+                    break; // abort building the codeTree for other guesses
+                }
             }
         }
         if (!botGuesses[turn]) {
@@ -200,7 +200,7 @@ class MastermindUtilities {
      * Sets code0 to newCode0 and 
      * calculates the number of black and white pegs.
      * @param code1 The code to compare to code0.
-     * @returns [nBlack, nWhite] The number of black and white pegs.
+     * @returns The number of black and white pegs.
      */
     setCode0AndCalculatePegs(newCode0: string, code1: string): Pegs {
         code0 = newCode0;
@@ -209,8 +209,8 @@ class MastermindUtilities {
 
     /**
      * Calculates the number of black and white pegs.
-     * @param code1 The code to compare to previously set code0.
-     * @returns [nBlack, nWhite] The number of black and white pegs.
+     * @param code1 The code to compare to the previously set code0.
+     * @returns The number of black and white pegs.
      */
     calculatePegs(code1: string): Pegs {
         let pegs: Pegs = { b: 0, w: 0 };
@@ -236,57 +236,6 @@ class MastermindUtilities {
         }
         // log(pegs, unpairedCode0, unpairedCode1);
         return pegs;
-    }
-
-    /**
-     * Calculates the number of valid codes remaining after a guess.
-     * 
-     * Assumes calculateValidCodeCount() has been called 
-     * for all previous turns.
-     * @param guess The guess code to compare to allCodes.
-     * @param gPegs The number of black and white pegs for the guess.
-     * @param gIndex The index of the turn for the guess.
-     */
-    calculateValidCodeCount(guess: string, 
-        gPegs: Pegs, 
-        gIndex: number): void {
-
-        var iMin = 0;
-        var iMax: number;
-        var tempCode: string;
-        var acPegs: Pegs;
-
-        if (gIndex !== turnIndex)
-            throw new Error(`calculateValidCodeCount() called with guessTurnIndex(${gIndex}) !== turnIndex(${turnIndex}).`);
-
-        if (gIndex === 0) {
-            validCodeCount = new Array(nTurns);
-            iMax = allCodes.length - 1;
-            guesses = guess;
-        } else {
-            iMax = validCodeCount[gIndex - 1] - 1;
-            guesses += ' ' + guess;
-        }
-
-        code0 = guess;
-        while (iMin <= iMax) {
-            acPegs = this.calculatePegs(allCodes[iMin]);
-            if (acPegs.b === gPegs.b && acPegs.w === gPegs.w) {
-                // valid code, keep it and move to the next code
-                iMin += 1;
-            } else {
-                // invalid code, swap it with the last valid code
-                tempCode = allCodes[iMax];
-                allCodes[iMax] = allCodes[iMin];
-                allCodes[iMin] = tempCode;
-                iMax -= 1;
-            }
-        }
-        iMax += 1; // iMax is now the valid code count
-        validCodeCount[gIndex] = iMax;
-
-        // log(`calculateValidCodeCount() on turn index ${gIndex} found ${validCodeCount[gIndex]} valid codes.`);
-        // log(`first valid code ${allCodes[0]}, last valid code ${allCodes[validCodeCount[gIndex] - 1]}, and first invalid code ${allCodes[validCodeCount[gIndex]]}`);
     }
 
 }
@@ -878,7 +827,7 @@ mm.GameView = Backbone.View.extend({
 
         u.initializeCodeTree();
 
-        appLog.setTitle('Mastermind Log.');
+        appLog.setTitle(`Mastermind Log.`);
 
         this.render(); // must be last line of initialize()
     },
@@ -995,29 +944,36 @@ mm.GameView = Backbone.View.extend({
         if (status === 'notStarted' || status === 'inPlay') { return; }
 
         var turnProgress: string = allCodes.length.toString();
-        var completedTurns: number = turnIndex + 1;
+        var guesses = 'no guesses';
         // Set next game's opener equal to this game's opener.
         autoOpener = turnsBbm[0].get('code'); 
         solutionBbv.setSolved();
+        $(gameBbv.gameOver_el).text(`you ${status}!`);
         if (status === 'won') {
             turnsBbm.at(turnIndex).set('locked_class', 'correct');
-            $(gameBbv.gameOver_el).text('you won!');
-            completedTurns = turnIndex + 1;
         } else {
             turnsBbm.at(turnIndex).set('locked_class', 'wrong');
             if (status === 'quit') { 
                 turnsBbv.at(turnIndex).hideTurnButton();
-                $(gameBbv.gameOver_el).text('you quit.');
-                completedTurns = turnIndex;
-            } else {
-                $(gameBbv.gameOver_el).text('you lost.');
-                completedTurns = nTurns;
             }
         }
-        if (completedTurns > 0) turnProgress += ' ' 
-            + validCodeCount.slice(0, completedTurns).join(' ');
-        appLog.prepend(`\nYou ${status} game ${nGames} on turn ${turnIndex + 1}. Secret code ${solution}, guesses ${guesses}, turn by turn progress: ${turnProgress}.`);
-
+        if (boardGuesses.length > 0) {
+            turnProgress += ' ' + boardValidCounts.join(' ');
+            guesses = `${boardGuesses[0]} (${botGuesses[0]})`;
+            for (var i = 1; i < boardGuesses.length - 1; i += 1) {
+                guesses += `, ${boardGuesses[i]} (${botGuesses[i]})`;
+            }
+            guesses += `, ${boardGuesses[i]} (${botGuesses[i]}` +
+                ((status === 'won' && botGuesses[i] !== boardGuesses[i]) 
+                ? ` you beat the bot!)` : `)`);
+            if (botGuesses.length > boardGuesses.length) {
+                guesses += `, [you ${status}] (${botGuesses[i + 1]})`;
+            }
+        };
+        appLog.prepend(`\nYou ${status} game ${nGames} on turn ` 
+            +`${turnIndex + 1}. Secret code ${solution}, ` 
+            + `guesses (bot guesses): ${guesses}. `
+            + `Turn by turn progress: ${turnProgress}.`);
         nGames += 1; // increment the number of games played
     },
 
