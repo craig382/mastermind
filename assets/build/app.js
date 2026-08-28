@@ -10,6 +10,24 @@ var allCodes;
 var appLog;
 var codeColors = 'ABCDEF';
 var palletColors = 'ABCDEFX';
+/** When validCountHints is true, each turn shows
+ * the number of valid codes remaining on the board
+ * to the right of the black and white peg display.
+ */
+var validCountHints = true;
+/** When botGuessHints is true, the bot fills
+ * in its suggestion for the next guess
+ * (which can be overridden by the player).
+ * Note that the bot's suggestion for the first
+ * move takes precedence over the auto opener guess.
+ */
+var botGuessHints = false;
+/** When autoOpenerMode is true, the first guess
+ * is automatically filled in with the
+ * opener from the previous game (or the default
+ * auto opener for the first game).
+ */
+var autoOpenerMode = true;
 /** The automatically filled in code for the
  * first guess. which he player can override. */
 var autoOpener = 'AABB';
@@ -104,7 +122,8 @@ class MastermindUtilities {
         this.calculateCodeTree(0, ['AABB', 'ABBC', 'ABCD']);
         // For hint mode, set the turn's
         // suggested guess to the bot's guess.
-        turnsBbm[turnIndex].set('code', botGuesses[turnIndex]);
+        if (botGuessHints)
+            turnsBbm[turnIndex].set('code', botGuesses[turnIndex]);
         log(`initializeCodeTree() executed, solution: ${solution}.`);
     }
     calculateCodeTree(turn, guessArray) {
@@ -631,7 +650,8 @@ mm.GameView = Backbone.View.extend({
         this.model.set('gameStatus', 'inPlay');
         // newGame stuff belongs here, not in newGame.
         // set the opener for auto opener mode
-        turnsBbm[turnIndex].set('code', autoOpener);
+        if (autoOpenerMode)
+            turnsBbm[turnIndex].set('code', autoOpener);
         u.initializeCodeTree();
         appLog.setTitle(`Mastermind (${allCodes.length} possible codes)`);
         // merge the previous game log into the bottom of the log
@@ -694,20 +714,21 @@ mm.GameView = Backbone.View.extend({
     */
     handleResults: function (pegs) {
         var hint_string = '<p class="hint b">' + pegs.b
-            + '</p><p class="hint w">' + pegs.w + '</p><p class="hint c">'
-            + codeTree[turnIndex][boardGuesses[turnIndex]][boardPegs[turnIndex]].length + '</p>';
+            + '</p><p class="hint w">' + pegs.w + '</p>';
+        if (validCountHints)
+            hint_string += '<p class="hint c">'
+                + codeTree[turnIndex][boardGuesses[turnIndex]][boardPegs[turnIndex]].length + '</p>';
         this.getCurrentTurnBbm().set('hint_string', hint_string);
         if (pegs.b === 4)
             gameBbm.set('gameStatus', 'won');
         else if (turnIndex === (nTurns - 1))
             gameBbm.set('gameStatus', 'lost');
         else {
-            // activate the next turn
+            // initialize the next turn
             turnIndex += 1; // increment the turn index
             u.calculateCodeTree(turnIndex);
-            // For hint mode, set the turn's
-            // suggested guess to the bot's guess.
-            turnsBbm[turnIndex].set('code', botGuesses[turnIndex]);
+            if (botGuessHints)
+                turnsBbm[turnIndex].set('code', botGuesses[turnIndex]);
             turnsBbv[turnIndex].activateRow();
         }
     },
