@@ -161,7 +161,7 @@ class MastermindUtilities {
         if (!botGuesses[turn]) {
             botGuesses[turn] = maxPegComboGuess;
         }
-        log(`executed calculateCodeTree(turn: ${turn}, guessArray: ${guessArrayIn}), botGuesses[${turn}]: ${botGuesses[turn]}.`);
+        // log(`executed calculateCodeTree(turn: ${turn}, guessArray: ${guessArrayIn}), botGuesses[${turn}]: ${botGuesses[turn]}.`);
         // log(codeTree);
     }
     /**
@@ -713,7 +713,6 @@ mm.GameView = Backbone.View.extend({
         var pegs0 = u.setCode0AndCalculatePegs(solution, guess);
         boardPegs[turnIndex] = AsPegCombo(pegs0);
         u.calculateCodeTree(turnIndex, [guess]);
-        u.calculateValidCodeCount(guess, pegs0, turnIndex);
         boardValidCounts[turnIndex] = codeTree[turnIndex][boardGuesses[turnIndex]][boardPegs[turnIndex]].length;
         this.handleResults(pegs0);
     },
@@ -723,8 +722,7 @@ mm.GameView = Backbone.View.extend({
     handleResults: function (pegs) {
         var hint_string = '<p class="hint b">' + pegs.b
             + '</p><p class="hint w">' + pegs.w + '</p><p class="hint c">'
-            + validCodeCount[turnIndex]
-            + ' ' + codeTree[turnIndex][boardGuesses[turnIndex]][boardPegs[turnIndex]].length + '</p>';
+            + codeTree[turnIndex][boardGuesses[turnIndex]][boardPegs[turnIndex]].length + '</p>';
         this.getCurrentTurnBbm().set('hint_string', hint_string);
         if (pegs.b === 4)
             gameBbm.set('gameStatus', 'won');
