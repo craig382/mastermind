@@ -40,11 +40,12 @@ var u;
  * codeTree is the data structure acted upon by the
  * calculateCodeTree function.*/
 var codeTree = {};
-/** botGuess[thisTurn] is the bot's guess for this turn
+/** botGuesses[thisTurn] is the bot's guess for this turn
  *  given the human's guesses prior to this turn. */
 var botGuesses = [];
 var boardGuesses = [];
 var boardPegs = [];
+var boardValidCounts = [];
 // Backbone.js models Bbm and views Bbv
 var gameBbm;
 var gameBbv;
@@ -98,7 +99,14 @@ class MastermindUtilities {
      */
     initializeCodeTree() {
         codeTree = {};
+        botGuesses = [];
+        boardGuesses = [];
+        boardPegs = [];
+        boardValidCounts = [];
         u.calculateCodeTree(0, ['AABB', 'ABBC', 'ABCD']);
+        // For hint mode, set the turn's
+        // suggested guess to the bot's guess.
+        turnsBbm[turnIndex].set('code', botGuesses[turnIndex]);
     }
     calculateCodeTree(turn, guessArray) {
         log(`execute calculateCodeTree(turn: ${turn}, guessArray: ${guessArray ? guessArray.join(' ') : 'undefined'}).`);
@@ -108,7 +116,6 @@ class MastermindUtilities {
         var pc = '00';
         if (turn === 0) {
             validCodesIn = allCodes;
-            botGuesses = [];
         }
         else {
             if (!codeTree[turn - 1][boardGuesses[turn - 1]]) {
@@ -126,7 +133,9 @@ class MastermindUtilities {
             codeTree[turn] = {};
         for (var g = 0; g < guessArray.length; g += 1) {
             var guess = guessArray[g];
-            if (!codeTree[turn][guess])
+            if (codeTree[turn][guess])
+                break;
+            else
                 codeTree[turn][guess] = {};
             code0 = guess;
             for (var v = 0; v < validCodesIn.length; v += 1) {
@@ -136,6 +145,7 @@ class MastermindUtilities {
                 // Push validCodesIn[v] onto the codeTree.
                 codeTree[turn][guess][pc].push(validCodesIn[v]);
             }
+            // Completed building codeTree for this guess.
             nPegCombos = Object.keys(codeTree[turn][guess]).length;
             if (nPegCombos > maxPegCombos) {
                 maxPegCombos = nPegCombos;
@@ -144,9 +154,14 @@ class MastermindUtilities {
             // log(`turn ${turn} guess ${guess} has ${nPegCombos} peg combos.`);
             if (nPegCombos === nValid) {
                 log(`turn ${turn} guess ${guess} is PERFECT.`);
+                botGuesses[turn] = guess;
+                break; // abort building the codeTree for other guesses
             }
         }
-        log(`calculateCodeTree executed for turn ${turn}, maxPegComboGuess: ${maxPegComboGuess}, maxPegCombos: ${maxPegCombos}.`);
+        if (!botGuesses[turn]) {
+            botGuesses[turn] = maxPegComboGuess;
+        }
+        log(`calculateCodeTree executed for turn ${turn}, botGuesses[${turn}]: ${botGuesses[turn]}.`);
         log(codeTree);
     }
     /**
@@ -695,13 +710,12 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     checkGuess: function (guess) {
-        var pegs0 = u.setCode0AndCalculatePegs(solution, guess);
         boardGuesses[turnIndex] = guess;
+        var pegs0 = u.setCode0AndCalculatePegs(solution, guess);
         boardPegs[turnIndex] = AsPegCombo(pegs0);
+        u.calculateCodeTree(turnIndex, [guess]);
         u.calculateValidCodeCount(guess, pegs0, turnIndex);
-        if (pegs0.b < nHoles)
-            u.calculateCodeTree(turnIndex + 1);
-        // log(`boardPegs[${turnIndex}]: ${boardPegs[turnIndex]}`);
+        boardValidCounts[turnIndex] = codeTree[turnIndex][boardGuesses[turnIndex]][boardPegs[turnIndex]].length;
         this.handleResults(pegs0);
     },
     /**
@@ -717,11 +731,13 @@ mm.GameView = Backbone.View.extend({
             gameBbm.set('gameStatus', 'won');
         else if (turnIndex === (nTurns - 1))
             gameBbm.set('gameStatus', 'lost');
-        else { // activate the next turn
+        else {
+            // activate the next turn
             turnIndex += 1; // increment the turn index
-            // set the next turn's code to the first valid code
-            // for help mode or hint mode
-            turnsBbm[turnIndex].set('code', allCodes[0]);
+            u.calculateCodeTree(turnIndex);
+            // For hint mode, set the turn's
+            // suggested guess to the bot's guess.
+            turnsBbm[turnIndex].set('code', botGuesses[turnIndex]);
             turnsBbv[turnIndex].activateRow();
         }
     },
