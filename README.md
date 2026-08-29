@@ -18,6 +18,9 @@ A web app to play mastermind. Written in Backbone.js.
 8. Created Bot Guess Hints that can be enabled or disabled. When enabled, the bot fills in its suggestion for the next guess. The player can accept or override this suggestion. Note that Bot Guess Hints take precedence over Auto Opener Mode.
 
 ## Future Changes?:
+- Eliminate SolutionView.
+- Make counts on/off act on all past turns instantly.
+- Make bot help on/off act on the active turn instantly.
 - Add a timer and show game play time in the "you won" message.
 - Add "Stats" to the bottom of the screen showing: reset stats button, number of games played, how many games lost, win percentage, average number of guesses to win a game (excludes lost games), guess distribution, current winning streak, max winning streak, time distribution, average time to win a game (excludes lost games), etc.
 - Add settings to the bottom of the screen: number of colors, max number of turns, length of code, repeat colors allowed in secret code, blanks allowed in guess, row hint toggle, color palette hint toggle, etc.
