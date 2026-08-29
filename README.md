@@ -18,6 +18,7 @@ A web app to play mastermind. Written in Backbone.js.
 8. Created Bot Guess Hints that can be enabled or disabled. When enabled, the bot fills in its suggestion for the next guess. The player can accept or override this suggestion. Note that Bot Guess Hints take precedence over Auto Opener Mode.
 
 ## Future Changes?:
+- There is a bug with the pallet buttons. It's almost as if there is a new extra button under each button for each game played. First game, a single click activates the button once. Second game, a single click of the button activates the button twice. Third game, a single click of the button activates the button 3 times. Etc.
 - Eliminate SolutionView.
 - Make counts on/off act on all past turns instantly.
 - Make bot help on/off act on the active turn instantly.

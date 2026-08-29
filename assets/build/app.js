@@ -66,8 +66,6 @@ var gameBbv;
 var turnsBbm;
 var turnsBbv;
 var currentTurnBbm;
-var solutionBbm;
-var solutionBbv;
 var palletBbm;
 var palletBbv;
 function AsPegCombo(pegs) {
@@ -323,10 +321,6 @@ function createTurnView(model) {
     var TurnViewClass = required(mm.TurnView);
     return new TurnViewClass({ model: model });
 }
-function createSolutionView(model) {
-    var SolutionViewClass = required(mm.SolutionView);
-    return new SolutionViewClass({ model: model });
-}
 function createAllPiecesView() {
     var AllPiecesViewClass = required(mm.AllPiecesView);
     return new AllPiecesViewClass();
@@ -356,7 +350,6 @@ mm.Turn = Backbone.Model.extend({
         alt_class: '', // presentation
         disabled_class: 'disabled', // for the guess button
         locked_class: 'locked',
-        reveal_text: 'quit' // for the solution view
     }
 });
 /**
@@ -493,67 +486,6 @@ mm.TurnView = Backbone.View.extend({
         this.showTurnButton();
     }
 });
-mm.SolutionView = Backbone.View.extend({
-    tagName: 'li',
-    template: 'script#solutionView',
-    code_el: 'span#code',
-    events: {
-        'click input#reveal': 'revealClicked'
-    },
-    /**
-     * mm.SolutionView
-     */
-    initialize: function () {
-        solutionBbv = this;
-        this.newSolution();
-        this.model.on('change:locked_class', this.render, this);
-    },
-    /**
-     * mm.SolutionView
-     */
-    newSolution: function () {
-        var randomColor;
-        solution = '';
-        for (var i = 0; i < nHoles; i += 1) {
-            var randomIndex = Math.floor(Math.random() * nColors);
-            randomColor = codeColors[randomIndex];
-            solution += randomColor;
-        }
-        // log('newSolution:', solution);
-        solutionBbm.set({ code: solution });
-    },
-    /**
-     * mm.SolutionView
-     */
-    render: function () {
-        var solutionTemplate = $(this.template).html();
-        var solutionHtml = _.template(solutionTemplate, this.model.toJSON());
-        this.$el.html(solutionHtml);
-        return this.el;
-    },
-    /**
-     * mm.SolutionView
-     */
-    setSolved: function () {
-        this.model.set('reveal_text', 'new game');
-        $(palletBbv.play_el).val('new game');
-        this.model.set('locked_class', ''); // unhides the solution pieces
-    },
-    /**
-     * Reveal or start a new game action from the solution view.
-     *
-     * mm.SolutionView
-     */
-    revealClicked: function (e) {
-        e.preventDefault();
-        if (solutionBbm.get('reveal_text') === 'quit') {
-            gameBbv.quit();
-        }
-        else {
-            gameBbv.newGame();
-        }
-    }
-});
 /**
  * mm.AllPieces model for mm.AllPiecesView.
  */
@@ -639,7 +571,7 @@ mm.AllPiecesView = Backbone.View.extend({
     openerClicked: function (e) {
         e.preventDefault();
         var buttonText = $(e.currentTarget).val();
-        // log('openerClicked, buttonText:', buttonText);
+        log('openerClicked, before toggle buttonText:', buttonText);
         if (buttonText === 'opener off') {
             $(e.currentTarget).val('opener on');
             autoOpenerMode = true;
@@ -655,7 +587,7 @@ mm.AllPiecesView = Backbone.View.extend({
     countsClicked: function (e) {
         e.preventDefault();
         var buttonText = $(e.currentTarget).val();
-        // log('countsClicked, buttonText:', buttonText);
+        log('countsClicked, before toggle buttonText:', buttonText);
         if (buttonText === 'counts off') {
             $(e.currentTarget).val('counts on');
             validCountHints = true;
@@ -672,7 +604,7 @@ mm.AllPiecesView = Backbone.View.extend({
     botClicked: function (e) {
         e.preventDefault();
         var buttonText = $(e.currentTarget).val();
-        // log('botClicked, buttonText:', buttonText);
+        log('botClicked, before toggle buttonText:', buttonText);
         if (buttonText === 'bot help off') {
             $(e.currentTarget).val('bot help on');
             botGuessHints = true;
@@ -690,7 +622,7 @@ mm.AllPiecesView = Backbone.View.extend({
     playClicked: function (e) {
         e.preventDefault();
         var buttonText = $(e.currentTarget).val();
-        // log('playClicked, buttonText:', buttonText);
+        log('playClicked, before toggle buttonText:', buttonText);
         if (buttonText === 'quit') {
             $(e.currentTarget).val('new game');
             gameBbv.quit();
@@ -729,8 +661,6 @@ mm.GameView = Backbone.View.extend({
     */
     initialize: function () {
         gameBbv = this;
-        solutionBbm = createTurnModel({ locked_class: 'hidden' });
-        createSolutionView(solutionBbm);
         createAllPiecesView();
         this.model.on('change:gameStatus', this.gameOver, this);
         this.resetBoard(); // START
@@ -738,6 +668,7 @@ mm.GameView = Backbone.View.extend({
         // A future change can keep this as notStarted until user clicks New Game.
         this.model.set('gameStatus', 'inPlay');
         // newGame stuff belongs here, not in newGame.
+        this.newSolution();
         // set the opener for auto opener mode
         if (autoOpenerMode)
             turnsBbm[turnIndex].set('code', autoOpener);
@@ -780,12 +711,25 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     render: function () {
-        var html_els_array = [this.header_template, this.gameOver_template, solutionBbv.render()];
+        var html_els_array = [this.header_template, this.gameOver_template];
         for (var i = 0; i < nTurns; i += 1) {
             var turnV = turnsBbv[i];
             html_els_array.push(turnV.render());
         }
         $(this.board_el).html(html_els_array);
+    },
+    /**
+     * mm.GameView
+     */
+    newSolution: function () {
+        var randomColor;
+        solution = '';
+        for (var i = 0; i < nHoles; i += 1) {
+            var randomIndex = Math.floor(Math.random() * nColors);
+            randomColor = codeColors[randomIndex];
+            solution += randomColor;
+        }
+        // log('newSolution:', solution);
     },
     /**
     * this = mm.GameView
@@ -851,7 +795,8 @@ mm.GameView = Backbone.View.extend({
         }
         // Set next game's opener equal to this game's opener.
         autoOpener = turnsBbm[0].get('code');
-        solutionBbv.setSolved();
+        // set the play button to 'new game'
+        $(palletBbv.play_el).val('new game');
         $(gameBbv.gameOver_el).text(`you ${status}!`);
         if (status === 'won') {
             turnsBbm.at(turnIndex).set('locked_class', 'correct');

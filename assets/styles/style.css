@@ -18,9 +18,9 @@ body {
 div#header {
 	width:auto;
 	padding:5px 0;
-	font-size:2.5em;
+	font-size:2em;
 	text-align: center;
-	background-color: #222;
+	background-color: #000;
 }
 h1 {
 	font:bold 4em Helvetica;
@@ -224,15 +224,6 @@ p.c {
 }
 span.hint.done { /* unused */
 	color:#FFF;
-}
-div.turn#solution {
-	background-color: #000;
-	border:1px #555 solid;
-}
-div.turn#solution div.pieces.hidden { /* solution */
-	display: none;
-	/* display: flex; */
-
 }
 
 
