@@ -267,6 +267,20 @@ class MastermindUtilities {
         return pegs;
     }
 
+    /** updateTurnHints() updates only the current turn 
+     * hints if allTurns is false, otherwise updates 
+     * all turn hints. */
+    updateTurnHints(allTurns = false): void {
+        var minTurn = allTurns ? 0 : boardPegs.length - 1;
+        for (var t = minTurn; t < boardPegs.length; t += 1) {
+            var hint_string: string = '<p class="hint b">' + boardPegs[t][0] 
+                + '</p><p class="hint w">' + boardPegs[t][1] + '</p>';
+            if (validCountHints) hint_string += '<p class="hint c">' 
+                + codeTree[t][boardGuesses[t]][boardPegs[t]].length + '</p>';
+            turnsBbm[t].set('hint_string', hint_string);
+        }
+    }
+
 }
 
 class AppLog {
@@ -854,6 +868,7 @@ mm.AllPiecesView = Backbone.View.extend({
             $(e.currentTarget).val('counts off');
             validCountHints = false;
         }
+        u.updateTurnHints(true);
     },
 
     /**
@@ -1008,12 +1023,7 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     handleResults: function (pegs: Pegs): void {
-        var hint_string: string = '<p class="hint b">' + pegs.b 
-            + '</p><p class="hint w">' + pegs.w + '</p>';
-        if (validCountHints) hint_string += '<p class="hint c">' 
-            + codeTree[turnIndex][boardGuesses[turnIndex]][boardPegs[turnIndex]].length + '</p>';
-        this.getCurrentTurnBbm().set('hint_string', hint_string);
-
+        u.updateTurnHints();
         if (pegs.b === 4) gameBbm.set('gameStatus', 'won');
         else if (turnIndex === (nTurns - 1)) gameBbm.set('gameStatus', 'lost');
         else { 
