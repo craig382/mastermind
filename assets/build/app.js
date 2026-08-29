@@ -342,7 +342,7 @@ mm.Turn = Backbone.Model.extend({
         alt_class: '', // presentation
         disabled_class: 'disabled', // for the guess button
         locked_class: 'locked',
-        button_text: 'quit' // for the solution view
+        reveal_text: 'quit' // for the solution view
     }
 });
 /**
@@ -521,7 +521,7 @@ mm.SolutionView = Backbone.View.extend({
      * mm.SolutionView
      */
     setSolved: function () {
-        this.model.set('button_text', 'New Game');
+        this.model.set('reveal_text', 'New Game');
         this.model.set('locked_class', '');
     },
     /**
@@ -531,7 +531,7 @@ mm.SolutionView = Backbone.View.extend({
      */
     revealClicked: function (e) {
         e.preventDefault();
-        if (solutionBbm.get('button_text') === 'quit') {
+        if (solutionBbm.get('reveal_text') === 'quit') {
             gameBbv.quit();
         }
         else {
@@ -545,6 +545,11 @@ mm.SolutionView = Backbone.View.extend({
 mm.AllPieces = Backbone.Model.extend({
     defaults: {
         color_class: 'X'
+        // color_class: 'X',
+        // opener_text: 'opener on',
+        // counts_text: 'counts off',
+        // bot_text: 'bot help off',
+        // reveal_text: 'quit'
     },
     initialize: function () {
         palletBbm = this;
@@ -557,10 +562,18 @@ mm.AllPieces = Backbone.Model.extend({
 mm.AllPiecesView = Backbone.View.extend({
     el: 'div#allPieces',
     cur_piece_el: 'div#current_piece',
+    opener_el: 'input#opener',
+    counts_el: 'input#counts',
+    bot_el: 'input#bot',
+    play_el: 'input#play',
     piece_template: '<div class="piece <%= color_class %>"><%= color_class %></div>',
     nub_template: '<div id="current_piece" class="piece <%= color_class %>"><%= color_class %></div>',
     events: {
-        'click div.piece': 'nubClicked'
+        'click div.piece': 'nubClicked',
+        'click input#opener': 'openerClicked',
+        'click input#counts': 'countsClicked',
+        'click input#bot': 'botClicked',
+        'click input#play': 'playClicked'
     },
     /**
      * this = mm.AllPiecesView
@@ -570,7 +583,6 @@ mm.AllPiecesView = Backbone.View.extend({
         this.model = createAllPiecesModel();
         this.model.on('change:color_class', this.render, this);
         this.render(); // reset the piece div
-        // this.resetNub(); // reset the nub to X
     },
     /**
      * this = mm.AllPiecesView
@@ -610,6 +622,70 @@ mm.AllPiecesView = Backbone.View.extend({
      */
     resetNub: function () {
         this.setNub('X');
+    },
+    /**
+     * this = mm.AllPiecesView
+     */
+    openerClicked: function (e) {
+        e.preventDefault();
+        var buttonText = $(e.currentTarget).val();
+        // log('openerClicked, buttonText:', buttonText, e);
+        if (buttonText === 'opener off') {
+            $(e.currentTarget).val('opener on');
+            autoOpenerMode = true;
+        }
+        else {
+            $(e.currentTarget).val('opener off');
+            autoOpenerMode = false;
+        }
+    },
+    /**
+     * this = mm.AllPiecesView
+     */
+    countsClicked: function (e) {
+        e.preventDefault();
+        var buttonText = $(e.currentTarget).val();
+        // log('countsClicked, buttonText:', buttonText, e);
+        if (buttonText === 'counts off') {
+            $(e.currentTarget).val('counts on');
+            validCountHints = true;
+        }
+        else {
+            $(e.currentTarget).val('counts off');
+            validCountHints = false;
+        }
+    },
+    /**
+     * this = mm.AllPiecesView
+     */
+    botClicked: function (e) {
+        e.preventDefault();
+        var buttonText = $(e.currentTarget).val();
+        // log('botClicked, buttonText:', buttonText, e);
+        if (buttonText === 'bot help off') {
+            $(e.currentTarget).val('bot help on');
+            botGuessHints = true;
+        }
+        else {
+            $(e.currentTarget).val('bot help off');
+            botGuessHints = false;
+        }
+    },
+    /**
+     * this = mm.AllPiecesView
+     */
+    playClicked: function (e) {
+        e.preventDefault();
+        var buttonText = $(e.currentTarget).val();
+        // log('playClicked, buttonText:', buttonText, e);
+        if (buttonText === 'quit') {
+            $(e.currentTarget).val('new game');
+            gameBbv.quit();
+        }
+        else {
+            $(e.currentTarget).val('quit');
+            gameBbv.newGame();
+        }
     }
 });
 /**

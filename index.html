@@ -27,6 +27,12 @@
             <div class="piece E">E</div>
             <div class="piece F">F</div>
         </div>
+        <div id="buttons">
+            <input id="opener" type="submit" value="opener on"/>
+            <input id="counts" type="submit" value="counts off"/>
+            <input id="bot" type="submit" value="bot help off"/>
+            <input id="play" type="submit" value="quit"/>
+        </div>
     </div>
     <div id="appLog">
         <div id="title"></div>
@@ -54,8 +60,8 @@
                     <div class="piece <%= c %>" id="<%= i %>"><%= c %></div>
                 <% }); %>
             </div>
-            <span class="hint"><%= hint_string %></span> 
-            <input id="reveal" type="submit" value="<%= button_text %>"/>
+            <span class="hint"><%= hint_string %></span>
+            <input id="reveal" type="submit" value="<%= reveal_text %>"/>
         </div>
     </script>
 
