@@ -418,6 +418,7 @@ type AllPiecesViewInstance = {
     setNub(color_class: string): void;
     getNub(): string;
     resetNub(): void;
+    play_el: Element;
 };
 
 type SolutionViewInstance = {
@@ -441,7 +442,7 @@ type ViewEvent = Event;
 type LockedClass = '' | 'active' | 'locked' | 'frozen' | 'correct' | 'wrong' | 'hidden';
 type DisabledClass = '' | 'hidden' | 'disabled';
 type GuessMark = 'x' | 'z';
-type ButtonText = 'quit' | 'New Game';
+type ButtonText = 'quit' | 'new game';
 type GameStatus = 'notStarted' | 'inPlay' | 'won' | 'quit' | 'lost';
 
 type ViewModelOption<TModel> = {
@@ -724,8 +725,9 @@ mm.SolutionView = Backbone.View.extend({
      * mm.SolutionView
      */
     setSolved: function (): void {
-        this.model.set('reveal_text', 'New Game');
-        this.model.set('locked_class', '');
+        this.model.set('reveal_text', 'new game');
+        $(palletBbv.play_el).val('new game');
+        this.model.set('locked_class', ''); // unhides the solution pieces
     },
 
     /**
@@ -749,11 +751,6 @@ mm.SolutionView = Backbone.View.extend({
 mm.AllPieces = Backbone.Model.extend({ 
     defaults: {
         color_class: 'X'
-        // color_class: 'X',
-        // opener_text: 'opener on',
-        // counts_text: 'counts off',
-        // bot_text: 'bot help off',
-        // reveal_text: 'quit'
     },
     initialize: function (): void {
         palletBbm = this;
@@ -844,11 +841,11 @@ mm.AllPiecesView = Backbone.View.extend({
     openerClicked: function (e: ViewEvent): void {
         e.preventDefault();
         var buttonText: string = $(e.currentTarget).val();
-        log('openerClicked, buttonText:', buttonText);
+        // log('openerClicked, buttonText:', buttonText);
         if (buttonText === 'opener off') {
             $(e.currentTarget).val('opener on');
             autoOpenerMode = true;
-        } else {
+        } else if (buttonText === 'opener on') {
             $(e.currentTarget).val('opener off');
             autoOpenerMode = false;
         }
@@ -860,11 +857,11 @@ mm.AllPiecesView = Backbone.View.extend({
     countsClicked: function (e: ViewEvent): void {
         e.preventDefault();
         var buttonText: string = $(e.currentTarget).val();
-        log('countsClicked, buttonText:', buttonText);
+        // log('countsClicked, buttonText:', buttonText);
         if (buttonText === 'counts off') {
             $(e.currentTarget).val('counts on');
             validCountHints = true;
-        } else {
+        } else if (buttonText === 'counts on') {
             $(e.currentTarget).val('counts off');
             validCountHints = false;
         }
@@ -877,12 +874,12 @@ mm.AllPiecesView = Backbone.View.extend({
     botClicked: function (e: ViewEvent): void {
         e.preventDefault();
         var buttonText: string = $(e.currentTarget).val();
-        log('botClicked, buttonText:', buttonText);
+        // log('botClicked, buttonText:', buttonText);
         if (buttonText === 'bot help off') {
             $(e.currentTarget).val('bot help on');
             botGuessHints = true;
             turnsBbm[turnIndex].set('code', botGuesses[turnIndex]);
-        } else {
+        } else if (buttonText === 'bot help on') {
             $(e.currentTarget).val('bot help off');
             botGuessHints = false;
             turnsBbm[turnIndex].set('code', 'XXXX');
@@ -895,11 +892,11 @@ mm.AllPiecesView = Backbone.View.extend({
     playClicked: function (e: ViewEvent): void {
         e.preventDefault();
         var buttonText: string = $(e.currentTarget).val();
-        log('playClicked, buttonText:', buttonText);
+        // log('playClicked, buttonText:', buttonText);
         if (buttonText === 'quit') {
             $(e.currentTarget).val('new game');
             gameBbv.quit();
-        } else {
+        } else if (buttonText === 'new game') {
             $(e.currentTarget).val('quit');
             gameBbv.newGame();
         }
