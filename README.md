@@ -21,6 +21,7 @@ A web app to play mastermind. Written in Backbone.js.
 - Eliminate SolutionView.
 - Make counts on/off act on all past turns instantly.
 - Make bot help on/off act on the active turn instantly.
+- Have the bot find all PERFECT guesses (not just the first one) and log them all, too.
 - Add a timer and show game play time in the "you won" message.
 - Add "Stats" to the bottom of the screen showing: reset stats button, number of games played, how many games lost, win percentage, average number of guesses to win a game (excludes lost games), guess distribution, current winning streak, max winning streak, time distribution, average time to win a game (excludes lost games), etc.
 - Add settings to the bottom of the screen: number of colors, max number of turns, length of code, repeat colors allowed in secret code, blanks allowed in guess, row hint toggle, color palette hint toggle, etc.
