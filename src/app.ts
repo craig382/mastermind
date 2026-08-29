@@ -202,7 +202,7 @@ class MastermindUtilities {
             if (nPegCombos === nValid) {
                 if (nValid > 2) {
                     var perfectMsg = botGuesses[turn] ? `YOU` : `The bot`;
-                    perfectMsg += ` found PERFECT guess ${guess} in game ${nGames} turn ${turn + 1} with ${nValid} valid codes remaining.`;
+                    perfectMsg += ` found PERFECT guess ${guess} on turn ${turn + 1} with ${nValid} valid codes remaining.`;
                     appLog.insert(perfectMsg);
                 }
                 if (!botGuesses[turn]) {
