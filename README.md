@@ -12,19 +12,16 @@ A web app to play mastermind. Written in Backbone.js.
 2. The player can pick a color from the color palette or past turns.
 3. Changed the appearance and location of the end game "you won" or "you lost" message. It no longer obscures the player's completed game.
 4. Color palette improvements. Moved the current color selected nub into the color palette. And added a "remove color" nub to the color palette. The current color nub now keeps its color until it is changed to a new color which makes placing duplicate colors easier. (The old behavior was that the current color automatically reset to no color after each color placement.) Also, the color palette is now at the bottom of the board (instead of the bottom of the screen).
-5. Created an appLog at the bottom of the screen for keeping game history and for debugging messages, etc.
+5. Created an appLog at the bottom of the screen for keeping game history.
+6. Created Valid Count Hints that can be enabled or disabled. A Valid Count Hint displays the number of valid codes remaining to the right of the black and white peg display.
+7. Created Auto Opener Mode that can be enabled or disabled. When enabled, the first guess is automatically filled in with the opener from the previous game (or the default auto opener for the first game).
+8. Created Bot Guess Hints that can be enabled or disabled. When enabled, the bot fills in its suggestion for the next guess. The player can accept or override this suggestion. Note that Bot Guess Hints take precedence over Auto Opener Mode.
 
 ## Future Changes?:
-- allCodes[0..1295] array with all possible 1296 combos.
-- validCodeCount[turn 0 .. turn 9].
-- let iMax = (iTurn === 0 ? allCodes.length : validCodeCount[iTurn - 1]) - 1;
-- Guess Suggestion Mode automatically fills in a guess suggestion for the active turn (suggestion of ABBC for turn 0 or allCodes[0] for any other turn). The user then gets to accept or modify the suggestion before hitting the GUESS button.
 - Add a timer and show game play time in the "you won" message.
 - Add "Stats" to the bottom of the screen showing: reset stats button, number of games played, how many games lost, win percentage, average number of guesses to win a game (excludes lost games), guess distribution, current winning streak, max winning streak, time distribution, average time to win a game (excludes lost games), etc.
 - Add settings to the bottom of the screen: number of colors, max number of turns, length of code, repeat colors allowed in secret code, blanks allowed in guess, row hint toggle, color palette hint toggle, etc.
-- Add row hint that show number of remaining possible solutions on past turns.
 - Add color palette hint that shows number of colors that the secret code contains.
-- Add a bot that gives analysis of the top 5 remaining guesses for each turn given the player's turn history up to that point. The bot should also give its solution from the start (if the bot were to play the game by itself, how many moves it required in total and what each of those moves were, and how many possible solutions were left after each of its moves). Of course, the bot is not allowed to know the secret code. It is only allowed to make guesses based on the black and white peg feedback it receives.
 - Add row hints on frozen rows that every time you change the code on the active row, it shows the black and white peg results vs the active code (only when each differs from the true black and white peg (vs the secret code) row hint).
 
 ## Development Setup After Conversion to TypeScript
