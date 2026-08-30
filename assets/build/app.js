@@ -14,7 +14,7 @@ var palletColors = 'ABCDEFX';
  * the number of valid codes remaining on the board
  * to the right of the black and white peg display.
  */
-var validCountHints = true;
+var validCountHints = false;
 /** When botGuessHints is true, the bot fills
  * in its suggestion for the next guess
  * (which can be overridden by the player).
@@ -85,6 +85,7 @@ var mm = {
         appLog = new AppLog();
         u = new MastermindUtilities();
         u.generateAllCodes();
+        createAllPiecesView();
         createGameView(createGameModel());
         log('mm.init() executed');
     }
@@ -513,10 +514,6 @@ mm.AllPiecesView = Backbone.View.extend({
     events: {
         'click div.piece': 'nubClicked',
         'click #buttons input': 'buttonClicked'
-        // 'click input#opener': 'openerClicked',
-        // 'click input#counts': 'countsClicked',
-        // 'click input#bot': 'botClicked',
-        // 'click input#play': 'playClicked'
     },
     /** this = mm.AllPiecesView */
     initialize: function () {
@@ -524,6 +521,7 @@ mm.AllPiecesView = Backbone.View.extend({
         this.model = createAllPiecesModel();
         this.model.on('change:color_class', this.render, this);
         this.render(); // reset the piece div
+        log(`mm.AllPiecesView.initialize() executed.`);
     },
     /** this = mm.AllPiecesView */
     render: function () {
@@ -532,13 +530,11 @@ mm.AllPiecesView = Backbone.View.extend({
     },
     /** this = mm.AllPiecesView */
     buttonClicked: function (e) {
-        // e.preventDefault();
         var id = $(e.currentTarget).attr('id');
         var oldText = $(e.currentTarget).val();
         var newText = '';
         switch (id) {
             case 'opener':
-                this.openerClicked(e);
                 if (autoOpenerMode) {
                     newText = 'opener off';
                     autoOpenerMode = false;
@@ -583,7 +579,7 @@ mm.AllPiecesView = Backbone.View.extend({
                 break;
         }
         $(e.currentTarget).val(newText);
-        log(`${id} buttonClicked executed with text changed from "${oldText}" to "${newText}".`);
+        // log(`${id} buttonClicked executed with text changed from "${oldText}" to "${newText}".`);
     },
     /**
      * User clicked a color in the palette.
@@ -642,7 +638,7 @@ mm.GameView = Backbone.View.extend({
     */
     initialize: function () {
         gameBbv = this;
-        createAllPiecesView();
+        // createAllPiecesView();
         this.model.on('change:gameStatus', this.gameOver, this);
         this.resetBoard(); // START
         // Keep current behavior: game begins immediately for now.
@@ -657,6 +653,7 @@ mm.GameView = Backbone.View.extend({
         appLog.setTitle(`Mastermind (${allCodes.length} possible codes)`);
         // merge the previous game log into the bottom of the log
         appLog.merge(`\nGame ${nGames}`);
+        palletBbv.resetNub();
         this.render(); // must be last line of initialize()
     },
     /**
