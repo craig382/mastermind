@@ -532,24 +532,58 @@ mm.AllPiecesView = Backbone.View.extend({
     },
     /** this = mm.AllPiecesView */
     buttonClicked: function (e) {
+        // e.preventDefault();
         var id = $(e.currentTarget).attr('id');
         var oldText = $(e.currentTarget).val();
         var newText = '';
         switch (id) {
             case 'opener':
                 this.openerClicked(e);
+                if (autoOpenerMode) {
+                    newText = 'opener off';
+                    autoOpenerMode = false;
+                }
+                else {
+                    newText = 'opener on';
+                    autoOpenerMode = true;
+                }
                 break;
             case 'counts':
-                this.countsClicked(e);
+                if (validCountHints) {
+                    newText = 'counts off';
+                    validCountHints = false;
+                }
+                else {
+                    newText = 'counts on';
+                    validCountHints = true;
+                }
+                u.updateTurnHints(true);
                 break;
             case 'bot':
-                this.botClicked(e);
+                if (botGuessHints) {
+                    newText = 'bot help off';
+                    botGuessHints = false;
+                    turnsBbm[turnIndex].set('code', 'XXXX');
+                }
+                else {
+                    newText = 'bot help on';
+                    botGuessHints = true;
+                    turnsBbm[turnIndex].set('code', botGuesses[turnIndex]);
+                }
                 break;
             case 'play':
-                this.playClicked(e);
+                if (oldText === 'quit') {
+                    newText = 'new game';
+                    gameBbv.quit();
+                }
+                else {
+                    newText = 'quit';
+                    gameBbv.newGame();
+                }
                 break;
         }
-        log(`buttonClicked executed with id: ${id}, oldText: ${oldText}, newText: ${newText}.`);
+        $(e.currentTarget).val(newText);
+        log(`${id} buttonClicked executed with text changed from "${oldText}" to "${newText}".`);
     },
     /**
      * User clicked a color in the palette.
@@ -578,65 +612,6 @@ mm.AllPiecesView = Backbone.View.extend({
     /** this = mm.AllPiecesView */
     resetNub: function () {
         this.setNub('X');
-    },
-    /** this = mm.AllPiecesView */
-    openerClicked: function (e) {
-        e.preventDefault();
-        var buttonText = $(e.currentTarget).val();
-        log('openerClicked, before toggle buttonText:', buttonText);
-        if (buttonText === 'opener off') {
-            $(e.currentTarget).val('opener on');
-            autoOpenerMode = true;
-        }
-        else if (buttonText === 'opener on') {
-            $(e.currentTarget).val('opener off');
-            autoOpenerMode = false;
-        }
-    },
-    /** this = mm.AllPiecesView */
-    countsClicked: function (e) {
-        e.preventDefault();
-        var buttonText = $(e.currentTarget).val();
-        log('countsClicked, before toggle buttonText:', buttonText);
-        if (buttonText === 'counts off') {
-            $(e.currentTarget).val('counts on');
-            validCountHints = true;
-        }
-        else if (buttonText === 'counts on') {
-            $(e.currentTarget).val('counts off');
-            validCountHints = false;
-        }
-        u.updateTurnHints(true);
-    },
-    /** this = mm.AllPiecesView */
-    botClicked: function (e) {
-        e.preventDefault();
-        var buttonText = $(e.currentTarget).val();
-        log('botClicked, before toggle buttonText:', buttonText);
-        if (buttonText === 'bot help off') {
-            $(e.currentTarget).val('bot help on');
-            botGuessHints = true;
-            turnsBbm[turnIndex].set('code', botGuesses[turnIndex]);
-        }
-        else if (buttonText === 'bot help on') {
-            $(e.currentTarget).val('bot help off');
-            botGuessHints = false;
-            turnsBbm[turnIndex].set('code', 'XXXX');
-        }
-    },
-    /** this = mm.AllPiecesView */
-    playClicked: function (e) {
-        e.preventDefault();
-        var buttonText = $(e.currentTarget).val();
-        log('playClicked, before toggle buttonText:', buttonText);
-        if (buttonText === 'quit') {
-            $(e.currentTarget).val('new game');
-            gameBbv.quit();
-        }
-        else if (buttonText === 'new game') {
-            $(e.currentTarget).val('quit');
-            gameBbv.newGame();
-        }
     }
 });
 /**
