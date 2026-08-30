@@ -191,6 +191,13 @@ class MastermindUtilities {
         // log(`executed calculateCodeTree(turn: ${turn}, guessArray: ${guessArrayIn}), botGuesses[${turn}]: ${botGuesses[turn]}.`);
         // log(codeTree);
     }
+    /** Sets the current turn's code only if the turn is active. */
+    setActiveTurnCode(guess) {
+        var turnState = turnsBbm[turnIndex].get('locked_class');
+        if (turnState !== 'active')
+            return;
+        turnsBbm[turnIndex].set('code', guess);
+    }
     /**
      * Sets code0 to newCode0 and
      * calculates the number of black and white pegs.
@@ -559,12 +566,12 @@ mm.AllPiecesView = Backbone.View.extend({
                 if (botGuessHints) {
                     newText = 'bot help off';
                     botGuessHints = false;
-                    turnsBbm[turnIndex].set('code', 'XXXX');
+                    u.setActiveTurnCode('XXXX');
                 }
                 else {
                     newText = 'bot help on';
                     botGuessHints = true;
-                    turnsBbm[turnIndex].set('code', botGuesses[turnIndex]);
+                    u.setActiveTurnCode(botGuesses[turnIndex]);
                 }
                 break;
             case 'play':
@@ -777,12 +784,12 @@ mm.GameView = Backbone.View.extend({
         $(palletBbv.play_el).val('new game');
         $(gameBbv.gameOver_el).text(`you ${status}!`);
         if (status === 'won') {
-            turnsBbm.at(turnIndex).set('locked_class', 'correct');
+            turnsBbm[turnIndex].set('locked_class', 'correct');
         }
         else {
-            turnsBbm.at(turnIndex).set('locked_class', 'wrong');
+            turnsBbm[turnIndex].set('locked_class', 'wrong');
             if (status === 'quit') {
-                turnsBbv.at(turnIndex).hideTurnButton();
+                turnsBbv[turnIndex].hideTurnButton();
             }
         }
         appLog.insert(`You ${status} on turn ${turnIndex + 1}.`);
