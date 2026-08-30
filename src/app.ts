@@ -671,30 +671,48 @@ mm.AllPiecesView = Backbone.View.extend({
     nub_template: '<div id="current_piece" class="piece <%= color_class %>"><%= color_class %></div>',
     events: {
         'click div.piece': 'nubClicked',
-        'click input#opener': 'openerClicked',
-        'click input#counts': 'countsClicked',
-        'click input#bot': 'botClicked',
-        'click input#play': 'playClicked'
+        'click #buttons input': 'buttonClicked'
+        // 'click input#opener': 'openerClicked',
+        // 'click input#counts': 'countsClicked',
+        // 'click input#bot': 'botClicked',
+        // 'click input#play': 'playClicked'
     },
 
-    /**
-     * this = mm.AllPiecesView
-     */
+    /** this = mm.AllPiecesView */
     initialize: function (): void {
         palletBbv = this;
         this.model = createAllPiecesModel();
         this.model.on('change:color_class', this.render, this);
-
         this.render(); // reset the piece div
     },
 
 
-    /**
-     * this = mm.AllPiecesView
-     */
+    /** this = mm.AllPiecesView */
     render: function (): void {
         var nubHtml = _.template(this.piece_template, this.model.attributes);
         $(this.cur_piece_el).html(nubHtml);
+    },
+
+    /** this = mm.AllPiecesView */
+    buttonClicked: function (e: ViewEvent): void {
+        var id = $(e.currentTarget).attr('id');
+        var oldText: string = $(e.currentTarget).val();
+        var newText: string = '';
+        switch (id) {
+            case 'opener':
+                this.openerClicked(e);
+                break;
+            case 'counts':
+                this.countsClicked(e);
+                break;
+            case 'bot':
+                this.botClicked(e);
+                break;
+            case 'play':
+                this.playClicked(e);
+                break;
+        }
+        log(`buttonClicked executed with id: ${id}, oldText: ${oldText}, newText: ${newText}.`);
     },
 
     /**
@@ -709,16 +727,14 @@ mm.AllPiecesView = Backbone.View.extend({
         palletBbv.setNub(color);
     },
 
-    /**
-     * this = mm.AllPiecesView
-     */
+    /** this = mm.AllPiecesView */
     setNub: function (color: string): void {
         nubColor = color;
         palletBbm.set('color_class', color);
     },
 
     /**
-     * Get current nub class.
+     * Get current nubColor.
      * 
      * this = mm.AllPiecesView
      */
@@ -726,16 +742,12 @@ mm.AllPiecesView = Backbone.View.extend({
         return nubColor;    
     },
 
-    /**
-     * this = mm.AllPiecesView
-     */
+    /** this = mm.AllPiecesView */
     resetNub: function (): void {
         this.setNub('X');    
     },
 
-    /**
-     * this = mm.AllPiecesView
-     */
+    /** this = mm.AllPiecesView */
     openerClicked: function (e: ViewEvent): void {
         e.preventDefault();
         var buttonText: string = $(e.currentTarget).val();
@@ -749,9 +761,7 @@ mm.AllPiecesView = Backbone.View.extend({
         }
     },
 
-    /**
-     * this = mm.AllPiecesView
-     */
+    /** this = mm.AllPiecesView */
     countsClicked: function (e: ViewEvent): void {
         e.preventDefault();
         var buttonText: string = $(e.currentTarget).val();
@@ -766,9 +776,7 @@ mm.AllPiecesView = Backbone.View.extend({
         u.updateTurnHints(true);
     },
 
-    /**
-     * this = mm.AllPiecesView
-     */
+    /** this = mm.AllPiecesView */
     botClicked: function (e: ViewEvent): void {
         e.preventDefault();
         var buttonText: string = $(e.currentTarget).val();
@@ -784,9 +792,7 @@ mm.AllPiecesView = Backbone.View.extend({
         }
     },
 
-    /**
-     * this = mm.AllPiecesView
-     */
+    /** this = mm.AllPiecesView */
     playClicked: function (e: ViewEvent): void {
         e.preventDefault();
         var buttonText: string = $(e.currentTarget).val();

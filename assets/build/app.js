@@ -512,26 +512,44 @@ mm.AllPiecesView = Backbone.View.extend({
     nub_template: '<div id="current_piece" class="piece <%= color_class %>"><%= color_class %></div>',
     events: {
         'click div.piece': 'nubClicked',
-        'click input#opener': 'openerClicked',
-        'click input#counts': 'countsClicked',
-        'click input#bot': 'botClicked',
-        'click input#play': 'playClicked'
+        'click #buttons input': 'buttonClicked'
+        // 'click input#opener': 'openerClicked',
+        // 'click input#counts': 'countsClicked',
+        // 'click input#bot': 'botClicked',
+        // 'click input#play': 'playClicked'
     },
-    /**
-     * this = mm.AllPiecesView
-     */
+    /** this = mm.AllPiecesView */
     initialize: function () {
         palletBbv = this;
         this.model = createAllPiecesModel();
         this.model.on('change:color_class', this.render, this);
         this.render(); // reset the piece div
     },
-    /**
-     * this = mm.AllPiecesView
-     */
+    /** this = mm.AllPiecesView */
     render: function () {
         var nubHtml = _.template(this.piece_template, this.model.attributes);
         $(this.cur_piece_el).html(nubHtml);
+    },
+    /** this = mm.AllPiecesView */
+    buttonClicked: function (e) {
+        var id = $(e.currentTarget).attr('id');
+        var oldText = $(e.currentTarget).val();
+        var newText = '';
+        switch (id) {
+            case 'opener':
+                this.openerClicked(e);
+                break;
+            case 'counts':
+                this.countsClicked(e);
+                break;
+            case 'bot':
+                this.botClicked(e);
+                break;
+            case 'play':
+                this.playClicked(e);
+                break;
+        }
+        log(`buttonClicked executed with id: ${id}, oldText: ${oldText}, newText: ${newText}.`);
     },
     /**
      * User clicked a color in the palette.
@@ -544,30 +562,24 @@ mm.AllPiecesView = Backbone.View.extend({
         // log('nubClicked read color: ', color);
         palletBbv.setNub(color);
     },
-    /**
-     * this = mm.AllPiecesView
-     */
+    /** this = mm.AllPiecesView */
     setNub: function (color) {
         nubColor = color;
         palletBbm.set('color_class', color);
     },
     /**
-     * Get current nub class.
+     * Get current nubColor.
      *
      * this = mm.AllPiecesView
      */
     getNub: function () {
         return nubColor;
     },
-    /**
-     * this = mm.AllPiecesView
-     */
+    /** this = mm.AllPiecesView */
     resetNub: function () {
         this.setNub('X');
     },
-    /**
-     * this = mm.AllPiecesView
-     */
+    /** this = mm.AllPiecesView */
     openerClicked: function (e) {
         e.preventDefault();
         var buttonText = $(e.currentTarget).val();
@@ -581,9 +593,7 @@ mm.AllPiecesView = Backbone.View.extend({
             autoOpenerMode = false;
         }
     },
-    /**
-     * this = mm.AllPiecesView
-     */
+    /** this = mm.AllPiecesView */
     countsClicked: function (e) {
         e.preventDefault();
         var buttonText = $(e.currentTarget).val();
@@ -598,9 +608,7 @@ mm.AllPiecesView = Backbone.View.extend({
         }
         u.updateTurnHints(true);
     },
-    /**
-     * this = mm.AllPiecesView
-     */
+    /** this = mm.AllPiecesView */
     botClicked: function (e) {
         e.preventDefault();
         var buttonText = $(e.currentTarget).val();
@@ -616,9 +624,7 @@ mm.AllPiecesView = Backbone.View.extend({
             turnsBbm[turnIndex].set('code', 'XXXX');
         }
     },
-    /**
-     * this = mm.AllPiecesView
-     */
+    /** this = mm.AllPiecesView */
     playClicked: function (e) {
         e.preventDefault();
         var buttonText = $(e.currentTarget).val();
