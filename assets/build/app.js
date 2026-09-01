@@ -883,30 +883,33 @@ mm.GameView = Backbone.View.extend({
         appLog.insert(`You ${status} on turn ${turnIndex + 1}.`);
         appLog.insert(`Secret code ${solution}.`);
         if (boardGuesses.length > 0) {
-            appLog.insert(`Turn by turn: board (bot):`);
+            appLog.insert(`Turn by turn: board [bot]:`);
             for (var i = 0; i < boardGuesses.length; i += 1) {
                 appLog.insert(`${u.upperOrLower(boardGuesses[i], boardIsValid[i])} `
                     + `${boardPegs[i][0]} ${boardPegs[i][1]} `
-                    + `${boardPegCombos[i]}`
+                    + `(${boardPegCombos[i]}`
                     + `${boardIsPerfect[i] ? 'p' : '/'}`
-                    + `${boardValidCounts[i]} `
-                    + `(${u.upperOrLower(botGuesses[i], botIsValid[i])} `
+                    + `${boardValidCounts[i]}) `
+                    + `${boardValidCounts[i + 1]} `
+                    + `[${u.upperOrLower(botGuesses[i], botIsValid[i])} `
                     + `${botPegs[i][0]} ${botPegs[i][1]} `
-                    + `${botPegCombos[i]}`
+                    + `(${botPegCombos[i]}`
                     + `${botIsPerfect[i] ? 'p' : '/'}`
-                    + `${botValidCounts[i]})`);
+                    + `${boardValidCounts[i]}) `
+                    + `${botValidCounts[i + 1]}]`);
             }
             i -= 1;
             if (status === 'won' && botGuesses[i] !== boardGuesses[i])
                 appLog.insert(`You beat the bot!`);
             i += 1;
             if (botGuesses.length > boardGuesses.length) {
-                appLog.insert(`[ you ${status} ] `
-                    + `(${u.upperOrLower(botGuesses[i], botIsValid[i])} `
+                appLog.insert(`( you ${status} ) `
+                    + `[${u.upperOrLower(botGuesses[i], botIsValid[i])} `
                     + `${botPegs[i][0]} ${botPegs[i][1]} `
-                    + `${botPegCombos[i]}`
+                    + `(${botPegCombos[i]}`
                     + `${botIsPerfect[i] ? 'p' : '/'}`
-                    + `${botValidCounts[i]})`);
+                    + `${boardValidCounts[i]}) `
+                    + `${botValidCounts[i + 1]}]`);
             }
         }
         ;
