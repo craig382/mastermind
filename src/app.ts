@@ -72,6 +72,9 @@ var botValidCounts: number[] = [];
 var botIsValid: boolean[] = [];
 var botIsPerfect: boolean[] = [];
 var botPerfect: {[turn: number]: string[]} = {};
+/** bot will keep searching for perfect 
+ * guesses up to this limit */
+var nPerfectSearch = 5;
 
 var boardGuesses: string[] = [];
 var boardPegs: PegCombo[] = [];
@@ -169,7 +172,8 @@ class MastermindUtilities {
         boardIsValid = [];
         boardIsPerfect = [];
 
-        this.calculateCodeTree(0, ['AABB', 'ABBC', 'ABCD']);
+        // this.calculateCodeTree(0, ['AABB', 'ABBC', 'ABCD']);
+        this.calculateCodeTree(0, ['AABB']);
         // For hint mode, set the turn's
         // suggested guess to the bot's guess.
         if (botGuessHints)
@@ -182,20 +186,28 @@ class MastermindUtilities {
         var guessArrayIn = guessArray ? guessArray.join(' ') : 'undefined'
         var validCodesIn: string[] = [];
         var pc: PegCombo = '00';
+        var nValid = 0  ;
         if (turn === 0) {
             validCodesIn = allCodes;
+            nValid = allCodes.length;
         } else {
             if (!codeTree[turn-1][boardGuesses[turn-1]]) {
                 this.calculateCodeTree(turn-1, [boardGuesses[turn-1]]);
             }
             validCodesIn = codeTree[turn-1][boardGuesses[turn-1]][boardPegs[turn-1]];
-            if (!guessArray) guessArray = validCodesIn;
+            nValid = validCodesIn.length;
+            if (!guessArray) {
+                if (2 < nValid && nValid <= nPegCombos4) {
+                    // expand the search for a perfect guesses
+                    log(`calculateCodeTree[turn: ${turn}] expanded the search for perfect guesses because 2 < nValid (${nValid}) <= nPegCombos4 (${nPegCombos4}).`);
+                    guessArray = validCodesIn.concat(allCodes);
+                } else guessArray = validCodesIn; // keep the search narrow
+            } 
         }
 
         var nPegCombos = 0;
         var maxPegCombos = 0;
         var maxPegComboGuess = '';
-        var nValid = validCodesIn.length;
         if (!codeTree[turn]) codeTree[turn] = {};
         for (var g = 0; g < guessArray.length; g += 1) {
             var guess = guessArray[g];
@@ -218,6 +230,9 @@ class MastermindUtilities {
             if (nPegCombos === nValid) {
                 if (!botPerfect[turn]) botPerfect[turn] = [];
                 botPerfect[turn].push(guess);
+                // if enough perfect guesses found, 
+                // stop searching for more
+                if (botPerfect[turn].length >= nPerfectSearch) break;
             }
         }
 
@@ -227,7 +242,7 @@ class MastermindUtilities {
                 botIsPerfect[turn] = true;
                 botGuesses[turn] = botPerfect[turn][0];
                 if (nValid > 2) {
-                    var perfectMsg = `On turn ${turn + 1}, The bot found ${botPerfect[turn].length} PERFECT guesses with ${nValid} valid codes remaining: ${botPerfect[turn].join(' ')} perfect of ${validCodesIn.join(' ')} valid.`;
+                    var perfectMsg = `On turn ${turn + 1}, The bot found ${botPerfect[turn].length} PERFECT guesses ${botPerfect[turn].join(' ')} with ${nValid} valid codes remaining ${validCodesIn.join(' ')}.`;
                     appLog.insert(perfectMsg);
                 }
             } else {
@@ -240,7 +255,7 @@ class MastermindUtilities {
             botIsValid[turn] = u.isValid(turn, botGuesses[turn]);
         }
 
-        log(`executed calculateCodeTree(turn: ${turn}, guessArray: ${guessArrayIn}), botGuesses[${turn}]: ${botGuesses[turn]}.`);
+        // log(`executed calculateCodeTree(turn: ${turn}, guessArray: ${guessArrayIn}), botGuesses[${turn}]: ${botGuesses[turn]}.`);
         // log(codeTree);
     }
 
@@ -310,10 +325,24 @@ class MastermindUtilities {
     isValid(guessTurnIndex: number, guess: string): boolean {
         if (guessTurnIndex === 0) return true;
         if (!boardGuesses[guessTurnIndex - 1]) 
-            throw new Error(`isValid ERROR. : boardGuesses[${guessTurnIndex - 1}] is undefined.`);
+            throw new Error(`isValid ERROR: boardGuesses[${guessTurnIndex - 1}] is undefined.`);
         var lastTurnPegs = boardPegs[guessTurnIndex - 1];
         var validCodes = codeTree[guessTurnIndex - 1][boardGuesses[guessTurnIndex - 1]][lastTurnPegs];
         return validCodes.includes(guess);
+    }
+
+    isPerfect(guessTurnIndex: number, guess: string): boolean {
+        if (guessTurnIndex === 0) return false;
+        if (!boardGuesses[guessTurnIndex - 1]) 
+            throw new Error(`isPerfect ERROR: boardGuesses[${guessTurnIndex - 1}] is undefined.`);
+        if (!codeTree[guessTurnIndex][guess])
+            throw new Error(`isPerfect ERROR: codeTree[${guessTurnIndex}][${guess}] is undefined.`);
+        var nPegCombos = Object.keys(codeTree[guessTurnIndex][guess]).length;
+        var lastTurnPegs = boardPegs[guessTurnIndex - 1];
+        var validCodes = codeTree[guessTurnIndex - 1][boardGuesses[guessTurnIndex - 1]][lastTurnPegs];
+        var nValid = validCodes.length;
+        if (nPegCombos === nValid) return true;
+        else return false;
     }
 
 }
@@ -937,6 +966,7 @@ mm.GameView = Backbone.View.extend({
         u.calculateCodeTree(turnIndex, [guess]);
         boardValidCounts[turnIndex] = codeTree[turnIndex][boardGuesses[turnIndex]][boardPegs[turnIndex]].length;
         boardIsValid[turnIndex] = u.isValid(turnIndex, guess);
+        boardIsPerfect[turnIndex] = u.isPerfect(turnIndex, guess);
         this.handleResults(pegs0);
     },
 
