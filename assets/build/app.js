@@ -889,13 +889,13 @@ mm.GameView = Backbone.View.extend({
                     + `(${u.upperOrLower(botGuesses[i], botIsValid[i])}), `
                     + `${boardPegs[i][0]} ${boardPegs[i][1]} `
                     + `(${botPegs[i][0]} ${botPegs[i][1]}), `
+                    + `${boardValidCounts[i + 1]} `
+                    + `(${botValidCounts[i + 1]}), `
                     + `${boardPegCombos[i]}`
                     + `${boardIsPerfect[i] ? 'p' : ''} `
                     + `(${botPegCombos[i]}`
-                    + `${botIsPerfect[i] ? 'p' : ''}) `
-                    + `/ ${boardValidCounts[i]}, `
-                    + `${boardValidCounts[i + 1]} `
-                    + `(${botValidCounts[i + 1]})`);
+                    + `${botIsPerfect[i] ? 'p' : ''}) / `
+                    + `${boardValidCounts[i]}`);
             }
             i -= 1;
             if (status === 'won' && botGuesses[i] !== boardGuesses[i])
@@ -905,10 +905,10 @@ mm.GameView = Backbone.View.extend({
                 appLog.insert(`( you ${status} ) `
                     + `(${u.upperOrLower(botGuesses[i], botIsValid[i])}, `
                     + `${botPegs[i][0]} ${botPegs[i][1]}, `
+                    + `${botValidCounts[i + 1]}, `
                     + `${botPegCombos[i]} `
-                    + `${botIsPerfect[i] ? 'p' : ''} `
-                    + `/ ${boardValidCounts[i]}, `
-                    + `${botValidCounts[i + 1]})`);
+                    + `${botIsPerfect[i] ? 'p' : ''}) / `
+                    + `${boardValidCounts[i]}`);
             }
         }
         ;
