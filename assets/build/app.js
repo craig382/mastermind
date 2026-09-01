@@ -61,6 +61,7 @@ var codeTree = {};
  *  given the human's guesses prior to this turn. */
 var botGuesses = [];
 var botPegs = [];
+var botPegCombos = [];
 var botValidCounts = [];
 var botIsValid = [];
 var botIsPerfect = [];
@@ -70,6 +71,7 @@ var botPerfect = {};
 var nPerfectSearch = 5;
 var boardGuesses = [];
 var boardPegs = [];
+var boardPegCombos = [];
 var boardValidCounts = [];
 var boardIsValid = [];
 var boardIsPerfect = [];
@@ -127,12 +129,14 @@ class MastermindUtilities {
         codeTree = {};
         botGuesses = [];
         botPegs = [];
+        botPegCombos = [];
         botValidCounts = [];
         botIsValid = [];
         botIsPerfect = [];
         botPerfect = {};
         boardGuesses = [];
         boardPegs = [];
+        boardPegCombos = [];
         boardValidCounts = [];
         boardIsValid = [];
         boardIsPerfect = [];
@@ -223,6 +227,7 @@ class MastermindUtilities {
                 botGuesses[turn] = maxPegComboGuess;
             }
             botPegs[turn] = AsPegCombo(this.setCode0AndCalculatePegs(solution, botGuesses[turn]));
+            botPegCombos[turn] = Object.keys(codeTree[turn][botGuesses[turn]]).length;
             botValidCounts[turn] = codeTree[turn][botGuesses[turn]][botPegs[turn]].length;
             botIsValid[turn] = u.isValid(turn, botGuesses[turn]);
         }
@@ -790,6 +795,7 @@ mm.GameView = Backbone.View.extend({
         boardValidCounts[turnIndex] = codeTree[turnIndex][boardGuesses[turnIndex]][boardPegs[turnIndex]].length;
         boardIsValid[turnIndex] = u.isValid(turnIndex, guess);
         boardIsPerfect[turnIndex] = u.isPerfect(turnIndex, guess);
+        boardPegCombos[turnIndex] = Object.keys(codeTree[turnIndex][guess]).length;
         this.handleResults(pegs0);
     },
     /**
@@ -865,9 +871,11 @@ mm.GameView = Backbone.View.extend({
                 appLog.insert(`${boardGuesses[i]} `
                     + `${boardPegs[i][0]} ${boardPegs[i][1]} `
                     + `${boardValidCounts[i]} `
+                    + `${boardPegCombos[i]} `
                     + `(${botGuesses[i]} `
                     + `${botPegs[i][0]} ${botPegs[i][1]} `
-                    + `${botValidCounts[i]})`);
+                    + `${botValidCounts[i]} `
+                    + `${botPegCombos[i]})`);
             }
             i -= 1;
             if (status === 'won' && botGuesses[i] !== boardGuesses[i])
