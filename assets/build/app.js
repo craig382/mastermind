@@ -184,7 +184,7 @@ class MastermindUtilities {
             }
         }
         if (!botPegs[turn]) {
-            log(`botPegs[${turn}] = "${botPegs[turn]}", !botPegs[turn] = "${!botPegs[turn]}".`);
+            // log(`botPegs[${turn}] = "${botPegs[turn]}", !botPegs[turn] = "${!botPegs[turn]}".`);
             if (botPerfect[turn]) {
                 botGuesses[turn] = botPerfect[turn][0];
                 if (nValid > 2) {
@@ -192,8 +192,8 @@ class MastermindUtilities {
                     appLog.insert(perfectMsg);
                 }
             }
-            else if (!botGuesses[turn]) {
-                log(`botGuesses[${turn}]: "${botGuesses[turn]}" <== "${maxPegComboGuess}".`);
+            else {
+                // log(`botGuesses[${turn}]: "${botGuesses[turn]}" <== "${maxPegComboGuess}".`);
                 botGuesses[turn] = maxPegComboGuess;
             }
             botPegs[turn] = AsPegCombo(this.setCode0AndCalculatePegs(solution, botGuesses[turn]));

@@ -215,15 +215,15 @@ class MastermindUtilities {
         }
 
         if (!botPegs[turn]) {
-            log(`botPegs[${turn}] = "${botPegs[turn]}", !botPegs[turn] = "${!botPegs[turn]}".`);
+            // log(`botPegs[${turn}] = "${botPegs[turn]}", !botPegs[turn] = "${!botPegs[turn]}".`);
             if (botPerfect[turn]) {
                 botGuesses[turn] = botPerfect[turn][0];
                 if (nValid > 2) {
                     var perfectMsg = `On turn ${turn + 1}, The bot found ${botPerfect[turn].length} PERFECT guesses with ${nValid} valid codes remaining: ${botPerfect[turn].join(' ')} perfect of ${validCodesIn.join(' ')} valid.`;
                     appLog.insert(perfectMsg);
                 }
-            } else if (!botGuesses[turn]) {
-                log(`botGuesses[${turn}]: "${botGuesses[turn]}" <== "${maxPegComboGuess}".`);
+            } else {
+                // log(`botGuesses[${turn}]: "${botGuesses[turn]}" <== "${maxPegComboGuess}".`);
                 botGuesses[turn] = maxPegComboGuess;
             }
             botPegs[turn] = AsPegCombo(this.setCode0AndCalculatePegs(solution, botGuesses[turn]));
