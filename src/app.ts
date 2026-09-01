@@ -40,6 +40,11 @@ var nubColor = 'X';
 var nColors = 6;
 /** number of holes in the code, i.e. code length */
 var nHoles = 4;
+/** 14 possible peg combos for 4 holes: 00; 
+ * 01, 10; 02, 11, 20; 03, 12, 21, 30; 04, 13, 22, 40. 
+ * Note that 31 is impossible because with 3 black 
+ * pegs there is no wrong hole left for a white peg. */
+var nPegCombos4 = 14;
 var nTurns = 10;
 //* number of games played, 1 for the first game */
 var nGames = 1;
@@ -64,14 +69,15 @@ var codeTree: {[turn: number]: {[guess: string]: {[pc: PegCombo]: string[]}}} = 
 var botGuesses: string[] = [];
 var botPegs: PegCombo[] = [];
 var botValidCounts: number[] = [];
-var botValid: boolean[] = [];
+var botIsValid: boolean[] = [];
+var botIsPerfect: boolean[] = [];
 var botPerfect: {[turn: number]: string[]} = {};
 
 var boardGuesses: string[] = [];
 var boardPegs: PegCombo[] = [];
 var boardValidCounts: number[] = [];
-var boardValid: boolean[] = [];
-var boardPerfect: string[] = [];
+var boardIsValid: boolean[] = [];
+var boardIsPerfect: boolean[] = [];
 
 // Backbone.js models Bbm and views Bbv
 var gameBbm: GameModel;
@@ -153,14 +159,15 @@ class MastermindUtilities {
         botGuesses = [];
         botPegs = [];
         botValidCounts = [];
-        botValid = [];
+        botIsValid = [];
+        botIsPerfect = [];
         botPerfect = {};
 
         boardGuesses = [];
         boardPegs = [];
         boardValidCounts = [];
-        boardValid = [];
-        boardPerfect = [];
+        boardIsValid = [];
+        boardIsPerfect = [];
 
         this.calculateCodeTree(0, ['AABB', 'ABBC', 'ABCD']);
         // For hint mode, set the turn's
@@ -217,6 +224,7 @@ class MastermindUtilities {
         if (!botPegs[turn]) {
             // log(`botPegs[${turn}] = "${botPegs[turn]}", !botPegs[turn] = "${!botPegs[turn]}".`);
             if (botPerfect[turn]) {
+                botIsPerfect[turn] = true;
                 botGuesses[turn] = botPerfect[turn][0];
                 if (nValid > 2) {
                     var perfectMsg = `On turn ${turn + 1}, The bot found ${botPerfect[turn].length} PERFECT guesses with ${nValid} valid codes remaining: ${botPerfect[turn].join(' ')} perfect of ${validCodesIn.join(' ')} valid.`;
@@ -224,10 +232,12 @@ class MastermindUtilities {
                 }
             } else {
                 // log(`botGuesses[${turn}]: "${botGuesses[turn]}" <== "${maxPegComboGuess}".`);
+                botIsPerfect[turn] = false;
                 botGuesses[turn] = maxPegComboGuess;
             }
             botPegs[turn] = AsPegCombo(this.setCode0AndCalculatePegs(solution, botGuesses[turn]));
             botValidCounts[turn] = codeTree[turn][botGuesses[turn]][botPegs[turn]].length;
+            botIsValid[turn] = u.isValid(turn, botGuesses[turn]);
         }
 
         log(`executed calculateCodeTree(turn: ${turn}, guessArray: ${guessArrayIn}), botGuesses[${turn}]: ${botGuesses[turn]}.`);
@@ -295,6 +305,15 @@ class MastermindUtilities {
                 + codeTree[t][boardGuesses[t]][boardPegs[t]].length + '</p>';
             turnsBbm[t].set('hint_string', hint_string);
         }
+    }
+
+    isValid(guessTurnIndex: number, guess: string): boolean {
+        if (guessTurnIndex === 0) return true;
+        if (!boardGuesses[guessTurnIndex - 1]) 
+            throw new Error(`isValid ERROR. : boardGuesses[${guessTurnIndex - 1}] is undefined.`);
+        var lastTurnPegs = boardPegs[guessTurnIndex - 1];
+        var validCodes = codeTree[guessTurnIndex - 1][boardGuesses[guessTurnIndex - 1]][lastTurnPegs];
+        return validCodes.includes(guess);
     }
 
 }
@@ -917,6 +936,7 @@ mm.GameView = Backbone.View.extend({
         boardPegs[turnIndex] =  AsPegCombo(pegs0);
         u.calculateCodeTree(turnIndex, [guess]);
         boardValidCounts[turnIndex] = codeTree[turnIndex][boardGuesses[turnIndex]][boardPegs[turnIndex]].length;
+        boardIsValid[turnIndex] = u.isValid(turnIndex, guess);
         this.handleResults(pegs0);
     },
 
@@ -1008,6 +1028,10 @@ mm.GameView = Backbone.View.extend({
                     + `${botPegs[i][0]} ${botPegs[i][1]} `
                     + `${botValidCounts[i]})`);
             }
+            appLog.insert(`botIsValid: ${botIsValid.join(' ')}`);
+            appLog.insert(`botIsPerfect: ${botIsPerfect.join(' ')}`);
+            appLog.insert(`boardIsValid: ${boardIsValid.join(' ')}`);
+            appLog.insert(`boardIsPerfect: ${boardIsPerfect.join(' ')}`);
         };
         nGames += 1; // increment the number of games played
     },
