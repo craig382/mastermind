@@ -107,7 +107,7 @@ var mm = {
         appLog = new AppLog();
         u = new MastermindUtilities();
         u.generateAllCodes();
-        createAllPiecesView();
+        createPalletView();
         createGameView(createGameModel());
         log('mm.init() executed');
     }
@@ -414,13 +414,13 @@ function createTurnView(model) {
     var TurnViewClass = required(mm.TurnView);
     return new TurnViewClass({ model: model });
 }
-function createAllPiecesView() {
-    var AllPiecesViewClass = required(mm.AllPiecesView);
-    return new AllPiecesViewClass();
+function createPalletView() {
+    var PalletViewClass = required(mm.PalletView);
+    return new PalletViewClass();
 }
-function createAllPiecesModel() {
-    var AllPiecesModelClass = required(mm.AllPieces);
-    return new AllPiecesModelClass();
+function createPalletModel() {
+    var PalletModelClass = required(mm.Pallet);
+    return new PalletModelClass();
 }
 function createGameModel() {
     var GameModelClass = required(mm.Game);
@@ -580,9 +580,9 @@ mm.TurnView = Backbone.View.extend({
     }
 });
 /**
- * mm.AllPieces model for mm.AllPiecesView.
+ * mm.Pallet model for mm.PalletView.
  */
-mm.AllPieces = Backbone.Model.extend({
+mm.Pallet = Backbone.Model.extend({
     defaults: {
         color_class: 'X'
     },
@@ -591,10 +591,10 @@ mm.AllPieces = Backbone.Model.extend({
     }
 });
 /**
- * mm.AllPiecesView handles the click and
+ * mm.PalletView handles the click and
  * sets the color_class in the model.
  */
-mm.AllPiecesView = Backbone.View.extend({
+mm.PalletView = Backbone.View.extend({
     el: 'div#allPieces',
     cur_piece_el: 'div#current_piece',
     opener_el: 'input#opener',
@@ -607,20 +607,20 @@ mm.AllPiecesView = Backbone.View.extend({
         'click div.piece': 'nubClicked',
         'click #buttons input': 'buttonClicked'
     },
-    /** this = mm.AllPiecesView */
+    /** this = mm.PalletView */
     initialize: function () {
         palletBbv = this;
-        this.model = createAllPiecesModel();
+        this.model = createPalletModel();
         this.model.on('change:color_class', this.render, this);
         this.render(); // reset the piece div
-        log(`mm.AllPiecesView.initialize() executed.`);
+        log(`mm.PalletView.initialize() executed.`);
     },
-    /** this = mm.AllPiecesView */
+    /** this = mm.PalletView */
     render: function () {
         var nubHtml = _.template(this.piece_template, this.model.attributes);
         $(this.cur_piece_el).html(nubHtml);
     },
-    /** this = mm.AllPiecesView */
+    /** this = mm.PalletView */
     buttonClicked: function (e) {
         var id = $(e.currentTarget).attr('id');
         var oldText = $(e.currentTarget).val();
@@ -676,7 +676,7 @@ mm.AllPiecesView = Backbone.View.extend({
     /**
      * User clicked a color in the palette.
      *
-     * this = mm.AllPiecesView
+     * this = mm.PalletView
      */
     nubClicked: function (e) {
         // log('nubClicked');
@@ -684,7 +684,7 @@ mm.AllPiecesView = Backbone.View.extend({
         // log('nubClicked read color: ', color);
         palletBbv.setNub(color);
     },
-    /** this = mm.AllPiecesView */
+    /** this = mm.PalletView */
     setNub: function (color) {
         nubColor = color;
         palletBbm.set('color_class', color);
@@ -692,12 +692,12 @@ mm.AllPiecesView = Backbone.View.extend({
     /**
      * Get current nubColor.
      *
-     * this = mm.AllPiecesView
+     * this = mm.PalletView
      */
     getNub: function () {
         return nubColor;
     },
-    /** this = mm.AllPiecesView */
+    /** this = mm.PalletView */
     resetNub: function () {
         this.setNub('X');
     }
@@ -730,7 +730,7 @@ mm.GameView = Backbone.View.extend({
     */
     initialize: function () {
         gameBbv = this;
-        // createAllPiecesView();
+        // createPalletView();
         this.model.on('change:gameStatus', this.gameOver, this);
         this.resetBoard(); // START
         // Keep current behavior: game begins immediately for now.
