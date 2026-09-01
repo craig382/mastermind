@@ -80,7 +80,7 @@ var botIsPerfect: boolean[] = [];
 var botPerfect: {[turn: number]: string[]} = {};
 /** bot will keep searching for perfect 
  * guesses up to this limit */
-var nPerfectSearch = 5;
+var nPerfectSearch = 1;
 
 var boardGuesses: string[] = [];
 var boardPegs: PegCombo[] = [];
@@ -257,10 +257,10 @@ class MastermindUtilities {
             if (botPerfect[turn]) {
                 botIsPerfect[turn] = true;
                 botGuesses[turn] = botPerfect[turn][0];
-                if (nValid > 2) {
-                    var perfectMsg = `On turn ${turn + 1}, The bot found ${botPerfect[turn].length} PERFECT guesses ${botPerfect[turn].join(' ')} with ${nValid} valid codes remaining ${validCodesIn.join(' ')}.`;
-                    appLog.insert(perfectMsg);
-                }
+                // if (nValid > 2) {
+                //     var perfectMsg = `On turn ${turn + 1}, The bot found ${botPerfect[turn].length} PERFECT guesses ${botPerfect[turn].join(' ')} with ${nValid} valid codes remaining ${validCodesIn.join(' ')}.`;
+                //     appLog.insert(perfectMsg);
+                // }
             } else {
                 // log(`botGuesses[${turn}]: "${botGuesses[turn]}" <== "${maxPegComboGuess}".`);
                 botIsPerfect[turn] = false;
@@ -1062,21 +1062,24 @@ mm.GameView = Backbone.View.extend({
         appLog.insert(`You ${status} on turn ${turnIndex + 1}.`);
         appLog.insert(`Secret code ${solution}.`);
         if (boardGuesses.length > 0) {
-            appLog.insert(`Turn by turn: board [bot]:`);
+            appLog.insert(`Turn by turn: board (bot)):`);
             for (var i = 0; i < boardGuesses.length; i += 1) {
                 appLog.insert(
                     `${u.upperOrLower(boardGuesses[i], boardIsValid[i])} `
+                    + `(${u.upperOrLower(botGuesses[i], botIsValid[i])}), `
+
                     + `${boardPegs[i][0]} ${boardPegs[i][1]} `
-                    + `(${boardPegCombos[i]}`
-                    + `${boardIsPerfect[i] ? 'p' : '/'}`
-                    + `${boardValidCounts[i]}) `
-                    + `${boardValidCounts[i+1]} `
-                    + `[${u.upperOrLower(botGuesses[i], botIsValid[i])} `
-                    + `${botPegs[i][0]} ${botPegs[i][1]} `
+                    + `(${botPegs[i][0]} ${botPegs[i][1]}), `
+
+                    + `${boardPegCombos[i]}`
+                    + `${boardIsPerfect[i] ? 'p' : ''} `
+
                     + `(${botPegCombos[i]}`
-                    + `${botIsPerfect[i] ? 'p' : '/'}`
-                    + `${boardValidCounts[i]}) `
-                    + `${botValidCounts[i+1]}]`);
+                    + `${botIsPerfect[i] ? 'p' : ''}) `
+                    + `/ ${boardValidCounts[i]}, `
+
+                    + `${boardValidCounts[i+1]} `
+                    + `(${botValidCounts[i+1]})`);
             }
             i -= 1;
             if (status === 'won' && botGuesses[i] !== boardGuesses[i]) 
@@ -1084,12 +1087,12 @@ mm.GameView = Backbone.View.extend({
             i += 1;
             if (botGuesses.length > boardGuesses.length) {
                 appLog.insert(`( you ${status} ) `
-                    + `[${u.upperOrLower(botGuesses[i], botIsValid[i])} `
-                    + `${botPegs[i][0]} ${botPegs[i][1]} `
-                    + `(${botPegCombos[i]}`
-                    + `${botIsPerfect[i] ? 'p' : '/'}`
-                    + `${boardValidCounts[i]}) `
-                    + `${botValidCounts[i+1]}]`);
+                    + `(${u.upperOrLower(botGuesses[i], botIsValid[i])}, `
+                    + `${botPegs[i][0]} ${botPegs[i][1]}, `
+                    + `${botPegCombos[i]} `
+                    + `${botIsPerfect[i] ? 'p' : ''} `
+                    + `/ ${boardValidCounts[i]}, `
+                    + `${botValidCounts[i+1]})`);
             }
         };
         nGames += 1; // increment the number of games played
