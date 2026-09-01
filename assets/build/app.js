@@ -57,9 +57,13 @@ var codeTree = {};
 var botGuesses = [];
 var botPegs = [];
 var botValidCounts = [];
+var botValid = [];
+var botPerfect = {};
 var boardGuesses = [];
 var boardPegs = [];
 var boardValidCounts = [];
+var boardValid = [];
+var boardPerfect = [];
 // Backbone.js models Bbm and views Bbv
 var gameBbm;
 var gameBbv;
@@ -115,9 +119,13 @@ class MastermindUtilities {
         botGuesses = [];
         botPegs = [];
         botValidCounts = [];
+        botValid = [];
+        botPerfect = {};
         boardGuesses = [];
         boardPegs = [];
         boardValidCounts = [];
+        boardValid = [];
+        boardPerfect = [];
         this.calculateCodeTree(0, ['AABB', 'ABBC', 'ABCD']);
         // For hint mode, set the turn's
         // suggested guess to the bot's guess.
@@ -151,11 +159,11 @@ class MastermindUtilities {
         for (var g = 0; g < guessArray.length; g += 1) {
             var guess = guessArray[g];
             if (codeTree[turn][guess])
-                break;
+                break; // skip, guess already processed
             else
-                codeTree[turn][guess] = {};
+                codeTree[turn][guess] = {}; // process guess
             code0 = guess;
-            for (var v = 0; v < validCodesIn.length; v += 1) {
+            for (var v = 0; v < nValid; v += 1) {
                 pc = AsPegCombo(this.calculatePegs(validCodesIn[v]));
                 if (!codeTree[turn][guess][pc])
                     codeTree[turn][guess][pc] = [];
@@ -170,25 +178,27 @@ class MastermindUtilities {
             }
             // log(`turn ${turn} guess ${guess} has ${nPegCombos} peg combos.`);
             if (nPegCombos === nValid) {
-                if (nValid > 2) {
-                    var perfectMsg = botGuesses[turn] ? `YOU` : `The bot`;
-                    perfectMsg += ` found PERFECT guess ${guess} on turn ${turn + 1} with ${nValid} valid codes remaining.`;
-                    appLog.insert(perfectMsg);
-                }
-                if (!botGuesses[turn]) {
-                    botGuesses[turn] = guess;
-                    break; // abort building the codeTree for other guesses
-                }
+                if (!botPerfect[turn])
+                    botPerfect[turn] = [];
+                botPerfect[turn].push(guess);
             }
         }
-        if (!botGuesses[turn]) {
+        if (botPerfect[turn]) {
+            botGuesses[turn] = botPerfect[turn][0];
+            if (nValid > 2) {
+                var perfectMsg = `On turn ${turn + 1}, The bot found ${botPerfect[turn].length} PERFECT guesses with ${nValid} valid codes remaining: ${botPerfect[turn].join(' ')} perfect of ${validCodesIn.join(' ')} valid.`;
+                appLog.insert(perfectMsg);
+            }
+        }
+        else if (!botGuesses[turn]) {
+            log(`botGuesses[${turn}]: "${botGuesses[turn]}" <== "${maxPegComboGuess}".`);
             botGuesses[turn] = maxPegComboGuess;
         }
         if (!botPegs[turn]) {
             botPegs[turn] = AsPegCombo(this.setCode0AndCalculatePegs(solution, botGuesses[turn]));
             botValidCounts[turn] = codeTree[turn][botGuesses[turn]][botPegs[turn]].length;
         }
-        // log(`executed calculateCodeTree(turn: ${turn}, guessArray: ${guessArrayIn}), botGuesses[${turn}]: ${botGuesses[turn]}.`);
+        log(`executed calculateCodeTree(turn: ${turn}, guessArray: ${guessArrayIn}), botGuesses[${turn}]: ${botGuesses[turn]}.`);
         // log(codeTree);
     }
     /** Sets the current turn's code only if the turn is active. */

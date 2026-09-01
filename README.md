@@ -18,11 +18,9 @@ A web app to play mastermind. Written in Backbone.js.
 8. Created Bot Guess Hints that can be enabled or disabled. When enabled, the bot fills in its suggestion for the next guess. The player can accept or override this suggestion. Note that Bot Guess Hints take precedence over Auto Opener Mode.
 
 ## Future Changes?:
-- There is a bug with the pallet buttons. It's almost as if there is a new extra button under each button for each game played. First game, a single click activates the button once. Second game, a single click of the button activates the button twice. Third game, a single click of the button activates the button 3 times. Etc.
-- Eliminate SolutionView.
-- Make counts on/off act on all past turns instantly.
-- Make bot help on/off act on the active turn instantly.
 - Have the bot find all PERFECT guesses (not just the first one) and log them all, too.
+- botValid[]: boolean and boardValid[]: boolean. Used for Valid  feedback (uppercase letters for valid, lowercase letters for invalid) in the turns and log. The tutor on/off button will provide two types of feedback. The first is uppercase / lowercase letters on the board and in the log (the log will always have this). The second is "live" help, as each color is placed in the current turn, the previous turn hints (peg results) will be outlined in green if their constraint has been met by the (possibly partial) guess.
+- maxPegCombos = 14. botPerfect[][]: string and boardPerfect[]: string. Perfect guesses in the log by the board and the bot will be underlined. Also, the bot will look for and log all perfect guesses, not just the first one. The bot will open up guessArray to allCodes when 2 < validCodesIn.length <= maxPegCombos. Because it is impossible to find a perfect guess when there are more than 14 (maxPegCompbos) validCodesIn.
 - Add a timer and show game play time in the "you won" message.
 - Add "Stats" to the bottom of the screen showing: reset stats button, number of games played, how many games lost, win percentage, average number of guesses to win a game (excludes lost games), guess distribution, current winning streak, max winning streak, time distribution, average time to win a game (excludes lost games), etc.
 - Add settings to the bottom of the screen: number of colors, max number of turns, length of code, repeat colors allowed in secret code, blanks allowed in guess, row hint toggle, color palette hint toggle, etc.
