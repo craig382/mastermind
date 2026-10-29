@@ -53,18 +53,42 @@
             can be one of 6 colors (A, B, C, D, E, F). 
             Duplicate colors are allowed in the code. 
             The code is randomly generated at the start of each game.
-            The game provides guess feedback in the form of pegs: 
+            The game provides guess feedback in the form of peg counts: 
             the black peg count is the number of pieces that are 
             correct in both color and position, and the white peg
             count is the number of pieces that are correct in color 
             but not in position.
         </li>
-        <li>The "Opener On" button automatically fills in
-            the next game's opening move with this game's 
+        <li>The "Opener" button turns on or off the automatical fill 
+            in of the next game's opening move with this game's 
             opening move. The opening move may be modified
             before the player submits it with the "Guess" button.
         </li>
-
+        <li>The "Counts" button turns on or off the display of the 
+            count of valid codes remaining after the submission of the 
+            guess. This count is displayed in cyan to the right 
+            of the peg results. A valid code is a code that satisfies 
+            the peg results of all submitted guesses. The secret 
+            code is always a member of the set of valid codes
+            (and thus the valid code count can never fall below 1,
+            even after the secret code is guessed). Usually, each 
+            guess will reduce the size of the set of valid codes. 
+            A player who always makes their guess a valid
+            guess will eventually guess the secret code either 
+            because the valid code count is small and 
+            the player is lucky, or because the valid code count 
+            is 1 (meaning the secret code was the only valid code 
+            remaining).
+        </li>
+        <li>The "Bot Help" button turns on or off the display of 
+            the bot's suggested next move. The bot's guesses are 
+            pretty good. If the bot's guesses are followed for 
+            an entire game, the bot will usually win in 5 or less 
+            moves. The bot's suggestion may be modified before the 
+            player submits it with the "Guess" button.
+        </li>
+        <li>The "Quit" button ends the current game.</li>
+        <li>The "New Game" button starts a new game.</li>
     </ol></div>
     
     <!-- templates -->
