@@ -15,17 +15,6 @@ body {
 	color:#e0e0e0;
 	display:block;
 }
-div#header {
-	width:auto;
-	padding:5px 0;
-	font-size:2em;
-	text-align: center;
-	background-color: #000;
-}
-h1 {
-	font:bold 4em Helvetica;
-	color:#BBB;
-}
 div#game {
 	width:fit-content;
 	position:relative;
@@ -33,9 +22,34 @@ div#game {
 	height:auto;
 	background-color: #000;
 }
-ul {
-	list-style: none;
+/* div#board {} */
+div#header {
+	width:auto;
+	padding:5px 0;
+	font-size:2em;
+	text-align: center;
+	background-color: #000;
 }
+div#gameOver {
+	width:100%;
+	align-items: center;
+	justify-content: center;
+	padding: 10px 0;
+	font-size:2em;
+	display:none;
+}
+div#game.lost div#gameOver, 
+div#game.quit div#gameOver {
+	display: flex;
+	color:#F00;
+	background-color: rgba(64,0,0,0.9);
+}
+div#game.won div#gameOver {
+	display:flex;
+	color:#0F0;
+	background-color: rgba(0,64,0,0.9);
+}
+
 div.turn {
 	width:100%;
 	padding:0px 10px 0px 0px;
@@ -49,15 +63,12 @@ div.turn {
 div.turn.alt {
 	background-color: #666;
 }
-div.locked {
+div.turn.locked {
 	border: 1px dotted #000;
 }
-div.active {
+div.turn.active {
 	border: 1px solid yellow;
 	/* background-color: #000; */
-}
-div.active div.pieces {
-	background-color: #000;
 }
 div.turn.correct {
 	border:2px solid green;
@@ -65,11 +76,18 @@ div.turn.correct {
 div.turn.wrong {
 	border:2px solid red;
 }
-div.frozen {
+div.turn.frozen {
 	border: 1px solid #000;
 }
-span.guess {
-	margin-right:10px;
+
+div#allPieces {
+	width:fit-content;
+	position:relative;
+	margin:10px auto;
+	padding:5px 0 5px 5px;
+	height:auto;
+	display:block;
+	border:1px solid;
 }
 div.pieces {
 	display: inline-flex;
@@ -83,6 +101,27 @@ div#current_piece {
 	float:left;
 	display:block;
 }
+div#buttons{
+	/* border: 1px solid purple; */
+	/* margin: top right bottom left; */
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+h1 {
+	font:bold 4em Helvetica;
+	color:#BBB;
+}
+ul {
+	list-style: none;
+}
+div.active div.pieces {
+	background-color: #000;
+}
+span.guess {
+	margin-right:10px;
+}
+
 div.piece {
 	width:40px;
 	margin-right:5px;
@@ -121,34 +160,7 @@ div.piece.E {
 div.piece.F {
 	background-color: #940;
 }
-div#allPieces {
-	width:fit-content;
-	position:relative;
-	margin:10px auto;
-	padding:5px 0 5px 5px;
-	height:auto;
-	display:block;
-	border:1px solid;
-}
-div#gameOver {
-	width:100%;
-	align-items: center;
-	justify-content: center;
-	padding: 10px 0;
-	font-size:2em;
-	display:none;
-}
-div#game.lost div#gameOver, 
-div#game.quit div#gameOver {
-	display: flex;
-	color:#F00;
-	background-color: rgba(64,0,0,0.9);
-}
-div#game.won div#gameOver {
-	display:flex;
-	color:#0F0;
-	background-color: rgba(0,64,0,0.9);
-}
+
 div#presentation {
 	width:300px;
 	text-align:center;
@@ -180,6 +192,7 @@ div#appLog #bottom {
 	color: #888;
 	white-space: pre-wrap;
 }
+
 /* guess button */
 input {
 	width:fit-content;
@@ -225,6 +238,4 @@ p.c {
 span.hint.done { /* unused */
 	color:#FFF;
 }
-
-
 
