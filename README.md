@@ -27,8 +27,8 @@ A web app to play mastermind. Written in Backbone.js.
 - Add color palette hint that shows number of colors that the secret code contains.
 - Add row hints on frozen rows that every time you change the code on the active row, it shows the black and white peg results vs the active code (only when each differs from the true black and white peg (vs the secret code) row hint).
 
-## Development Setup After Conversion to TypeScript
-
+## If "Launch in Brave" does not work:
+`npm run build`
 `npm run serve`
 
 ## Development setup

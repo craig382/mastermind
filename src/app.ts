@@ -916,7 +916,7 @@ mm.GameView = Backbone.View.extend({
 
         appLog.setTitle(`Mastermind`);
         // merge the previous game log into the bottom of the log
-        appLog.merge(`\nGame ${nGames}`);
+        // appLog.merge(`\nGame ${nGames}`);
 
         palletBbv.resetNub();
 
@@ -1059,42 +1059,29 @@ mm.GameView = Backbone.View.extend({
                 turnsBbv[turnIndex].hideTurnButton();
             }
         }
-        appLog.insert(`You ${status} on turn ${turnIndex + 1}.`);
-        appLog.insert(`Secret code ${solution}.`);
+        // merge the previous game log into the bottom of the log
+        appLog.merge(`\nYou ${status} Game ${nGames} (${solution}) on turn ${turnIndex + 1}.`);
         if (boardGuesses.length > 0) {
-            appLog.insert(`Turn by turn: board (bot)):`);
+            appLog.insert(`Log (board, bot): code, peg combos / counts before`);
+            appLog.insert(`    => pegs & valid counts after`);
             for (var i = 0; i < boardGuesses.length; i += 1) {
                 appLog.insert(
-                    `${u.upperOrLower(boardGuesses[i], boardIsValid[i])} `
-                    + `(${u.upperOrLower(botGuesses[i], botIsValid[i])}), `
+                    `(${u.upperOrLower(boardGuesses[i], boardIsValid[i])}, `
+                    + `${u.upperOrLower(botGuesses[i], botIsValid[i])}) `
 
-                    + `${boardPegs[i][0]} ${boardPegs[i][1]} `
-                    + `(${botPegs[i][0]} ${botPegs[i][1]}), `
-
-                    + `${boardValidCounts[i+1]} `
-                    + `(${botValidCounts[i+1]}), `
-
-                    + `${boardPegCombos[i]}`
-                    + `${boardIsPerfect[i] ? 'p' : ''} `
-                    + `(${botPegCombos[i]}`
+                    + `(${boardPegCombos[i]}`
+                    + `${boardIsPerfect[i] ? 'p' : ''}, `
+                    + `${botPegCombos[i]}`
                     + `${botIsPerfect[i] ? 'p' : ''}) / `
-                    + `${boardValidCounts[i]}`
+                    + `${boardValidCounts[i]} => `
+
+                    + `(${boardPegs[i][0]} ${boardPegs[i][1]} ${boardValidCounts[i+1]}, `
+                    + `${botPegs[i][0]} ${botPegs[i][1]} ${botValidCounts[i+1]}) `
                 );
             }
             i -= 1;
             if (status === 'won' && botGuesses[i] !== boardGuesses[i]) 
                 appLog.insert(`You beat the bot!`);
-            i += 1;
-            if (botGuesses.length > boardGuesses.length) {
-                appLog.insert(`( you ${status} ) `
-                    + `(${u.upperOrLower(botGuesses[i], botIsValid[i])}, `
-                    + `${botPegs[i][0]} ${botPegs[i][1]}, `
-                    + `${botValidCounts[i+1]}, `
-                    + `${botPegCombos[i]} `
-                    + `${botIsPerfect[i] ? 'p' : ''}) / `
-                    + `${boardValidCounts[i]}`
-                );
-            }
         };
         nGames += 1; // increment the number of games played
     },
