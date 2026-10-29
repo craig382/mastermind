@@ -103,7 +103,6 @@ div#current_piece {
 }
 div#buttons{
 	/* border: 1px solid purple; */
-	/* margin: top right bottom left; */
 	margin-top: 10px;
 	margin-bottom: 10px;
 }
@@ -162,11 +161,15 @@ div.piece.F {
 }
 
 div#presentation {
-	width:300px;
-	text-align:center;
-	margin:10px auto;
-	padding:10px 10px;
+	width:400px;
+	/* text-align:center; */
+	text-align:left;
+	/* margin: top right bottom left; */
+	margin:10px auto 10px auto;
+	padding:10px 10px 10px 40px;
 	border:1px solid;
+	/* background-color: #666; */
+	background-color: #000;
 }
 div#appLog {
 	width:400px;

@@ -39,7 +39,33 @@
         <div id="top"></div>
         <div id="bottom"></div>
     </div>
-    <div id="presentation"><a href="http://www.slideshare.net/bobbyroe/backbonejs-an-introduction-14284042">Backbone.js - an Introduction</a></div>
+    <div id="presentation"><ol>
+        <b>Mastermind Instructions</b>
+        <li>Play Craig's Mastermind Game at this
+            <a href="http://craig382.github.io/mastermind/"> link</a>.
+        </li>
+        <li>See Craig's Mastermind Game Source Code at this
+            <a href="https://github.com/craig382/mastermind"> link</a>.
+        </li>
+        <li>This Mastermind game uses the rules from the classic
+            game. The player has 10 turns to guess the secret code. 
+            The secret code is a sequence of 4 pieces, each of which 
+            can be one of 6 colors (A, B, C, D, E, F). 
+            Duplicate colors are allowed in the code. 
+            The code is randomly generated at the start of each game.
+            The game provides guess feedback in the form of pegs: 
+            the black peg count is the number of pieces that are 
+            correct in both color and position, and the white peg
+            count is the number of pieces that are correct in color 
+            but not in position.
+        </li>
+        <li>The "Opener On" button automatically fills in
+            the next game's opening move with this game's 
+            opening move. The opening move may be modified
+            before the player submits it with the "Guess" button.
+        </li>
+
+    </ol></div>
     
     <!-- templates -->
     <script type="text/template" id="turnView">
