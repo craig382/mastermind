@@ -263,8 +263,8 @@ class MastermindUtilities {
                 // }
             } else {
                 // log(`botGuesses[${turn}]: "${botGuesses[turn]}" <== "${maxPegComboGuess}".`);
-                botIsPerfect[turn] = false;
                 botGuesses[turn] = maxPegComboGuess;
+                botIsPerfect[turn] = (maxPegCombos === nPegCombos4);
             }
             botPegs[turn] = AsPegCombo(this.setCode0AndCalculatePegs(solution, botGuesses[turn]));
             botPegCombos[turn] = Object.keys(codeTree[turn][botGuesses[turn]]).length;
@@ -358,7 +358,7 @@ class MastermindUtilities {
         var lastTurnPegs = boardPegs[guessTurnIndex - 1];
         var validCodes = codeTree[guessTurnIndex - 1][boardGuesses[guessTurnIndex - 1]][lastTurnPegs];
         var nValid = validCodes.length;
-        if (nPegCombos === nValid) return true;
+        if (nPegCombos === nValid || nPegCombos === nPegCombos4) return true;
         else return false;
     }
 

@@ -89,6 +89,26 @@
         </li>
         <li>The "Quit" button ends the current game.</li>
         <li>The "New Game" button starts a new game.</li>
+        <li>There are a maximum of 14 peg combos for a 4-piece code. 
+            The log shows "14p" when there are 14 peg combos. 
+            The "p" stands for "Perfect!", a very skillful guess! 
+            The 14 possible (black white) peg combos are: 0 0; 
+            0 1, 1 0; 0 2, 1 1, 2 0; 0 3, 1 2, 2 1, 3 0;
+            0 4, 1 3, 2 2, <s>3 1</s>, 4 0. The peg combo 4 0 is the 
+            winning peg combo. Note that the peg combo 3 1 is impossible 
+            because with 3 black pegs the only position available 
+            for the last remaining correctly colored piece is 
+            its own position, which would make it the 4th black peg, 
+            not a white peg.
+        </li>
+        <li>The log also shows a "p" on the peg combos number when
+            the number of peg combos is equal to the number of 
+            valid codes remaining before the current guess. 
+            Such a guess may not be the secret code, but it is 
+            guaranteed that after such a guess, the secret code 
+            is the only valid code remaining. Thus that guess is a 
+            very skillful guess, a very good guess, a "Perfect!" guess!
+        </li>
     </ol></div>
     
     <!-- templates -->
