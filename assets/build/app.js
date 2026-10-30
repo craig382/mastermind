@@ -29,7 +29,7 @@ var botGuessHints = false;
  */
 var autoOpenerMode = true;
 /** The automatically filled in code for the
- * first guess. which he player can override. */
+ * first guess. which the player can override. */
 var autoOpener = 'AABB';
 var nubColor = 'X';
 var nColors = 6;
@@ -150,7 +150,7 @@ class MastermindUtilities {
         boardIsValid = [];
         boardIsPerfect = [];
         // this.calculateCodeTree(0, ['AABB', 'ABBC', 'ABCD']);
-        this.calculateCodeTree(0, ['AABB']);
+        this.calculateCodeTree(0, ['CCDD']); // bot's opener is CCDD
         // For hint mode, set the turn's
         // suggested guess to the bot's guess.
         if (botGuessHints)
