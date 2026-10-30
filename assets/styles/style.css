@@ -142,22 +142,22 @@ div.piece.X {
 	color:#000;
 }
 div.piece.A {
-	background-color: #090;
+	background-color: #488;
 }
 div.piece.B {
-	background-color: #900;
-	}
-div.piece.C {
-	background-color: #009;
-}
-div.piece.D {
-	background-color: #990;
-}
-div.piece.E {
 	background-color: #90F;
 }
+div.piece.C {
+	background-color: #990;
+}
+div.piece.D {
+	background-color: #090;
+}
+div.piece.E {
+	background-color: #900;
+	}
 div.piece.F {
-	background-color: #940;
+	background-color: #009;
 }
 
 div#presentation {
