@@ -186,7 +186,7 @@ class MastermindUtilities {
         boardIsPerfect = [];
 
         // this.calculateCodeTree(0, ['AABB', 'ABBC', 'ABCD']);
-        this.calculateCodeTree(0, ['CCDD']); // bot's opener is CCDD
+        this.calculateCodeTree(0, ['ABCD']); // bot's opener is CCDD
         // For hint mode, set the turn's
         // suggested guess to the bot's guess.
         if (botGuessHints)
@@ -349,17 +349,16 @@ class MastermindUtilities {
     }
 
     isPerfect(guessTurnIndex: number, guess: string): boolean {
-        if (guessTurnIndex === 0) return false;
-        if (!boardGuesses[guessTurnIndex - 1]) 
-            throw new Error(`isPerfect ERROR: boardGuesses[${guessTurnIndex - 1}] is undefined.`);
         if (!codeTree[guessTurnIndex][guess])
             throw new Error(`isPerfect ERROR: codeTree[${guessTurnIndex}][${guess}] is undefined.`);
         var nPegCombos = Object.keys(codeTree[guessTurnIndex][guess]).length;
+        if (guessTurnIndex === 0) return (nPegCombos === nPegCombos4);
+        if (!boardGuesses[guessTurnIndex - 1]) 
+            throw new Error(`isPerfect ERROR: boardGuesses[${guessTurnIndex - 1}] is undefined.`);
         var lastTurnPegs = boardPegs[guessTurnIndex - 1];
         var validCodes = codeTree[guessTurnIndex - 1][boardGuesses[guessTurnIndex - 1]][lastTurnPegs];
         var nValid = validCodes.length;
-        if (nPegCombos === nValid || nPegCombos === nPegCombos4) return true;
-        else return false;
+        return (nPegCombos === nValid || nPegCombos === nPegCombos4);
     }
 
     /** convert str to upper or lower case based on upper*/
