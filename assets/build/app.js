@@ -150,7 +150,7 @@ class MastermindUtilities {
         boardIsValid = [];
         boardIsPerfect = [];
         // this.calculateCodeTree(0, ['AABB', 'ABBC', 'ABCD']);
-        this.calculateCodeTree(0, ['ABCD']); // bot's opener is CCDD
+        this.calculateCodeTree(0, ['CCDD']); // bot's opener is CCDD
         // For hint mode, set the turn's
         // suggested guess to the bot's guess.
         if (botGuessHints)
