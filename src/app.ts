@@ -564,16 +564,6 @@ function createPalletModel(): PalletModel {
     return new PalletModelClass();
 }
 
-function createGameModel(): GameModel {
-    var GameModelClass = required(mm.Game);
-    return new GameModelClass();
-}
-
-function createGameView(model: GameModel): GameViewInstance {
-    var GameViewClass = required(mm.GameView);
-    return new GameViewClass({model: model});
-}
-
 /**
  * Model shared by both the turn rows and the solution row.
  * It stores the current code state, hint text, display classes,
