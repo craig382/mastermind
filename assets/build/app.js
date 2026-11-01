@@ -546,6 +546,7 @@ mm.TurnView = Backbone.View.extend({
      * mm.TurnView.
      */
     guessClicked: function (_e) {
+        console.log('guessClicked');
         if (this.model.get('locked_class') !== 'active')
             return;
         if (this.codeIsValid() === false)
@@ -732,17 +733,17 @@ mm.GameView = Backbone.View.extend({
         this.resetBoard(); // START
         // Keep current behavior: game begins immediately for now.
         // A future change can keep this as notStarted until user clicks New Game.
-        this.model.set('gameStatus', 'inPlay');
+        // this.model.set('gameStatus', 'notStarted');
+        // this.model.set('gameStatus', 'inPlay');
         // newGame stuff belongs here, not in newGame.
-        this.newSolution();
+        // this.newSolution();
         // set the opener for auto opener mode
-        if (autoOpenerMode)
-            turnsBbm[turnIndex].set('code', autoOpener);
-        u.initializeCodeTree();
-        appLog.setTitle(`Mastermind`);
+        // if (autoOpenerMode) turnsBbm[turnIndex].set('code', autoOpener);
+        // u.initializeCodeTree();
+        // appLog.setTitle(`Mastermind`);
         // merge the previous game log into the bottom of the log
         // appLog.merge(`\nGame ${nGames}`);
-        palletBbv.resetNub();
+        // palletBbv.resetNub();
         this.render(); // must be last line of initialize()
     },
     /**
@@ -756,21 +757,23 @@ mm.GameView = Backbone.View.extend({
         for (var i = 0; i < nTurns; i += 1) {
             // initialize the model
             var class_name = (i % 2) ? 'alt' : '';
-            var locked_class;
-            var disabled_class;
-            if (i === 0) {
-                locked_class = 'active';
-                disabled_class = '';
-            }
-            else {
-                locked_class = 'locked';
-                disabled_class = 'hidden';
-            }
+            // var locked_class: LockedClass;
+            // var disabled_class: DisabledClass;
+            var locked_class = 'locked';
+            var disabled_class = 'hidden';
+            // if (i === 0) { 
+            //     locked_class = 'active';
+            //     disabled_class = ''; 
+            // } else { 
+            //     locked_class = 'locked';
+            //     disabled_class = 'hidden'; 
+            // }
             var turnM = createTurnModel({ alt_class: class_name, locked_class: locked_class, disabled_class: disabled_class, id: i });
             var turnV = createTurnView(turnM);
             turnsBbm.push(turnM);
             turnsBbv.push(turnV);
         }
+        turnsBbv[0].freezeRow();
     },
     /**
      * Executes at the beginning of each new game.
@@ -802,6 +805,7 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     checkGuess: function (guess) {
+        console.log(`checkGuess called with guess: ${guess}`);
         boardGuesses[turnIndex] = guess;
         var pegs0 = u.setCode0AndCalculatePegs(solution, guess);
         boardPegs[turnIndex] = AsPegCombo(pegs0);
@@ -907,8 +911,22 @@ mm.GameView = Backbone.View.extend({
     */
     newGame: function () {
         // Create the primary game view and pass in a new game model.
-        // Put nothing else but the following line in newGame().
+        // DELETE Put nothing else but the following line in newGame().
         createGameView(createGameModel());
+        // DELETE newGame stuff belongs here, not in newGame.
+        this.newSolution();
+        // set the opener for auto opener mode
+        if (autoOpenerMode)
+            turnsBbm[turnIndex].set('code', autoOpener);
+        u.initializeCodeTree();
+        appLog.setTitle(`Mastermind Game ${nGames}`);
+        // merge the previous game log into the bottom of the log
+        // appLog.merge(`\nGame ${nGames}`);
+        palletBbv.resetNub();
+        turnsBbv[0].activateRow(); // activate the first turn
+        // this.model.set('gameStatus', 'inPlay');
+        gameBbm.set('gameStatus', 'inPlay');
+        this.render(); // must be last line of newGame()
     }
 });
 $(function () {
