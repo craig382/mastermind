@@ -139,7 +139,12 @@ var mm: MastermindRoot = {
         u = new MastermindUtilities();
         u.generateAllCodes();
         createPalletView();
-        createGameView(createGameModel());
+        // createGameView(createGameModel());
+        // gameBbm = createGameModel();
+        // gameBbv = createGameView(gameBbm);
+        gameBbm = new mm.Game();
+        gameBbv = new mm.GameView({ model: gameBbm });
+        gameBbm.set('gameStatus', 'notStarted');
         log('mm.init() executed');
     }
 };
@@ -494,6 +499,7 @@ type GameViewInstance = {
     getNextTurnBbm(): TurnModel;
     quit(): void;
     newGame(): void;
+    resetBoard(): void;
     handleResults(pegs: Pegs): void;
     game_el: string;
     gameOver_el: string;
@@ -871,9 +877,11 @@ mm.Game = Backbone.Model.extend({
     gameStatus: 'notStarted',
 
     initialize:function (): void {
-        gameBbm = this;
-        turnIndex = 0;
-        gameBbm.set('gameStatus', 'notStarted');
+        // gameBbm = this;
+        // turnIndex = 0;
+        // gameBbm.set('gameStatus', 'notStarted');
+        // this.set('gameStatus', 'notStarted');
+        // this.gameStatus = 'notStarted';
     }
 
 });
@@ -896,10 +904,12 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     initialize: function (): void {
-        gameBbv = this;
+        console.log('mm.GameView.initialize() executed.');
+        // gameBbv = this;
         // createPalletView();
         this.model.on('change:gameStatus', this.gameOver, this);
-        this.resetBoard(); // START
+        this.resetBoard();
+        // gameBbv.resetBoard();
 
         // Keep current behavior: game begins immediately for now.
         // A future change can keep this as notStarted until user clicks New Game.
@@ -930,6 +940,8 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     resetBoard: function (): void {
+        console.log('mm.GameView.resetBoard() executed.');
+        turnIndex = 0;
         turnsBbm = [];
         turnsBbv = [];
         for (var i = 0; i < nTurns; i += 1) {
@@ -1099,7 +1111,13 @@ mm.GameView = Backbone.View.extend({
     newGame: function (): void {
         // Create the primary game view and pass in a new game model.
         // DELETE Put nothing else but the following line in newGame().
-        createGameView(createGameModel());
+        // createGameView(createGameModel());
+        // gameBbm = createGameModel();
+        // gameBbv = createGameView(gameBbm);
+        // gameBbm = new mm.Game();
+        // gameBbv = new mm.GameView({ model: gameBbm });
+
+        gameBbv.resetBoard();
 
         // DELETE newGame stuff belongs here, not in newGame.
 

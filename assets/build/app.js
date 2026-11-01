@@ -108,7 +108,12 @@ var mm = {
         u = new MastermindUtilities();
         u.generateAllCodes();
         createPalletView();
-        createGameView(createGameModel());
+        // createGameView(createGameModel());
+        // gameBbm = createGameModel();
+        // gameBbv = createGameView(gameBbm);
+        gameBbm = new mm.Game();
+        gameBbv = new mm.GameView({ model: gameBbm });
+        gameBbm.set('gameStatus', 'notStarted');
         log('mm.init() executed');
     }
 };
@@ -706,9 +711,11 @@ mm.PalletView = Backbone.View.extend({
 mm.Game = Backbone.Model.extend({
     gameStatus: 'notStarted',
     initialize: function () {
-        gameBbm = this;
-        turnIndex = 0;
-        gameBbm.set('gameStatus', 'notStarted');
+        // gameBbm = this;
+        // turnIndex = 0;
+        // gameBbm.set('gameStatus', 'notStarted');
+        // this.set('gameStatus', 'notStarted');
+        // this.gameStatus = 'notStarted';
     }
 });
 /**
@@ -727,10 +734,12 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     initialize: function () {
-        gameBbv = this;
+        console.log('mm.GameView.initialize() executed.');
+        // gameBbv = this;
         // createPalletView();
         this.model.on('change:gameStatus', this.gameOver, this);
-        this.resetBoard(); // START
+        this.resetBoard();
+        // gameBbv.resetBoard();
         // Keep current behavior: game begins immediately for now.
         // A future change can keep this as notStarted until user clicks New Game.
         // this.model.set('gameStatus', 'notStarted');
@@ -752,6 +761,8 @@ mm.GameView = Backbone.View.extend({
     * this = mm.GameView
     */
     resetBoard: function () {
+        console.log('mm.GameView.resetBoard() executed.');
+        turnIndex = 0;
         turnsBbm = [];
         turnsBbv = [];
         for (var i = 0; i < nTurns; i += 1) {
@@ -912,7 +923,12 @@ mm.GameView = Backbone.View.extend({
     newGame: function () {
         // Create the primary game view and pass in a new game model.
         // DELETE Put nothing else but the following line in newGame().
-        createGameView(createGameModel());
+        // createGameView(createGameModel());
+        // gameBbm = createGameModel();
+        // gameBbv = createGameView(gameBbm);
+        // gameBbm = new mm.Game();
+        // gameBbv = new mm.GameView({ model: gameBbm });
+        gameBbv.resetBoard();
         // DELETE newGame stuff belongs here, not in newGame.
         this.newSolution();
         // set the opener for auto opener mode
