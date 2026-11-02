@@ -50,6 +50,11 @@ var nGames = 1;
 var turnIndex = 0;
 var solution = '';
 var u;
+/** Amount of time it took in ms to play the game. */
+var gameMs = 0;
+/** A string with the time to play the game in minutes
+ * rounded to one decimal place. */
+var gameTime = '';
 /** validCodesArray = codeTree[turn][guess][nBlack][nWhite];
  *
  * A tree structure that stores an array of valid
@@ -836,6 +841,8 @@ mm.GameView = Backbone.View.extend({
         if (status === 'notStarted' || status === 'inPlay') {
             return;
         }
+        gameMs = performance.now() - gameMs; // stop the game timer
+        gameTime = (gameMs / 60000).toFixed(1);
         // Set next game's opener equal to this game's opener.
         autoOpener = turnsBbm[0].get('code');
         // set the play button to 'new game'
@@ -851,7 +858,7 @@ mm.GameView = Backbone.View.extend({
             }
         }
         // merge the previous game log into the bottom of the log
-        appLog.merge(`\nYou ${status} Game ${nGames} (${solution}) on turn ${turnIndex + 1}.`);
+        appLog.merge(`\nYou ${status} Game ${nGames} (${solution}) on turn ${turnIndex + 1} in ${gameTime} minutes.`);
         if (boardGuesses.length > 0) {
             appLog.insert(`Log (board, bot): code, peg combos / counts before`);
             appLog.insert(`    => pegs & valid counts after`);
@@ -889,6 +896,7 @@ mm.GameView = Backbone.View.extend({
         palletBbv.resetNub();
         turnsBbv[0].activateRow(); // activate the first turn
         gameBbm.set('gameStatus', 'inPlay');
+        gameMs = performance.now(); // start the game timer
         this.render(); // must be last line of newGame()
     }
 });
